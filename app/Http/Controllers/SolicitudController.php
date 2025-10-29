@@ -37,7 +37,13 @@ class SolicitudController extends Controller
      */
     public function store(SolicitudRequest $request): RedirectResponse
     {
-        Solicitud::create($request->validated());
+        $data = $request->validated();
+        $data['nombre_solicitante'] = trim(($data['nombre'] ?? '') . ' ' . ($data['apellido'] ?? '')) ?: ($data['nombre'] ?? null);
+        $data['fecha_creacion'] = $data['fecha_inicio'] ?? now()->toDateString();
+        $data['descripcion'] = $data['insumos_necesarios'] ?? ($data['tipo_emergencia'] ?? '');
+        $data['estado'] = $data['estado'] ?? 'pendiente';
+
+        Solicitud::create($data);
 
         return Redirect::route('solicitud.index')
             ->with('success', 'Solicitud created successfully.');
@@ -68,17 +74,31 @@ class SolicitudController extends Controller
      */
     public function update(SolicitudRequest $request, Solicitud $solicitud): RedirectResponse
     {
-        $solicitud->update($request->validated());
+        $data = $request->validated();
+        $data['nombre_solicitante'] = trim(($data['nombre'] ?? '') . ' ' . ($data['apellido'] ?? '')) ?: ($data['nombre'] ?? $solicitud->nombre_solicitante);
+        $data['fecha_creacion'] = $data['fecha_inicio'] ?? ($solicitud->fecha_creacion ?? now()->toDateString());
+        $data['descripcion'] = $data['insumos_necesarios'] ?? ($data['tipo_emergencia'] ?? $solicitud->descripcion);
+        $data['estado'] = $data['estado'] ?? ($solicitud->estado ?? 'pendiente');
+
+        $solicitud->update($data);
 
         return Redirect::route('solicitud.index')
             ->with('success', 'Solicitud updated successfully');
     }
 
-    public function destroy($id): RedirectResponse
-    {
-        Solicitud::find($id)->delete();
+public function destroy($id_solicitud)
+{
+    $solicitud = Solicitud::find($id_solicitud);
 
-        return Redirect::route('solicitud.index')
-            ->with('success', 'Solicitud deleted successfully');
+    if (!$solicitud) {
+        return redirect()->route('solicitud.index')
+            ->with('error', 'La solicitud no existe o ya fue eliminada.');
     }
+
+    $solicitud->delete();
+
+    return redirect()->route('solicitud.index')
+        ->with('success', 'Solicitud eliminada correctamente.');
+}
+
 }

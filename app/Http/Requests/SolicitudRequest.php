@@ -22,12 +22,19 @@ class SolicitudRequest extends FormRequest
     public function rules(): array
     {
         return [
-			'nombre_solicitante' => 'required|string',
-			'fecha_creacion' => 'required',
-			'descripcion' => 'required|string',
-			'ubicacion' => 'required|string',
-			'estado' => 'required|string',
-			'codigo_seguimiento' => 'string',
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'nullable|string|max:255',
+            'carnet_identidad' => 'required|string|max:50',
+            'correo_electronico' => 'nullable|email|max:255',
+            'comunidad_solicitante' => 'nullable|string|max:255',
+            'ubicacion' => 'required|string|max:255',
+            'provincia' => 'nullable|string|max:255',
+            'nro_celular' => 'nullable|string|max:50',
+            'cantidad_personas' => 'nullable|integer|min:1',
+            'fecha_inicio' => 'nullable|date',
+            'tipo_emergencia' => 'required|string|max:255',
+            'insumos_necesarios' => 'nullable|string',
+            'codigo_seguimiento' => 'nullable|string|max:255',
         ];
     }
 }

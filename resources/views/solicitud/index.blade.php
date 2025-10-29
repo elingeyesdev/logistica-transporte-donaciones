@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    Solicituds
+    Solicitudes
 @endsection
 
 @section('content')
@@ -11,18 +11,18 @@
                 <div class="card">
                     <div class="card-header">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-
                             <span id="card_title">
-                                {{ __('Solicitud') }}
+                                {{ __('Solicitudes') }}
                             </span>
 
-                             <div class="float-right">
-                                <a href="{{ route('solicitud.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Create New') }}
+                            <div class="float-right">
+                                <a href="{{ route('solicitud.create') }}" class="btn btn-primary btn-sm float-right">
+                                    <i class="fa fa-plus"></i> {{ __('Crear nueva') }}
                                 </a>
-                              </div>
+                            </div>
                         </div>
                     </div>
+
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success m-4">
                             <p>{{ $message }}</p>
@@ -32,40 +32,59 @@
                     <div class="card-body bg-white">
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
-                                <thead class="thead">
+                                <thead class="thead-dark">
                                     <tr>
-                                        <th>No</th>
-                                        
-									<th >Nombre Solicitante</th>
-									<th >Fecha Creacion</th>
-									<th >Descripcion</th>
-									<th >Ubicacion</th>
-									<th >Estado</th>
-									<th >Codigo Seguimiento</th>
-
-                                        <th></th>
+                                        <th>#</th>
+                                        <th>Nombre</th>
+                                        <th>Apellido</th>
+                                        <th>CI</th>
+                                        <th>Correo</th>
+                                        <th>Comunidad</th>
+                                        <th>Provincia</th>
+                                        <th>Ubicación</th>
+                                        <th>Celular</th>
+                                        <th>Tipo de Emergencia</th>
+                                        <th>Código Seguimiento</th>
+                                        <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($solicituds as $solicitud)
                                         <tr>
                                             <td>{{ ++$i }}</td>
-                                            
-										<td >{{ $solicitud->nombre_solicitante }}</td>
-										<td >{{ $solicitud->fecha_creacion }}</td>
-										<td >{{ $solicitud->descripcion }}</td>
-										<td >{{ $solicitud->ubicacion }}</td>
-										<td >{{ $solicitud->estado }}</td>
-										<td >{{ $solicitud->codigo_seguimiento }}</td>
+                                            <td>{{ $solicitud->nombre }}</td>
+                                            <td>{{ $solicitud->apellido }}</td>
+                                            <td>{{ $solicitud->carnet_identidad }}</td>
+                                            <td>{{ $solicitud->correo_electronico }}</td>
+                                            <td>{{ $solicitud->comunidad_solicitante }}</td>
+                                            <td>{{ $solicitud->provincia }}</td>
+                                            <td>{{ $solicitud->ubicacion }}</td>
+                                            <td>{{ $solicitud->nro_celular }}</td>
+                                            <td>{{ $solicitud->tipo_emergencia }}</td>
+                                            <td>{{ $solicitud->codigo_seguimiento }}</td>
 
-                                            <td>
-                                                <form action="{{ route('solicitud.destroy', $solicitud->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('solicitud.show', $solicitud->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('solicitud.edit', $solicitud->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
-                                                </form>
+                                            <td class="text-center">
+                                               @php($key = method_exists($solicitud, 'getRouteKey') ? $solicitud->getRouteKey() : ($solicitud->id_solicitud ?? $solicitud->id ?? null))
+                                               @if($key)
+                                               <form action="{{ route('solicitud.destroy', ['solicitud' => $key]) }}" method="POST">
+                                                <a class="btn btn-sm btn-primary" href="{{ route('solicitud.show', ['solicitud' => $key]) }}">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                <a class="btn btn-sm btn-success" href="{{ route('solicitud.edit', ['solicitud' => $key]) }}">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar esta solicitud?')">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </form>
+                                               @else
+                                                <button class="btn btn-sm btn-secondary" disabled><i class="fa fa-eye"></i></button>
+                                                <button class="btn btn-sm btn-secondary" disabled><i class="fa fa-edit"></i></button>
+                                                <button class="btn btn-sm btn-secondary" disabled><i class="fa fa-trash"></i></button>
+                                               @endif
+
                                             </td>
                                         </tr>
                                     @endforeach
@@ -74,6 +93,7 @@
                         </div>
                     </div>
                 </div>
+
                 {!! $solicituds->withQueryString()->links() !!}
             </div>
         </div>
