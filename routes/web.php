@@ -21,3 +21,8 @@ Route::resource('solicitud', SolicitudController::class);
 use App\Http\Controllers\DonacionController;
 
 Route::resource('donacion', DonacionController::class);
+
+//estados
+use App\Http\Controllers\EstadoController;
+
+Route::resource('estado', EstadoController::class);

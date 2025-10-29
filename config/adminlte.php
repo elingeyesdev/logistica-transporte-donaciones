@@ -322,14 +322,20 @@ return [
         [
             'text' => 'Solicitud',
             'url'  => 'solicitud',
-            'icon' => 'fas fa-box-heart',
+            'icon' => 'far fa-fw fa-file',
          ],
 
         [
             'text' => 'Donaciones',
             'url'  => 'donacion',
-            'icon' => 'fas fa-box-heart',
+            'icon' => 'far fa-fw fa-file',
         ],
+        [
+            'text' => 'Estados',
+            'url'  => 'estado',
+            'icon' => 'fas fa-flag',
+        ],
+
 
         [
             'text' => 'blog',
