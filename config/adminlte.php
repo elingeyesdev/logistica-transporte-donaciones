@@ -140,6 +140,10 @@ return [
     'usermenu_desc' => false,
     'usermenu_profile_url' => false,
     
+    'text' => 'Donaciones',
+    'url'  => 'donacion',
+    'icon' => 'fas fa-box-heart',
+
     /*
     |--------------------------------------------------------------------------
     | Layout
@@ -315,6 +319,18 @@ return [
             'type' => 'sidebar-menu-search',
             'text' => 'search',
         ],
+        [
+            'text' => 'Solicitud',
+            'url'  => 'solicitud',
+            'icon' => 'fas fa-box-heart',
+         ],
+
+        [
+            'text' => 'Donaciones',
+            'url'  => 'donacion',
+            'icon' => 'fas fa-box-heart',
+        ],
+
         [
             'text' => 'blog',
             'url' => 'admin/blog',

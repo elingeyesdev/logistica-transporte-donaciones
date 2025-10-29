@@ -16,3 +16,8 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 // ✅ CRUD de Solicitud
 Route::resource('solicitud', SolicitudController::class);
+
+//Donacion
+use App\Http\Controllers\DonacionController;
+
+Route::resource('donacion', DonacionController::class);
