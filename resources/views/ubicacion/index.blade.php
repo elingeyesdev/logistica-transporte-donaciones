@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    Estados
+    ubicacion
 @endsection
 
 @section('content')
@@ -13,11 +13,11 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Estados') }}
+                                {{ __('ubicacion') }}
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('estados.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('ubicacion.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
                               </div>
@@ -36,30 +36,28 @@
                                     <tr>
                                         <th>No</th>
                                         
-									<th >Id Estado</th>
-									<th >Nombre Estado</th>
-									<th >Descripcion</th>
-									<th >Tipo</th>
-									<th >Color</th>
+									<th >Id Ubicacion</th>
+									<th >Latitud</th>
+									<th >Longitud</th>
+									<th >Zona</th>
 
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($estados as $estado)
+                                    @foreach ($ubicacion as $ubicacion)
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
-										<td >{{ $estado->id_estado }}</td>
-										<td >{{ $estado->nombre_estado }}</td>
-										<td >{{ $estado->descripcion }}</td>
-										<td >{{ $estado->tipo }}</td>
-										<td >{{ $estado->color }}</td>
+										<td >{{ $ubicacion->id_ubicacion }}</td>
+										<td >{{ $ubicacion->latitud }}</td>
+										<td >{{ $ubicacion->longitud }}</td>
+										<td >{{ $ubicacion->zona }}</td>
 
                                             <td>
-                                                <form action="{{ route('estados.destroy', $estado->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('estados.show', $estado->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('estados.edit', $estado->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('ubicacion.destroy', $ubicacion->id) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('ubicacion.show', $ubicacion->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('ubicacion.edit', $ubicacion->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
@@ -72,7 +70,7 @@
                         </div>
                     </div>
                 </div>
-                {!! $estados->withQueryString()->links() !!}
+                {!! $ubicacion->withQueryString()->links() !!}
             </div>
         </div>
     </div>

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SolicitudController; // 👈 importa el controlador
+use App\Http\Controllers\SolicitudController;
 
 // Página de bienvenida o raíz
 Route::get('/', function () {
@@ -10,11 +10,8 @@ Route::get('/', function () {
 
 // Rutas de autenticación (login, registro, logout)
 Auth::routes();
-
-// Ruta de inicio después de login
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-// ✅ CRUD de Solicitud
 Route::resource('solicitud', SolicitudController::class);
 
 //Donacion
@@ -26,3 +23,15 @@ Route::resource('donacion', DonacionController::class);
 use App\Http\Controllers\EstadoController;
 
 Route::resource('estado', EstadoController::class);
+
+use App\Http\Controllers\SolicitanteController;
+
+Route::resource('solicitante', SolicitanteController::class);
+
+use App\Http\Controllers\UbicacionController;
+
+Route::resource('ubicacion', UbicacionController::class);
+
+use App\Http\Controllers\DestinoController;
+
+Route::resource('destino', controller: DestinoController::class);

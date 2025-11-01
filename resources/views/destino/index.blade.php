@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    Estados
+    destino
 @endsection
 
 @section('content')
@@ -13,11 +13,11 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Estados') }}
+                                {{ __('destino') }}
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('estados.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('destino.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
                               </div>
@@ -36,30 +36,32 @@
                                     <tr>
                                         <th>No</th>
                                         
-									<th >Id Estado</th>
-									<th >Nombre Estado</th>
-									<th >Descripcion</th>
-									<th >Tipo</th>
-									<th >Color</th>
+									<th >Id Destino</th>
+									<th >Comunidad</th>
+									<th >Direccion</th>
+									<th >Latitud</th>
+									<th >Longitud</th>
+									<th >Provincia</th>
 
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($estados as $estado)
+                                    @foreach ($destino as $destino)
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
-										<td >{{ $estado->id_estado }}</td>
-										<td >{{ $estado->nombre_estado }}</td>
-										<td >{{ $estado->descripcion }}</td>
-										<td >{{ $estado->tipo }}</td>
-										<td >{{ $estado->color }}</td>
+										<td >{{ $destino->id_destino }}</td>
+										<td >{{ $destino->comunidad }}</td>
+										<td >{{ $destino->direccion }}</td>
+										<td >{{ $destino->latitud }}</td>
+										<td >{{ $destino->longitud }}</td>
+										<td >{{ $destino->provincia }}</td>
 
                                             <td>
-                                                <form action="{{ route('estados.destroy', $estado->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('estados.show', $estado->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('estados.edit', $estado->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('destino.destroy', $destino->id) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('destino.show', $destino->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('destino.edit', $destino->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
@@ -72,7 +74,7 @@
                         </div>
                     </div>
                 </div>
-                {!! $estados->withQueryString()->links() !!}
+                {!! $destino->withQueryString()->links() !!}
             </div>
         </div>
     </div>

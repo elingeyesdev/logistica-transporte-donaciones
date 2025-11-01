@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    Estados
+    solicitante
 @endsection
 
 @section('content')
@@ -13,11 +13,11 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Estados') }}
+                                {{ __('solicitante') }}
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('estados.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('solicitante.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
                               </div>
@@ -36,30 +36,32 @@
                                     <tr>
                                         <th>No</th>
                                         
-									<th >Id Estado</th>
-									<th >Nombre Estado</th>
-									<th >Descripcion</th>
-									<th >Tipo</th>
-									<th >Color</th>
+									<th >Id Solicitante</th>
+									<th >Apellido</th>
+									<th >Ci</th>
+									<th >Email</th>
+									<th >Nombre</th>
+									<th >Telefono</th>
 
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($estados as $estado)
+                                    @foreach ($solicitante as $solicitante)
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
-										<td >{{ $estado->id_estado }}</td>
-										<td >{{ $estado->nombre_estado }}</td>
-										<td >{{ $estado->descripcion }}</td>
-										<td >{{ $estado->tipo }}</td>
-										<td >{{ $estado->color }}</td>
+										<td >{{ $solicitante->id_solicitante }}</td>
+										<td >{{ $solicitante->apellido }}</td>
+										<td >{{ $solicitante->ci }}</td>
+										<td >{{ $solicitante->email }}</td>
+										<td >{{ $solicitante->nombre }}</td>
+										<td >{{ $solicitante->telefono }}</td>
 
                                             <td>
-                                                <form action="{{ route('estados.destroy', $estado->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('estados.show', $estado->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('estados.edit', $estado->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('solicitante.destroy', $solicitante->id) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('solicitante.show', $solicitante->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('solicitante.edit', $solicitante->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
@@ -72,7 +74,7 @@
                         </div>
                     </div>
                 </div>
-                {!! $estados->withQueryString()->links() !!}
+                {!! $solicitante->withQueryString()->links() !!}
             </div>
         </div>
     </div>

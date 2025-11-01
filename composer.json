@@ -13,6 +13,7 @@
         "laravel/ui": "^4.6"
     },
     "require-dev": {
+        "doctrine/dbal": "^4.3",
         "fakerphp/faker": "^1.23",
         "ibex/crud-generator": "^2.1",
         "laravel/pail": "^1.2.2",

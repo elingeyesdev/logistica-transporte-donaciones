@@ -10,7 +10,7 @@ class Solicitud extends Model
     use HasFactory;
 
     protected $table = 'solicitud';
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'id_solicitud';
     public $incrementing = true;
     protected $keyType = 'int';
 

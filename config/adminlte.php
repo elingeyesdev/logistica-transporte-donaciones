@@ -335,6 +335,21 @@ return [
             'url'  => 'estado',
             'icon' => 'fas fa-flag',
         ],
+        [
+            'text' => 'solicitante',
+            'url'  => 'solicitante',
+            'icon' => 'fas fa-user-friends',
+        ],
+        [
+            'text' => 'destino',
+            'url'  => 'destino',
+            'icon' => 'fas fa-map-marker-alt',
+        ],
+        [
+            'text' => 'Ubicaciones',
+            'url'  => 'ubicacion',
+            'icon' => 'fas fa-map-pin',
+        ],
 
 
         [

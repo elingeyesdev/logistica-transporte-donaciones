@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ $estado->name ?? __('Show') . " " . __('Estado') }}
+    {{ $ubicacion->name ?? __('Show') . " " . __('Ubicacion') }}
 @endsection
 
 @section('content')
@@ -11,34 +11,30 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="float-left">
-                            <span class="card-title">{{ __('Show') }} Estado</span>
+                            <span class="card-title">{{ __('Show') }} Ubicacion</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('estados.index') }}"> {{ __('Back') }}</a>
+                            <a class="btn btn-primary btn-sm" href="{{ route('ubicacion.index') }}"> {{ __('Back') }}</a>
                         </div>
                     </div>
 
                     <div class="card-body bg-white">
                         
                                 <div class="form-group mb-2 mb20">
-                                    <strong>Id Estado:</strong>
-                                    {{ $estado->id_estado }}
+                                    <strong>Id Ubicacion:</strong>
+                                    {{ $ubicacion->id_ubicacion }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
-                                    <strong>Nombre Estado:</strong>
-                                    {{ $estado->nombre_estado }}
+                                    <strong>Latitud:</strong>
+                                    {{ $ubicacion->latitud }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
-                                    <strong>Descripcion:</strong>
-                                    {{ $estado->descripcion }}
+                                    <strong>Longitud:</strong>
+                                    {{ $ubicacion->longitud }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
-                                    <strong>Tipo:</strong>
-                                    {{ $estado->tipo }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Color:</strong>
-                                    {{ $estado->color }}
+                                    <strong>Zona:</strong>
+                                    {{ $ubicacion->zona }}
                                 </div>
 
                     </div>

@@ -20,20 +20,14 @@ class Estado extends Model
 {
     use HasFactory;
 
-    // 👇 Nombre real de la tabla (evita pluralización)
     protected $table = 'estado';
-
-    // 👇 Clave primaria real
     protected $primaryKey = 'id_estado';
 
-    // 👇 Campos que se pueden asignar masivamente
     protected $fillable = [
         'nombre_estado',
         'descripcion',
         'tipo',
         'color',
     ];
-
-    // 👇 Paginación por defecto
     protected $perPage = 20;
 }
