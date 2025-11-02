@@ -38,3 +38,7 @@ Route::resource('destino', controller: DestinoController::class);
 
 use App\Http\Controllers\UsuarioController;
 Route::resource('usuario', controller: UsuarioController::class);
+
+use App\Http\Controllers\ReporteController;
+
+Route::resource('reporte', ReporteController::class);

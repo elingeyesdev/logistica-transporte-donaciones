@@ -355,6 +355,11 @@ return [
             'url'  => 'usuario',
             'icon' => 'fas fa-map-pin',
         ],
+         [
+            'text' => 'Reportes',
+            'url'  => 'reporte',
+            'icon' => 'fas fa-map-pin',
+        ],
 
 
         [
