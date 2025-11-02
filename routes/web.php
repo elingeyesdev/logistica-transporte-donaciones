@@ -35,3 +35,6 @@ Route::resource('ubicacion', UbicacionController::class);
 use App\Http\Controllers\DestinoController;
 
 Route::resource('destino', controller: DestinoController::class);
+
+use App\Http\Controllers\UsuarioController;
+Route::resource('usuario', controller: UsuarioController::class);

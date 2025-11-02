@@ -350,6 +350,11 @@ return [
             'url'  => 'ubicacion',
             'icon' => 'fas fa-map-pin',
         ],
+         [
+            'text' => 'Usuarios',
+            'url'  => 'usuario',
+            'icon' => 'fas fa-map-pin',
+        ],
 
 
         [
