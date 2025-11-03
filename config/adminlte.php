@@ -320,7 +320,7 @@ return [
             'text' => 'search',
         ],
         [
-            'text' => 'Solicitud',
+            'text' => 'Solicitudes',
             'url'  => 'solicitud',
             'icon' => 'far fa-fw fa-file',
          ],
@@ -336,12 +336,12 @@ return [
             'icon' => 'fas fa-flag',
         ],
         [
-            'text' => 'solicitante',
+            'text' => 'Solicitantes',
             'url'  => 'solicitante',
             'icon' => 'fas fa-user-friends',
         ],
         [
-            'text' => 'destino',
+            'text' => 'Destinos',
             'url'  => 'destino',
             'icon' => 'fas fa-map-marker-alt',
         ],
@@ -361,7 +361,7 @@ return [
             'icon' => 'fas fa-book',
         ],
         [
-            'text' => 'Seguimiento',
+            'text' => 'Seguimiento de Paquetes',
             'url'  => 'seguimiento',
             'icon' => 'fas fa-map',
         ],
