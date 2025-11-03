@@ -18,7 +18,7 @@ class HistorialSeguimientoDonacioneController extends Controller
     {
         $historialSeguimientoDonaciones = HistorialSeguimientoDonacione::paginate();
 
-        return view('historial-seguimiento-donacione.index', compact('historialSeguimientoDonaciones'))
+        return view('seguimiento.index', compact('historialSeguimientoDonaciones'))
             ->with('i', ($request->input('page', 1) - 1) * $historialSeguimientoDonaciones->perPage());
     }
 
@@ -29,7 +29,7 @@ class HistorialSeguimientoDonacioneController extends Controller
     {
         $historialSeguimientoDonacione = new HistorialSeguimientoDonacione();
 
-        return view('historial-seguimiento-donacione.create', compact('historialSeguimientoDonacione'));
+        return view('seguimiento.create', compact('historialSeguimientoDonacione'));
     }
 
     /**
@@ -39,7 +39,7 @@ class HistorialSeguimientoDonacioneController extends Controller
     {
         HistorialSeguimientoDonacione::create($request->validated());
 
-        return Redirect::route('historial-seguimiento-donaciones.index')
+        return Redirect::route('seguimiento.index')
             ->with('success', 'HistorialSeguimientoDonacione created successfully.');
     }
 
@@ -50,7 +50,7 @@ class HistorialSeguimientoDonacioneController extends Controller
     {
         $historialSeguimientoDonacione = HistorialSeguimientoDonacione::find($id);
 
-        return view('historial-seguimiento-donacione.show', compact('historialSeguimientoDonacione'));
+        return view('seguimiento.show', compact('historialSeguimientoDonacione'));
     }
 
     /**
@@ -60,7 +60,7 @@ class HistorialSeguimientoDonacioneController extends Controller
     {
         $historialSeguimientoDonacione = HistorialSeguimientoDonacione::find($id);
 
-        return view('historial-seguimiento-donacione.edit', compact('historialSeguimientoDonacione'));
+        return view('seguimiento.edit', compact('historialSeguimientoDonacione'));
     }
 
     /**
@@ -70,7 +70,7 @@ class HistorialSeguimientoDonacioneController extends Controller
     {
         $historialSeguimientoDonacione->update($request->validated());
 
-        return Redirect::route('historial-seguimiento-donaciones.index')
+        return Redirect::route('seguimiento.index')
             ->with('success', 'HistorialSeguimientoDonacione updated successfully');
     }
 
@@ -78,7 +78,7 @@ class HistorialSeguimientoDonacioneController extends Controller
     {
         HistorialSeguimientoDonacione::find($id)->delete();
 
-        return Redirect::route('historial-seguimiento-donaciones.index')
+        return Redirect::route('seguimiento.index')
             ->with('success', 'HistorialSeguimientoDonacione deleted successfully');
     }
 }

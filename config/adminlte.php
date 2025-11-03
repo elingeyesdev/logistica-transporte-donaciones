@@ -362,7 +362,7 @@ return [
         ],
         [
             'text' => 'Seguimiento',
-            'url'  => 'Seguimiento',
+            'url'  => 'seguimiento',
             'icon' => 'fas fa-map',
         ],
 

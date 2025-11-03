@@ -45,4 +45,4 @@ Route::resource('reporte', ReporteController::class);
 
 use App\Http\Controllers\HistorialSeguimientoDonacioneController;
 
-Route::resource('reporte', HistorialSeguimientoDonacioneController::class);
+Route::resource('seguimiento', HistorialSeguimientoDonacioneController::class);

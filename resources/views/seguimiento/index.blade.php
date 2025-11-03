@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    Historial Seguimiento Donaciones
+    Seguimiento de Paquetes
 @endsection
 
 @section('content')
@@ -13,11 +13,11 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Historial Seguimiento Donaciones') }}
+                                {{ __('Historial Seguimiento de Paquetes') }}
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('historial-seguimiento-donaciones.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('seguimiento.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
                               </div>
@@ -61,9 +61,9 @@
 										<td >{{ $historialSeguimientoDonacione->id_ubicacion }}</td>
 
                                             <td>
-                                                <form action="{{ route('historial-seguimiento-donaciones.destroy', $historialSeguimientoDonacione->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('historial-seguimiento-donaciones.show', $historialSeguimientoDonacione->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('historial-seguimiento-donaciones.edit', $historialSeguimientoDonacione->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('seguimiento.destroy', $historialSeguimientoDonacione->id) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('seguimiento.show', $historialSeguimientoDonacione->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('seguimiento.edit', $historialSeguimientoDonacione->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
