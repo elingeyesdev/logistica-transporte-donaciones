@@ -353,14 +353,18 @@ return [
          [
             'text' => 'Usuarios',
             'url'  => 'usuario',
-            'icon' => 'fas fa-map-pin',
+            'icon' => 'fas fa-user',
         ],
          [
             'text' => 'Reportes',
             'url'  => 'reporte',
-            'icon' => 'fas fa-map-pin',
+            'icon' => 'fas fa-book',
         ],
-
+        [
+            'text' => 'Seguimiento',
+            'url'  => 'Seguimiento',
+            'icon' => 'fas fa-map',
+        ],
 
         [
             'text' => 'blog',

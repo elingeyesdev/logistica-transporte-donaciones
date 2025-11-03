@@ -42,3 +42,7 @@ Route::resource('usuario', controller: UsuarioController::class);
 use App\Http\Controllers\ReporteController;
 
 Route::resource('reporte', ReporteController::class);
+
+use App\Http\Controllers\HistorialSeguimientoDonacioneController;
+
+Route::resource('reporte', HistorialSeguimientoDonacioneController::class);
