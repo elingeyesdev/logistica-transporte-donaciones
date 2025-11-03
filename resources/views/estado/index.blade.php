@@ -17,7 +17,7 @@
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('estados.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('estado.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
                               </div>
@@ -46,20 +46,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($estados as $estado)
+                                    @foreach ($estado as $estados)
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
-										<td >{{ $estado->id_estado }}</td>
-										<td >{{ $estado->nombre_estado }}</td>
-										<td >{{ $estado->descripcion }}</td>
-										<td >{{ $estado->tipo }}</td>
-										<td >{{ $estado->color }}</td>
+										<td >{{ $estados->id_estado }}</td>
+										<td >{{ $estados->nombre_estado }}</td>
+										<td >{{ $estados->descripcion }}</td>
+										<td >{{ $estados->tipo }}</td>
+										<td >{{ $estados->color }}</td>
 
                                             <td>
-                                                <form action="{{ route('estados.destroy', $estado->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('estados.show', $estado->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('estados.edit', $estado->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('estado.destroy', $estados->id) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('estado.show', $estados->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('estado.edit', $estados->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
@@ -72,7 +72,7 @@
                         </div>
                     </div>
                 </div>
-                {!! $estados->withQueryString()->links() !!}
+                {!! $estado->withQueryString()->links() !!}
             </div>
         </div>
     </div>
