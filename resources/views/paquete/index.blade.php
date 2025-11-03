@@ -12,9 +12,9 @@
         <div class="col-sm-12">
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title mb-0">Listado de Donaciones</h3>
+                    <h3 class="card-title mb-0">Listado de Paquetes</h3>
                     <a href="{{ route('paquete.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Nueva Donación
+                        <i class="fas fa-plus"></i> Nuevo Paquete
                     </a>
                 </div>
 
@@ -30,7 +30,7 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>#</th>
-                                    <th>ID Donación</th>
+                                    <th>ID Paquete</th>
                                     <th>Solicitud</th>
                                     <th>Descripción</th>
                                     <th>Cantidad Total</th>

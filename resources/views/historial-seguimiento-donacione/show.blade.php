@@ -11,7 +11,7 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="float-left">
-                            <span class="card-title">{{ __('Show') }} Historial Seguimiento Donacion</span>
+                            <span class="card-title">{{ __('Show') }} Seguimiento de Paquetes</span>
                         </div>
                         <div class="float-right">
                             <a class="btn btn-primary btn-sm" href="{{ route('historial-seguimiento-donaciones.index') }}"> {{ __('Back') }}</a>
@@ -41,7 +41,7 @@
                                     {{ $historialSeguimientoDonacione->imagen_evidencia }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
-                                    <strong>Id Donacion:</strong>
+                                    <strong>Id Paquete:</strong>
                                     {{ $historialSeguimientoDonacione->id_paquete }}
                                 </div>
                                 <div class="form-group mb-2 mb20">

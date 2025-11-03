@@ -2,8 +2,8 @@
     <div class="col-md-12">
         
         <div class="form-group mb-2 mb20">
-            <label for="id_paquete" class="form-label">{{ __('Id Donacion') }}</label>
-            <input type="text" name="id_paquete" class="form-control @error('id_paquete') is-invalid @enderror" value="{{ old('id_paquete', $paquete?->id_paquete) }}" id="id_paquete" placeholder="Id Donacion">
+            <label for="id_paquete" class="form-label">{{ __('Id Paquete') }}</label>
+            <input type="text" name="id_paquete" class="form-control @error('id_paquete') is-invalid @enderror" value="{{ old('id_paquete', $paquete?->id_paquete) }}" id="id_paquete" placeholder="Id Paquete">
             {!! $errors->first('id_paquete', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
         <div class="form-group mb-2 mb20">

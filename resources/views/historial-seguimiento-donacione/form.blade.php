@@ -27,9 +27,9 @@
             {!! $errors->first('imagen_evidencia', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
         <div class="form-group mb-2 mb20">
-            <label for="id_donacion" class="form-label">{{ __('Id Donacion') }}</label>
-            <input type="text" name="id_donacion" class="form-control @error('id_donacion') is-invalid @enderror" value="{{ old('id_donacion', $historialSeguimientoDonacione?->id_donacion) }}" id="id_donacion" placeholder="Id Donacion">
-            {!! $errors->first('id_donacion', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+            <label for="id_paquete" class="form-label">{{ __('Id Paquete') }}</label>
+            <input type="text" name="id_paquete" class="form-control @error('id_paquete') is-invalid @enderror" value="{{ old('id_paquete', $historialSeguimientoDonacione?->id_paquete) }}" id="id_paquete" placeholder="Id Paquete">
+            {!! $errors->first('id_paquete', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
         <div class="form-group mb-2 mb20">
             <label for="id_ubicacion" class="form-label">{{ __('Id Ubicacion') }}</label>
