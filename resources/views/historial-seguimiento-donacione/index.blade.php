@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('adminlte::page')
 
 @section('template_title')
     Historial Seguimiento Donaciones
@@ -41,7 +41,7 @@
 									<th >Estado</th>
 									<th >Fecha Actualizacion</th>
 									<th >Imagen Evidencia</th>
-									<th >Id Donacion</th>
+									<th >Id Paquete</th>
 									<th >Id Ubicacion</th>
 
                                         <th></th>
@@ -57,7 +57,7 @@
 										<td >{{ $historialSeguimientoDonacione->estado }}</td>
 										<td >{{ $historialSeguimientoDonacione->fecha_actualizacion }}</td>
 										<td >{{ $historialSeguimientoDonacione->imagen_evidencia }}</td>
-										<td >{{ $historialSeguimientoDonacione->id_donacion }}</td>
+										<td >{{ $historialSeguimientoDonacione->id_paquete }}</td>
 										<td >{{ $historialSeguimientoDonacione->id_ubicacion }}</td>
 
                                             <td>

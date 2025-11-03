@@ -140,8 +140,8 @@ return [
     'usermenu_desc' => false,
     'usermenu_profile_url' => false,
     
-    'text' => 'Donaciones',
-    'url'  => 'donacion',
+    'text' => 'Paquetes',
+    'url'  => 'paquete',
     'icon' => 'fas fa-box-heart',
 
     /*
@@ -326,8 +326,8 @@ return [
          ],
 
         [
-            'text' => 'Donaciones',
-            'url'  => 'donacion',
+            'text' => 'Paquetes',
+            'url'  => 'paquete',
             'icon' => 'far fa-fw fa-file',
         ],
         [

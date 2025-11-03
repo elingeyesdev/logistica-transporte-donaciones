@@ -15,9 +15,9 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::resource('solicitud', SolicitudController::class);
 
 //Donacion
-use App\Http\Controllers\DonacionController;
+use App\Http\Controllers\paqueteController;
 
-Route::resource('donacion', DonacionController::class);
+Route::resource('paquete', paqueteController::class);
 
 //estados
 use App\Http\Controllers\EstadoController;

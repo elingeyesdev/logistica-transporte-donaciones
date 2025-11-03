@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Editar Donación')
+@section('title', 'Editar Paquete')
 
 @section('content_header')
-    <h1>Editar Donación</h1>
+    <h1>Editar Paquete</h1>
 @stop
 
 @section('content')
@@ -12,21 +12,21 @@
         <div class="col-md-10">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-edit"></i> Actualizar Donación</h5>
+                    <h5 class="mb-0"><i class="fas fa-edit"></i> Actualizar Paquete</h5>
                 </div>
 
                 <div class="card-body bg-white">
-                    <form method="POST" action="{{ route('donacion.update', $donacion->id_donacion) }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('paquete.update', $paquete->id_paquete) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
-                        @include('donacion.form')
+                        @include('paquete.form')
 
                         <div class="mt-3 text-right">
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save"></i> Guardar Cambios
                             </button>
-                            <a href="{{ route('donacion.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('paquete.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Volver
                             </a>
                         </div>

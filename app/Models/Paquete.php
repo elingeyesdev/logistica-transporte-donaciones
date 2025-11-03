@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Donacion
+ * Class paquete
  *
- * @property $id_donacion
+ * @property $id_paquete
  * @property $id_solicitud
  * @property $descripcion
  * @property $cantidad_total
@@ -22,18 +22,18 @@ use Illuminate\Database\Eloquent\Model;
  * @package App
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
-class Donacion extends Model
+class paquete extends Model
 {
     
-    protected $table = 'donacion';
+    protected $table = 'paquete';
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $primaryKey = 'id_donacion';
-    protected $fillable = ['id_donacion', 'id_solicitud', 'descripcion', 'cantidad_total', 'estado_entrega', 'ubicacion_actual', 'fecha_creacion', 'fecha_entrega'];
+    protected $primaryKey = 'id_paquete';
+    protected $fillable = ['id_paquete', 'id_solicitud', 'descripcion', 'cantidad_total', 'estado_entrega', 'ubicacion_actual', 'fecha_creacion', 'fecha_entrega'];
 
 
     /**
