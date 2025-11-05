@@ -37,6 +37,6 @@ class Solicitud extends Model
 
     public function getRouteKeyName()
     {
-        return 'id';
+        return 'id_solicitud';
     }
 }

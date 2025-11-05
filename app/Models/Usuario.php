@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Usuario extends Model
 {
-    protected $table = 'usuario'; // 👈 Nombre real de la tabla en singular
-    protected $primaryKey = 'id_usuario'; // 👈 Nombre real de la columna ID
+    protected $table = 'usuario'; 
+    protected $primaryKey = 'id_usuario'; 
     public $incrementing = true;
     protected $keyType = 'int';
-    public $timestamps = true; // si tu tabla tiene created_at y updated_at
+    public $timestamps = true;
 
     protected $fillable = [
         'active',

@@ -26,13 +26,15 @@ class HistorialSeguimientoDonacione extends Model
 {
     
     protected $perPage = 20;
-
+    protected $primaryKey = 'id_historial';
+    public $incrementing = true;
+    protected $keyType = 'int';
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $fillable = ['id_historial', 'ci_usuario', 'estado', 'fecha_actualizacion', 'imagen_evidencia', 'id_paquete', 'id_ubicacion'];
+    protected $fillable = ['ci_usuario', 'estado', 'fecha_actualizacion', 'imagen_evidencia', 'id_paquete', 'id_ubicacion'];
 
 
     /**

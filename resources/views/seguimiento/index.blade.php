@@ -61,9 +61,9 @@
 										<td >{{ $historialSeguimientoDonacione->id_ubicacion }}</td>
 
                                             <td>
-                                                <form action="{{ route('seguimiento.destroy', $historialSeguimientoDonacione->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('seguimiento.show', $historialSeguimientoDonacione->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('seguimiento.edit', $historialSeguimientoDonacione->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('seguimiento.destroy', $historialSeguimientoDonacione->id_historial) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('seguimiento.show', $historialSeguimientoDonacione->id_historial) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('seguimiento.edit', $historialSeguimientoDonacione->id_historial) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>

@@ -33,7 +33,8 @@
         </div>
         <div class="form-group mb-2 mb20">
             <label for="fecha_creacion" class="form-label">{{ __('Fecha Creacion') }}</label>
-            <input type="text" name="fecha_creacion" class="form-control @error('fecha_creacion') is-invalid @enderror" value="{{ old('fecha_creacion', $paquete?->fecha_creacion) }}" id="fecha_creacion" placeholder="Fecha Creacion">
+            <input type="date" name="fecha_creacion" class="form-control @error('fecha_creacion') is-invalid @enderror"
+                value="{{ old('fecha_creacion', $paquete?->fecha_creacion ?? now()->format('Y-m-d')) }}" id="fecha_creacion" placeholder="Fecha Creacion">
             {!! $errors->first('fecha_creacion', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
         <div class="form-group mb-2 mb20">

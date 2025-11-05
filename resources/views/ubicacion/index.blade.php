@@ -55,9 +55,9 @@
 										<td >{{ $ubicacion->zona }}</td>
 
                                             <td>
-                                                <form action="{{ route('ubicacion.destroy', $ubicacion->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('ubicacion.show', $ubicacion->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('ubicacion.edit', $ubicacion->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('ubicacion.destroy', $ubicacion->id_ubicacion) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('ubicacion.show', $ubicacion->id_ubicacion) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('ubicacion.edit', $ubicacion->id_ubicacion) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
@@ -70,7 +70,6 @@
                         </div>
                     </div>
                 </div>
-                {!! $ubicacion->withQueryString()->links() !!}
             </div>
         </div>
     </div>

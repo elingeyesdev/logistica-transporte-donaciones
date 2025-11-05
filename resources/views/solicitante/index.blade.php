@@ -37,10 +37,10 @@
                                         <th>No</th>
                                         
 									<th >Id Solicitante</th>
+									<th >Nombre</th>
 									<th >Apellido</th>
 									<th >Ci</th>
 									<th >Email</th>
-									<th >Nombre</th>
 									<th >Telefono</th>
 
                                         <th></th>
@@ -52,16 +52,16 @@
                                             <td>{{ ++$i }}</td>
                                             
 										<td >{{ $solicitante->id_solicitante }}</td>
+                                        <td >{{ $solicitante->nombre }}</td>
 										<td >{{ $solicitante->apellido }}</td>
 										<td >{{ $solicitante->ci }}</td>
 										<td >{{ $solicitante->email }}</td>
-										<td >{{ $solicitante->nombre }}</td>
 										<td >{{ $solicitante->telefono }}</td>
 
                                             <td>
-                                                <form action="{{ route('solicitante.destroy', $solicitante->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('solicitante.show', $solicitante->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('solicitante.edit', $solicitante->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('solicitante.destroy', $solicitante->id_solicitante) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('solicitante.show', $solicitante->id_solicitante) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('solicitante.edit', $solicitante->id_solicitante) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
@@ -74,7 +74,6 @@
                         </div>
                     </div>
                 </div>
-                {!! $solicitante->withQueryString()->links() !!}
             </div>
         </div>
     </div>

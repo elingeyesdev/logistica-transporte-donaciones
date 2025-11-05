@@ -14,7 +14,7 @@
                         <span class="card-title">{{ __('Update') }} Historial Seguimiento de Paquetes</span>
                     </div>
                     <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('seguimiento.update', $historialSeguimientoDonacione->id) }}"  role="form" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('seguimiento.update', $historialSeguimientoDonacione->id_historial) }}"  role="form" enctype="multipart/form-data">
                             {{ method_field('PATCH') }}
                             @csrf
 
