@@ -18,8 +18,7 @@ class User extends Authenticatable
      * @var list<string>
      */
    protected $fillable = [
-        'nombre','apellido','correo_electronico','password',
-        'ci','telefono','email_verified_at','remember_token','administrador', 'activo'
+        'nombre','apellido','correo_electronico','password', 'ci','telefono','email_verified_at','remember_token','administrador', 'activo'
     ];
      public function getEmailForPasswordReset()
     {

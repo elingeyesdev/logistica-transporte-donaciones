@@ -1,10 +1,26 @@
 <div class="row padding-1 p-1">
     <div class="col-md-12">
-        
         <div class="form-group mb-2 mb20">
-            <label for="id_reporte" class="form-label">{{ __('Id Reporte') }}</label>
-            <input type="text" name="id_reporte" class="form-control @error('id_reporte') is-invalid @enderror" value="{{ old('id_reporte', $reporte?->id_reporte) }}" id="id_reporte" placeholder="Id Reporte">
-            {!! $errors->first('id_reporte', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+            <label for="id_paquete" class="form-label">Paquete:</label>
+            <select name="id_paquete" id="id_paquete" 
+                    class="form-control @error('id_paquete') is-invalid @enderror" required>
+                <option value="">-- Seleccione un paquete --</option>
+                @foreach($paquetes as $p)
+                @php
+                    $sol = optional($p->solicitud->solicitante);
+                    $label = sprintf('#%d · %s %s · %s',
+                        $p->id_paquete,
+                        $sol->nombre ?? '—',
+                        $sol->apellido ?? '',
+                        $p->codigo ?? '');
+                @endphp
+                <option value="{{ $p->id_paquete }}"
+                    {{ (string) old('id_paquete', $reporte->id_paquete ?? '') === (string) $p->id_paquete ? 'selected' : '' }}>
+                    {{ $label }}
+                </option>
+                @endforeach
+            </select>
+            {!! $errors->first('id_paquete', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
         </div>
         <div class="form-group mb-2 mb20">
             <label for="direccion_archivo" class="form-label">{{ __('Direccion Archivo') }}</label>

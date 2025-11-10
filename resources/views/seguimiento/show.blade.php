@@ -37,9 +37,18 @@
                                     {{ $historialSeguimientoDonacione->fecha_actualizacion }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
-                                    <strong>Imagen Evidencia:</strong>
-                                    {{ $historialSeguimientoDonacione->imagen_evidencia }}
+                                    <strong>Imagen Evidencia:</strong><br>
+                                    @if(!empty($historialSeguimientoDonacione->imagen_evidencia))
+                                        <a href="{{ $historialSeguimientoDonacione->imagen_evidencia }}" target="_blank">
+                                            <img src="{{ $historialSeguimientoDonacione->imagen_evidencia }}" 
+                                                alt="Evidencia" 
+                                                style="max-height: 180px; border-radius: 8px; border: 1px solid #ddd; margin-top: 5px;">
+                                        </a>
+                                    @else
+                                        <span class="text-muted">No disponible</span>
+                                    @endif
                                 </div>
+
                                 <div class="form-group mb-2 mb20">
                                     <strong>Id Paquete:</strong>
                                     {{ $historialSeguimientoDonacione->id_paquete }}

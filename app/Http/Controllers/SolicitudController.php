@@ -27,19 +27,21 @@ class SolicitudController extends Controller
         return view('solicitud.create', compact('solicitud'));
     }
 
-  public function store(SolicitudRequest $request): RedirectResponse
+    public function store(SolicitudRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
         return DB::transaction(function () use ($data) {
 
-            $solicitante = Solicitante::create([
-                'nombre'  => $data['nombre'],
-                'apellido'=> $data['apellido'],
-                'ci'      => $data['carnet_identidad'] ?? null,
-                'email'   => $data['correo_electronico'] ?? null,
-                'telefono'=> $data['nro_celular'] ?? null,
-            ]);
+            $solicitante = Solicitante::firstOrCreate(
+                ['ci' => $data['carnet_identidad']],
+                [
+                    'nombre'   => $data['nombre'],
+                    'apellido' => $data['apellido'],
+                    'email'    => $data['correo_electronico'] ?? null,
+                    'telefono' => $data['nro_celular'] ?? null,
+                ]
+            );
 
             $destino = Destino::create([
                 'comunidad' => $data['comunidad_solicitante'] ?? null,

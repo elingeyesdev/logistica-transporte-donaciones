@@ -45,11 +45,13 @@ class HistorialSeguimientoDonacioneController extends Controller
             ->with('success', 'Seguimiento registrado.');
     }
 
-    public function show($id): View
+   public function show($id): View
     {
-        $historialSeguimientoDonaciones = HistorialSeguimientoDonacione::with(['paquete'])->paginate();
+        $historialSeguimientoDonacione = HistorialSeguimientoDonacione::with(['paquete'])->findOrFail($id);
+
         return view('seguimiento.show', compact('historialSeguimientoDonacione'));
     }
+
 
     public function edit($id): View
     {
@@ -57,9 +59,11 @@ class HistorialSeguimientoDonacioneController extends Controller
         return view('seguimiento.edit', compact('historialSeguimientoDonacione'));
     }
 
-    public function update(HistorialSeguimientoDonacioneRequest $request, HistorialSeguimientoDonacione $historialSeguimientoDonacione): RedirectResponse
+   public function update(HistorialSeguimientoDonacioneRequest $request, HistorialSeguimientoDonacione $historialSeguimientoDonacione): RedirectResponse
     {
-        $paq = Paquete::with('estado')->findOrFail($request->input('id_paquete', $historialSeguimientoDonacione->id_paquete));
+        $paq = Paquete::with('estado')->findOrFail(
+            $request->input('id_paquete', $historialSeguimientoDonacione->id_paquete)
+        );
         $estadoNombre = optional($paq->estado)->nombre_estado ?? 'Pendiente';
 
         $historialSeguimientoDonacione->update(array_merge(
@@ -74,6 +78,7 @@ class HistorialSeguimientoDonacioneController extends Controller
         return Redirect::route('seguimiento.index')
             ->with('success', 'Seguimiento actualizado.');
     }
+
 
     public function destroy($id): RedirectResponse
     {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reporte;
+use App\Models\paquete;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\ReporteRequest;
@@ -28,8 +29,9 @@ class ReporteController extends Controller
     public function create(): View
     {
         $reporte = new Reporte();
+        $paquetes = Paquete::with('solicitud.solicitante')->get();
 
-        return view('reporte.create', compact('reporte'));
+        return view('reporte.create', compact('reporte', 'paquetes'));
     }
 
     /**
@@ -58,9 +60,10 @@ class ReporteController extends Controller
      */
     public function edit($id): View
     {
-        $reporte = Reporte::find($id);
+        $reporte = Reporte::findOrFail($id);
+        $paquetes = Paquete::with('solicitud.solicitante')->get();
 
-        return view('reporte.edit', compact('reporte'));
+        return view('reporte.edit', compact('reporte', 'paquetes'));
     }
 
     /**

@@ -21,11 +21,15 @@
             <input type="text" name="fecha_actualizacion" class="form-control @error('fecha_actualizacion') is-invalid @enderror" value="{{ old('fecha_actualizacion', $historialSeguimientoDonacione?->fecha_actualizacion) }}" id="fecha_actualizacion" placeholder="Fecha Actualizacion">
             {!! $errors->first('fecha_actualizacion', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
-        <div class="form-group mb-2 mb20">
-            <label for="imagen_evidencia" class="form-label">{{ __('Imagen Evidencia') }}</label>
-            <input type="text" name="imagen_evidencia" class="form-control @error('imagen_evidencia') is-invalid @enderror" value="{{ old('imagen_evidencia', $historialSeguimientoDonacione?->imagen_evidencia) }}" id="imagen_evidencia" placeholder="Imagen Evidencia">
-            {!! $errors->first('imagen_evidencia', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+       <div class="form-group mb-2 mb20">
+            <label for="imagen_evidencia" class="form-label">Imagen Evidencia (URL)</label>
+            <input type="url" name="imagen_evidencia" id="imagen_evidencia"
+                class="form-control @error('imagen_evidencia') is-invalid @enderror"
+                value="{{ old('imagen_evidencia', $historialSeguimientoDonacione->imagen_evidencia ?? '') }}"
+                placeholder="https://ejemplo.com/evidencia.jpg">
+            {!! $errors->first('imagen_evidencia', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
         </div>
+
         <div class="form-group mb-2 mb20">
             <label for="id_paquete" class="form-label">{{ __('Id Paquete') }}</label>
             <input type="text" name="id_paquete" class="form-control @error('id_paquete') is-invalid @enderror" value="{{ old('id_paquete', $historialSeguimientoDonacione?->id_paquete) }}" id="id_paquete" placeholder="Id Paquete">

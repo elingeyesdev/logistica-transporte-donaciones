@@ -22,9 +22,10 @@ class ReporteRequest extends FormRequest
     public function rules(): array
     {
         return [
-			'id_reporte' => 'required',
-			'direccion_archivo' => 'string',
-			'gestion' => 'string',
+			'direccion_archivo' => ['nullable', 'string', 'max:255'],
+            'fecha_reporte'     => ['required', 'date'],
+            'gestion'           => ['nullable', 'string', 'max:255'],
+            'id_paquete'        => ['required', 'integer', 'exists:paquete,id_paquete'],
         ];
     }
 }
