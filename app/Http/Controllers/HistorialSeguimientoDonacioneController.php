@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Auth;
 use App\Models\HistorialSeguimientoDonacione;
+use App\Models\Paquete;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\HistorialSeguimientoDonacioneRequest;
@@ -11,74 +12,74 @@ use Illuminate\View\View;
 
 class HistorialSeguimientoDonacioneController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): View
     {
-        $historialSeguimientoDonaciones = HistorialSeguimientoDonacione::paginate();
-
+        $historialSeguimientoDonaciones = HistorialSeguimientoDonacione::with(['paquete'])->paginate();
         return view('seguimiento.index', compact('historialSeguimientoDonaciones'))
             ->with('i', ($request->input('page', 1) - 1) * $historialSeguimientoDonaciones->perPage());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
+        
         $historialSeguimientoDonacione = new HistorialSeguimientoDonacione();
-
         return view('seguimiento.create', compact('historialSeguimientoDonacione'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(HistorialSeguimientoDonacioneRequest $request): RedirectResponse
     {
-        HistorialSeguimientoDonacione::create($request->validated());
+        $paq = Paquete::with('estado')->findOrFail($request->input('id_paquete'));
+        $estadoNombre = optional($paq->estado)->nombre_estado ?? 'Pendiente';
+
+        HistorialSeguimientoDonacione::create(array_merge(
+            $request->validated(),
+            [
+                'estado'              => $estadoNombre,
+                'ci_usuario'          => optional(Auth::user())->ci,
+                'fecha_actualizacion' => now(),
+            ]
+        ));
+
 
         return Redirect::route('seguimiento.index')
-            ->with('success', 'HistorialSeguimientoDonacione created successfully.');
+            ->with('success', 'Seguimiento registrado.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id): View
     {
-        $historialSeguimientoDonacione = HistorialSeguimientoDonacione::find($id);
-
+        $historialSeguimientoDonaciones = HistorialSeguimientoDonacione::with(['paquete'])->paginate();
         return view('seguimiento.show', compact('historialSeguimientoDonacione'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id): View
     {
         $historialSeguimientoDonacione = HistorialSeguimientoDonacione::find($id);
-
         return view('seguimiento.edit', compact('historialSeguimientoDonacione'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(HistorialSeguimientoDonacioneRequest $request, HistorialSeguimientoDonacione $historialSeguimientoDonacione): RedirectResponse
     {
-        $historialSeguimientoDonacione->update($request->validated());
+        $paq = Paquete::with('estado')->findOrFail($request->input('id_paquete', $historialSeguimientoDonacione->id_paquete));
+        $estadoNombre = optional($paq->estado)->nombre_estado ?? 'Pendiente';
+
+        $historialSeguimientoDonacione->update(array_merge(
+            $request->validated(),
+            [
+                'estado'              => $estadoNombre,
+                'ci_usuario'          => optional(Auth::user())->ci ?? $historialSeguimientoDonacione->ci_usuario,
+                'fecha_actualizacion' => now(),
+            ]
+        ));
 
         return Redirect::route('seguimiento.index')
-            ->with('success', 'HistorialSeguimientoDonacione updated successfully');
+            ->with('success', 'Seguimiento actualizado.');
     }
 
     public function destroy($id): RedirectResponse
     {
-        HistorialSeguimientoDonacione::find($id)->delete();
+        HistorialSeguimientoDonacione::find($id)?->delete();
 
         return Redirect::route('seguimiento.index')
-            ->with('success', 'HistorialSeguimientoDonacione deleted successfully');
+            ->with('success', 'Seguimiento eliminado.');
     }
 }

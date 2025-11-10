@@ -7,36 +7,36 @@ use Illuminate\Database\Eloquent\Model;
 
 class Solicitud extends Model
 {
-    use HasFactory;
-
     protected $table = 'solicitud';
-    protected $primaryKey = 'id_solicitud';
+
+    protected $primaryKey = 'id_solicitud'; 
     public $incrementing = true;
     protected $keyType = 'int';
-
-    protected $fillable = [
-        'nombre',
-        'apellido',
-        'carnet_identidad',
-        'correo_electronico',
-        'comunidad_solicitante',
-        'ubicacion',
-        'provincia',
-        'nro_celular',
+   protected $fillable = [
+        'id_solicitante',
+        'id_destino',
         'cantidad_personas',
         'fecha_inicio',
         'tipo_emergencia',
         'insumos_necesarios',
         'codigo_seguimiento',
-        // Campos requeridos por la tabla antigua
-        'nombre_solicitante',
-        'fecha_creacion',
-        'descripcion',
         'estado',
+        'fecha_solicitud',
+        'aprobada',
+        'apoyoaceptado',
+        'justificacion'
     ];
 
-    public function getRouteKeyName()
+
+    protected $casts = [
+        'fecha_inicio' => 'date',
+    ];
+    public function solicitante()
     {
-        return 'id_solicitud';
+        return $this->belongsTo(\App\Models\Solicitante::class, 'id_solicitante', 'id_solicitante');
+    }
+    public function destino()
+    {
+        return $this->belongsTo(\App\Models\Destino::class, 'id_destino', 'id_destino');
     }
 }

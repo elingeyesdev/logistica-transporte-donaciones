@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ __('Update') }} Ubicacion
+    {{ __('Editar') }} Ubicacion
 @endsection
 
 @section('content')
@@ -11,7 +11,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Update') }} Ubicacion</span>
+                        <span class="card-title">{{ __('Editar') }} Ubicacion</span>
                     </div>
                     <div class="card-body bg-white">
                         <form method="POST" action="{{ route('ubicacion.update', $ubicacion->id_ubicacion) }}"  role="form" enctype="multipart/form-data">

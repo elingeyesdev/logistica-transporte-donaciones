@@ -3,102 +3,135 @@
 namespace App\Http\Controllers;
 
 use App\Models\Solicitud;
+use App\Models\Solicitante;
+use App\Models\Destino;
+use App\Http\Requests\SolicitudRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Http\Requests\SolicitudRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
 class SolicitudController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): View
     {
-        $solicituds = Solicitud::paginate();
-
+        $solicituds = Solicitud::with(['solicitante','destino'])->paginate();
         return view('solicitud.index', compact('solicituds'))
             ->with('i', ($request->input('page', 1) - 1) * $solicituds->perPage());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
         $solicitud = new Solicitud();
-
         return view('solicitud.create', compact('solicitud'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(SolicitudRequest $request): RedirectResponse
+  public function store(SolicitudRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $data['nombre_solicitante'] = trim(($data['nombre'] ?? '') . ' ' . ($data['apellido'] ?? '')) ?: ($data['nombre'] ?? null);
-        $data['fecha_creacion'] = $data['fecha_inicio'] ?? now()->toDateString();
-        $data['descripcion'] = $data['insumos_necesarios'] ?? ($data['tipo_emergencia'] ?? '');
-        $data['estado'] = $data['estado'] ?? 'pendiente';
 
-        Solicitud::create($data);
+        return DB::transaction(function () use ($data) {
 
-        return Redirect::route('solicitud.index')
-            ->with('success', 'Solicitud created successfully.');
+            $solicitante = Solicitante::create([
+                'nombre'  => $data['nombre'],
+                'apellido'=> $data['apellido'],
+                'ci'      => $data['carnet_identidad'] ?? null,
+                'email'   => $data['correo_electronico'] ?? null,
+                'telefono'=> $data['nro_celular'] ?? null,
+            ]);
+
+            $destino = Destino::create([
+                'comunidad' => $data['comunidad_solicitante'] ?? null,
+                'provincia' => $data['provincia'] ?? null,
+                'direccion' => $data['ubicacion'] ?? null,
+                'latitud'   => $data['latitud'] ?? null,
+                'longitud'  => $data['longitud'] ?? null,
+            ]);
+
+            $solicitud = Solicitud::create([
+                'id_solicitante'     => $solicitante->id_solicitante,
+                'id_destino'         => $destino->id_destino,
+                'cantidad_personas'  => $data['cantidad_personas'],
+                'fecha_inicio'       => $data['fecha_inicio'],
+                'tipo_emergencia'    => $data['tipo_emergencia'],
+                'insumos_necesarios' => $data['insumos_necesarios'],
+                'codigo_seguimiento' => $data['codigo_seguimiento'] ?? null,
+                'estado'             => 'pendiente',
+                'fecha_solicitud'    => $data['fecha_solicitud'] ?? now()->toDateString(),
+                'aprobada'           => (bool)($data['aprobada'] ?? false),
+                'apoyoaceptado'      => (bool)($data['apoyoaceptado'] ?? false),
+                'justificacion'      => $data['justificacion'] ?? null,
+            ]);
+
+            return redirect()
+                ->route('solicitud.show', $solicitud->id_solicitud)
+                ->with('success', 'Solicitud creada correctamente.');
+        });
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id): View
     {
-        $solicitud = Solicitud::find($id);
-
-        return view('solicitud.show', compact('solicitud'));
+        $solicitud = Solicitud::with(['solicitante','destino'])->findOrFail($id);
+    return view('solicitud.show', compact('solicitud'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id): View
     {
-        $solicitud = Solicitud::find($id);
-
+        $solicitud = Solicitud::with(['solicitante','destino'])->findOrFail($id);
         return view('solicitud.edit', compact('solicitud'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(SolicitudRequest $request, Solicitud $solicitud): RedirectResponse
     {
         $data = $request->validated();
-        $data['nombre_solicitante'] = trim(($data['nombre'] ?? '') . ' ' . ($data['apellido'] ?? '')) ?: ($data['nombre'] ?? $solicitud->nombre_solicitante);
-        $data['fecha_creacion'] = $data['fecha_inicio'] ?? ($solicitud->fecha_creacion ?? now()->toDateString());
-        $data['descripcion'] = $data['insumos_necesarios'] ?? ($data['tipo_emergencia'] ?? $solicitud->descripcion);
-        $data['estado'] = $data['estado'] ?? ($solicitud->estado ?? 'pendiente');
 
-        $solicitud->update($data);
+         return DB::transaction(function () use ($data, $solicitud) {
 
-        return Redirect::route('solicitud.index')
-            ->with('success', 'Solicitud updated successfully');
+            $solicitud->solicitante?->update([
+                'nombre'  => $data['nombre'],
+                'apellido'=> $data['apellido'],
+                'ci'      => $data['carnet_identidad'] ?? null,
+                'email'   => $data['correo_electronico'] ?? null,
+                'telefono'=> $data['nro_celular'] ?? null,
+            ]);
+
+            $solicitud->destino?->update([
+                'comunidad' => $data['comunidad_solicitante'] ?? null,
+                'provincia' => $data['provincia'] ?? null,
+                'direccion' => $data['ubicacion'] ?? null,
+                'latitud'   => $data['latitud'] ?? null,
+                'longitud'  => $data['longitud'] ?? null,
+            ]);
+
+            $solicitud->update([
+                'cantidad_personas'  => $data['cantidad_personas'],
+                'fecha_inicio'       => $data['fecha_inicio'],
+                'tipo_emergencia'    => $data['tipo_emergencia'],
+                'insumos_necesarios' => $data['insumos_necesarios'],
+                'codigo_seguimiento' => $data['codigo_seguimiento'] ?? $solicitud->codigo_seguimiento,
+                'fecha_solicitud'    => $data['fecha_solicitud'] ?? $solicitud->fecha_solicitud,
+                'aprobada'           => (bool)($data['aprobada'] ?? $solicitud->aprobada),
+                'apoyoaceptado'      => (bool)($data['apoyoaceptado'] ?? $solicitud->apoyoaceptado),
+                'justificacion'      => $data['justificacion'] ?? $solicitud->justificacion,
+            ]);
+
+            return redirect()
+                ->route('solicitud.show', $solicitud->id_solicitud)
+                ->with('success', 'Solicitud actualizada correctamente.');
+        });
+
     }
 
-public function destroy($id_solicitud)
-{
-    $solicitud = Solicitud::find($id_solicitud);
-
-    if (!$solicitud) {
+    public function destroy($id_solicitud): RedirectResponse
+    {
+        $solicitud = Solicitud::find($id_solicitud);
+        if (!$solicitud) {
+            return redirect()->route('solicitud.index')
+                ->with('error', 'La solicitud no existe o ya fue eliminada.');
+        }
+        $solicitud->delete();
         return redirect()->route('solicitud.index')
-            ->with('error', 'La solicitud no existe o ya fue eliminada.');
+            ->with('success', 'Solicitud eliminada correctamente.');
     }
-
-    $solicitud->delete();
-
-    return redirect()->route('solicitud.index')
-        ->with('success', 'Solicitud eliminada correctamente.');
-}
-
 }

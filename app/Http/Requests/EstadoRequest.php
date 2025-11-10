@@ -24,9 +24,6 @@ class EstadoRequest extends FormRequest
         return [
 			'id_estado' => 'required',
 			'nombre_estado' => 'required|string',
-			'descripcion' => 'string',
-			'tipo' => 'required|string',
-			'color' => 'string',
         ];
     }
 }

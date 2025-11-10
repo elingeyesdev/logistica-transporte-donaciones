@@ -25,9 +25,6 @@ class Estado extends Model
 
     protected $fillable = [
         'nombre_estado',
-        'descripcion',
-        'tipo',
-        'color',
     ];
     protected $perPage = 20;
 }

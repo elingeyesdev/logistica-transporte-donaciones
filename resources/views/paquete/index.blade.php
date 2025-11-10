@@ -32,8 +32,6 @@
                                     <th>#</th>
                                     <th>ID Paquete</th>
                                     <th>Solicitud</th>
-                                    <th>Descripción</th>
-                                    <th>Cantidad Total</th>
                                     <th>Estado de Entrega</th>
                                     <th>Ubicación Actual</th>
                                     <th>Fecha Creación</th>
@@ -47,16 +45,17 @@
                                         <td>{{ ++$i }}</td>
                                         <td>{{ $paquete->id_paquete }}</td>
                                         <td>{{ $paquete->id_solicitud }}</td>
-                                        <td>{{ $paquete->descripcion }}</td>
-                                        <td>{{ $paquete->cantidad_total }}</td>
+    
+                                       @php $nombre = optional($paquete->estado)->nombre_estado; @endphp
                                         <td>
-                                            <span class="badge 
-                                                @if($paquete->estado_entrega == 'En preparación') bg-warning 
-                                                @elseif($paquete->estado_entrega == 'En camino') bg-info 
-                                                @elseif($paquete->estado_entrega == 'Entregada') bg-success 
-                                                @else bg-secondary @endif">
-                                                {{ $paquete->estado_entrega }}
-                                            </span>
+                                        <span class="badge
+                                            @if($nombre === 'Pendiente') bg-warning
+                                            @elseif($nombre === 'En camino') bg-info
+                                            @elseif($nombre === 'Entregada') bg-success
+                                            @elseif($nombre === 'Esperando Aprobacion') bg-secondary
+                                            @else bg-secondary @endif">
+                                            {{ $nombre ?? '—' }}
+                                        </span>
                                         </td>
                                         <td>{{ $paquete->ubicacion_actual }}</td>
                                         <td>{{ $paquete->fecha_creacion }}</td>

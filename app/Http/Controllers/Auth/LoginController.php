@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-
+use Illuminate\Http\Request;
 class LoginController extends Controller
 {
     /*
@@ -36,5 +36,14 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
         $this->middleware('auth')->only('logout');
+    }
+       protected function username()
+    {
+        return 'correo_electronico';
+    }
+
+    protected function credentials(Request $request)
+    {
+        return $request->only('correo_electronico', 'password');
     }
 }

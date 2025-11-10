@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ __('Update') }} Historial Seguimiento de Paquetes
+    {{ __('Editar') }} Historial Seguimiento de Paquetes
 @endsection
 
 @section('content')
@@ -11,7 +11,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Update') }} Historial Seguimiento de Paquetes</span>
+                        <span class="card-title">{{ __('Editar') }} Historial Seguimiento de Paquetes</span>
                     </div>
                     <div class="card-body bg-white">
                         <form method="POST" action="{{ route('seguimiento.update', $historialSeguimientoDonacione->id_historial) }}"  role="form" enctype="multipart/form-data">

@@ -16,8 +16,8 @@
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('usuario.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Create New') }}
+                                <a href="{{ route('user.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                  {{ __('Crear Nuevo') }}
                                 </a>
                               </div>
                         </div>
@@ -49,27 +49,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($usuarios as $usuario)
+                                    @foreach ($users as $user)
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
-										<td >{{ $usuario->id_usuario }}</td>
-										<td >{{ $usuario->active }}</td>
-										<td >{{ $usuario->admin }}</td>
-										<td >{{ $usuario->apellido }}</td>
-										<td >{{ $usuario->ci }}</td>
-										<td >{{ $usuario->contrasena }}</td>
-										<td >{{ $usuario->correo_electronico }}</td>
-										<td >{{ $usuario->nombre }}</td>
-										<td >{{ $usuario->telefono }}</td>
+										<td >{{ $user->id_usuario }}</td>
+										<td >{{ $user->active }}</td>
+										<td >{{ $user->admin }}</td>
+										<td >{{ $user->apellido }}</td>
+										<td >{{ $user->ci }}</td>
+										<td >{{ $user->contrasena }}</td>
+										<td >{{ $user->correo_electronico }}</td>
+										<td >{{ $user->nombre }}</td>
+										<td >{{ $user->telefono }}</td>
 
                                             <td>
-                                                <form action="{{ route('usuario.destroy', $usuario->id_usuario) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('usuario.show', $usuario->id_usuario) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('usuario.edit', $usuario->id_usuario) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('user.destroy', $user->id_usuario) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('user.show', $user->id_usuario) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('user.edit', $user->id_usuario) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
                                                 </form>
                                             </td>
                                         </tr>

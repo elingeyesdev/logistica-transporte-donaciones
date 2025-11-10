@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 @section('template_title')
-    {{ __('Update') }} Solicitud
+    {{ __('Editar') }} Solicitud
 @endsection
 
 @section('content')
@@ -10,7 +10,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Update') }} Solicitud</span>
+                        <span class="card-title">{{ __('Editar') }} Solicitud</span>
                     </div>
                     <div class="card-body bg-white">
                         <form method="POST" action="{{ route('solicitud.update', ['solicitud' => $solicitud->getRouteKey()]) }}"  role="form" enctype="multipart/form-data">

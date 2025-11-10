@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ $reporte->name ?? __('Show') . " " . __('Reporte') }}
+    {{ $reporte->name ?? __('Mostrar') . " " . __('Reporte') }}
 @endsection
 
 @section('content')
@@ -11,10 +11,10 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="float-left">
-                            <span class="card-title">{{ __('Show') }} Reporte</span>
+                            <span class="card-title">{{ __('Mostrar') }} Reporte</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('reporte.index') }}"> {{ __('Back') }}</a>
+                            <a class="btn btn-primary btn-sm" href="{{ route('reporte.index') }}"> {{ __('Volver') }}</a>
                         </div>
                     </div>
 

@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property $id_solicitud
  * @property $descripcion
  * @property $cantidad_total
- * @property $estado_entrega
+ * @property $estado_id
  * @property $ubicacion_actual
  * @property $fecha_creacion
  * @property $fecha_entrega
@@ -33,7 +33,7 @@ class paquete extends Model
      * @var array<int, string>
      */
     protected $primaryKey = 'id_paquete';
-    protected $fillable = ['id_paquete', 'id_solicitud', 'descripcion', 'cantidad_total', 'estado_entrega', 'ubicacion_actual', 'fecha_creacion', 'fecha_entrega'];
+    protected $fillable = ['id_paquete', 'id_solicitud', 'estado_id','cantidad_total', 'ubicacion_actual', 'fecha_creacion', 'fecha_entrega'];
 
 
     /**
@@ -41,7 +41,15 @@ class paquete extends Model
      */
     public function solicitud()
     {
-        return $this->belongsTo(\App\Models\Solicitud::class, 'id_solicitud', 'id');
+        return $this->belongsTo(\App\Models\Solicitud::class, 'id_solicitud', 'id_solicitud');
     }
-    
+       public function estado()
+    {
+        return $this->belongsTo(\App\Models\Estado::class, 'estado_id', 'id_estado');
+    }
+    public function encargado()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'id_encargado', 'ci');
+    }
+
 }

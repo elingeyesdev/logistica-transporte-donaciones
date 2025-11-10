@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ $historialSeguimientoDonacione->name ?? __('Show') . " " . __('Historial Seguimiento de Paquetes') }}
+    {{ $historialSeguimientoDonacione->name ?? __('Mostrar') . " " . __('Historial Seguimiento de Paquetes') }}
 @endsection
 
 @section('content')
@@ -11,10 +11,10 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="float-left">
-                            <span class="card-title">{{ __('Show') }} Seguimiento de Paquetes</span>
+                            <span class="card-title">{{ __('Mostrar') }} Seguimiento de Paquetes</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('seguimiento.index') }}"> {{ __('Back') }}</a>
+                            <a class="btn btn-primary btn-sm" href="{{ route('seguimiento.index') }}"> {{ __('Volver') }}</a>
                         </div>
                     </div>
 

@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ $paquete->name ?? __('Show') . " " . __('Paquete') }}
+    {{ $paquete->name ?? __('Mostrar') . " " . __('Paquete') }}
 @endsection
 
 @section('content')
@@ -11,10 +11,10 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="float-left">
-                            <span class="card-title">{{ __('Show') }} Paquete</span>
+                            <span class="card-title">{{ __('Mostrar') }} Paquete</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('paquete.index') }}"> {{ __('Back') }}</a>
+                            <a class="btn btn-primary btn-sm" href="{{ route('paquete.index') }}"> {{ __('Volver') }}</a>
                         </div>
                     </div>
 
@@ -28,18 +28,12 @@
                                     <strong>Id Solicitud:</strong>
                                     {{ $paquete->id_solicitud }}
                                 </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Descripcion:</strong>
-                                    {{ $paquete->descripcion }}
+                                
+                               <div class="form-group mb-2 mb20">
+                                    <strong>Estado:</strong>
+                                    {{ optional($paquete->estado)->nombre_estado ?? '—' }}
                                 </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Cantidad Total:</strong>
-                                    {{ $paquete->cantidad_total }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Estado Entrega:</strong>
-                                    {{ $paquete->estado_entrega }}
-                                </div>
+
                                 <div class="form-group mb-2 mb20">
                                     <strong>Ubicacion Actual:</strong>
                                     {{ $paquete->ubicacion_actual }}

@@ -14,7 +14,7 @@
                             <span class="card-title">{{ __('Show') }} Estado</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('estado.index') }}"> {{ __('Back') }}</a>
+                            <a class="btn btn-primary btn-sm" href="{{ route('estado.index') }}"> {{ __('Volver') }}</a>
                         </div>
                     </div>
 
@@ -28,19 +28,6 @@
                                     <strong>Nombre Estado:</strong>
                                     {{ $estado->nombre_estado }}
                                 </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Descripcion:</strong>
-                                    {{ $estado->descripcion }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Tipo:</strong>
-                                    {{ $estado->tipo }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Color:</strong>
-                                    {{ $estado->color }}
-                                </div>
-
                     </div>
                 </div>
             </div>

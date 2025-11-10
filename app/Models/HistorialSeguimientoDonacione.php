@@ -34,7 +34,16 @@ class HistorialSeguimientoDonacione extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['ci_usuario', 'estado', 'fecha_actualizacion', 'imagen_evidencia', 'id_paquete', 'id_ubicacion'];
+// app/Models/HistorialSeguimientoDonacione.php
+    protected $fillable = [
+        'ci_usuario',
+        'estado',
+        'imagen_evidencia',
+        'fecha_actualizacion',
+        'id_paquete',
+        'id_ubicacion',
+        'user_id',
+    ];
 
 
     /**

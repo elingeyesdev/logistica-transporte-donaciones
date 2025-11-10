@@ -20,21 +20,34 @@ class SolicitudRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
-        return [
-            'nombre' => 'required|string|max:255',
-            'apellido' => 'nullable|string|max:255',
-            'carnet_identidad' => 'required|string|max:50',
-            'correo_electronico' => 'nullable|email|max:255',
-            'comunidad_solicitante' => 'nullable|string|max:255',
-            'ubicacion' => 'required|string|max:255',
-            'provincia' => 'nullable|string|max:255',
-            'nro_celular' => 'nullable|string|max:50',
-            'cantidad_personas' => 'nullable|integer|min:1',
-            'fecha_inicio' => 'nullable|date',
-            'tipo_emergencia' => 'required|string|max:255',
-            'insumos_necesarios' => 'nullable|string',
-            'codigo_seguimiento' => 'nullable|string|max:255',
-        ];
-    }
+{
+    return [
+        // PERSONA
+        'nombre'             => ['required','string','max:255'],
+        'apellido'           => ['required','string','max:255'],
+        'carnet_identidad'   => ['required','string','max:255'],
+        'correo_electronico' => ['required','email','max:255'],
+        'nro_celular'        => ['required','string','max:50'],
+
+        // DESTINO
+        'comunidad_solicitante' => ['required','string','max:255'],
+        'provincia'             => ['required','string','max:255'],
+        'ubicacion'             => ['required','string','max:255'],
+        'latitud'               => ['required','numeric'],
+        'longitud'              => ['required','numeric'],
+
+        // SOLICITUD 
+        'cantidad_personas'  => ['required','integer','min:0'],
+        'fecha_inicio'       => ['required','date'],
+        'tipo_emergencia'    => ['required','string','max:255'],
+        'insumos_necesarios' => ['required','string'],
+        'codigo_seguimiento' => ['required','string','max:255'],
+        'estado'             => ['nullable','string','max:255'],
+        'fecha_solicitud'    => ['nullable','date'],
+        'aprobada'           => ['nullable','boolean'], 
+        'apoyoaceptado'      => ['nullable','boolean'],
+        'justificacion'      => ['nullable','string','max:255']
+    ];
+}
+
 }
