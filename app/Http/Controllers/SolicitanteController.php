@@ -71,7 +71,7 @@ class SolicitanteController extends Controller
         $solicitante->update($request->validated());
 
         return Redirect::route('solicitante.index')
-            ->with('success', 'Solicitante updated successfully');
+            ->with('success', 'Solicitante actualizado correctamente');
     }
 
     public function destroy($id): RedirectResponse
@@ -79,6 +79,6 @@ class SolicitanteController extends Controller
         Solicitante::find($id)->delete();
 
         return Redirect::route('solicitante.index')
-            ->with('success', 'Solicitante deleted successfully');
+            ->with('success', 'Solicitante eliminado');
     }
 }

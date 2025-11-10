@@ -21,14 +21,13 @@ class Ubicacion extends Model
 {
      protected $table = 'ubicacion'; 
     protected $primaryKey = 'id_ubicacion';
-    protected $perPage = 20;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $fillable = ['id_ubicacion', 'latitud', 'longitud', 'zona'];
+    protected $fillable = ['latitud', 'longitud', 'zona'];
 
 
 }

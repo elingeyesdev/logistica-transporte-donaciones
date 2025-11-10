@@ -71,7 +71,7 @@ class DestinoController extends Controller
         $destino->update($request->validated());
 
         return Redirect::route('destino.index')
-            ->with('success', 'Destino updated successfully');
+            ->with('success', 'Destino actualizado correctamente');
     }
 
     public function destroy($id): RedirectResponse
@@ -79,6 +79,6 @@ class DestinoController extends Controller
         Destino::find($id)->delete();
 
         return Redirect::route('destino.index')
-            ->with('success', 'Destino deleted successfully');
+            ->with('success', 'Destino eliminado');
     }
 }

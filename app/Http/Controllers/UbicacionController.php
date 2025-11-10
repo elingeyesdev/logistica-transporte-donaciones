@@ -71,7 +71,7 @@ class UbicacionController extends Controller
         $ubicacion->update($request->validated());
 
         return Redirect::route('ubicacion.index')
-            ->with('success', 'Ubicacion updated successfully');
+            ->with('success', 'Ubicacion actualizado correctamente');
     }
 
     public function destroy($id): RedirectResponse
@@ -79,6 +79,6 @@ class UbicacionController extends Controller
         Ubicacion::find($id)->delete();
 
         return Redirect::route('ubicacion.index')
-            ->with('success', 'Ubicacion deleted successfully');
+            ->with('success', 'Ubicacion eliminado');
     }
 }

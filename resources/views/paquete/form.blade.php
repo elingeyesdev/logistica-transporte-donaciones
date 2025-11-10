@@ -58,13 +58,59 @@
       @endif
     </div>
 
-    <div class="form-group mb-2 mb20">
-      <label for="ubicacion_actual" class="form-label">Ubicación Actual</label>
-      <input type="text" name="ubicacion_actual" id="ubicacion_actual"
-             class="form-control @error('ubicacion_actual') is-invalid @enderror"
-             value="{{ old('ubicacion_actual', $paquete->ubicacion_actual) }}" placeholder="Punto actual de tránsito">
-      {!! $errors->first('ubicacion_actual', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
+    {{-- UBICACIÓN ACTUAL --}}
+    <div class="card mt-3 mb-3">
+      <div class="card-header">
+        <strong>Ubicación Actual</strong>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group mb-2 mb20">
+              <label for="zona" class="form-label">Zona o Comunidad</label>
+              <input type="text" name="zona" id="zona"
+                    class="form-control @error('zona') is-invalid @enderror"
+                    value="{{ old('zona') }}"
+                    placeholder="Ej. Zona Sur, Centro, Norte...">
+              {!! $errors->first('zona', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="form-group mb-2 mb20">
+              <label for="latitud" class="form-label">Latitud</label>
+              <input type="number" step="any" name="latitud" id="latitud"
+                    class="form-control @error('latitud') is-invalid @enderror"
+                    value="{{ old('latitud') }}"
+                    placeholder="-17.7833">
+              {!! $errors->first('latitud', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="form-group mb-2 mb20">
+              <label for="longitud" class="form-label">Longitud</label>
+              <input type="number" step="any" name="longitud" id="longitud"
+                    class="form-control @error('longitud') is-invalid @enderror"
+                    value="{{ old('longitud') }}"
+                    placeholder="-63.1821">
+              {!! $errors->first('longitud', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
+            </div>
+          </div>
+        </div>
+
+        {{-- Campo generado automáticamente --}}
+        <div class="form-group mb-2 mb20" hidden>
+          <label for="ubicacion_actual" class="form-label">Ubicación (generada automáticamente)</label>
+          <input type="text" name="ubicacion_actual" id="ubicacion_actual"
+                class="form-control"
+                value="{{ old('ubicacion_actual', $paquete->ubicacion_actual) }}"
+                readonly
+                placeholder="Se generará al guardar">
+        </div>
+      </div>
     </div>
+
 
     <div class="row">
       <div class="col-md-6">

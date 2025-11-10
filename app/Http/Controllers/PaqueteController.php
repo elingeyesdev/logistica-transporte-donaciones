@@ -54,10 +54,11 @@ class PaqueteController extends Controller
                 $paq->update(['fecha_entrega' => now()->toDateString()]);
             }
 
-            $ubicacionId = null;
             $lat = $request->input('latitud');
             $lng = $request->input('longitud');
             $zona = $request->input('zona');
+
+            $ubicacionId = null;
             if ($lat !== null && $lng !== null) {
                 $ubic = Ubicacion::create([
                     'latitud'  => $lat,
@@ -67,9 +68,14 @@ class PaqueteController extends Controller
                 $ubicacionId = $ubic->id_ubicacion;
             }
 
+            $ubicacionString = $this->buildUbicacionString($zona, $lat, $lng);
+            $data['ubicacion_actual'] = $ubicacionString;
+
+            $paq = Paquete::create($data);
+
             HistorialSeguimientoDonacione::create([
                 'ci_usuario'          => optional(Auth::user())->ci,
-                'estado'              => $estadoNombre,
+                'estado'              => optional($paq->estado)->nombre_estado ?? 'Pendiente',
                 'imagen_evidencia'    => $request->input('imagen_evidencia'),
                 'id_paquete'          => $paq->id_paquete,
                 'id_ubicacion'        => $ubicacionId,
@@ -93,6 +99,14 @@ class PaqueteController extends Controller
         }
         return 'D-' . substr((string) time(), -3);
     }
+    private function buildUbicacionString($zona, $lat, $lng): string
+    {
+        $parts = [];
+        if ($zona) $parts[] = $zona;
+        if ($lat && $lng) $parts[] = "($lat, $lng)";
+        return implode(' - ', $parts);
+    }
+
 
     public function show($id): View
     {
@@ -127,10 +141,11 @@ class PaqueteController extends Controller
                     $paquete->update(['fecha_entrega' => now()->toDateString()]);
                 }
 
-                $ubicacionId = null;
                 $lat = $request->input('latitud');
                 $lng = $request->input('longitud');
                 $zona = $request->input('zona');
+
+                $ubicacionId = null;
                 if ($lat !== null && $lng !== null) {
                     $ubic = Ubicacion::create([
                         'latitud'  => $lat,
@@ -140,6 +155,9 @@ class PaqueteController extends Controller
                     $ubicacionId = $ubic->id_ubicacion;
                 }
 
+                $ubicacionString = $this->buildUbicacionString($zona, $lat, $lng);
+                $paquete->update(['ubicacion_actual' => $ubicacionString]);
+
                 HistorialSeguimientoDonacione::create([
                     'ci_usuario'          => optional(Auth::user())->ci,
                     'estado'              => $newNombre,
@@ -148,6 +166,7 @@ class PaqueteController extends Controller
                     'id_ubicacion'        => $ubicacionId,
                     'fecha_actualizacion' => now(),
                 ]);
+
             }
         });
 

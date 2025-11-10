@@ -22,12 +22,24 @@
   </div>
 
   <div class="mb-3">
-    <label for="correo_electronico" class="form-label">Correo ElectronicoS</label>
+    <label for="correo_electronico" class="form-label">Correo Electronico</label>
     <input type="email" class="form-control @error('correo_electronico') is-invalid @enderror"
            id="correo_electronico" name="correo_electronico" value="{{ old('correo_electronico') }}" required>
     @error('correo_electronico') <div class="invalid-feedback">{{ $message }}</div> @enderror
   </div>
 
+   <div class="mb-3">
+    <label for="telefono" class="form-label">Número de Celular:</label>
+    <input type="number" class="form-control @error('telefono') is-invalid @enderror"
+           id="telefono" name="telefono" value="{{ old('telefono') }}" required>
+    @error('telefono') <div class="invalid-feedback">{{ $message }}</div> @enderror
+  </div>
+    <div class="mb-3">
+    <label for="ci" class="form-label">Carnet de Identidad:</label>
+    <input type="text" class="form-control @error('ci') is-invalid @enderror"
+           id="ci" name="ci" value="{{ old('ci') }}" required>
+    @error('ci') <div class="invalid-feedback">{{ $message }}</div> @enderror
+  </div>
   <div class="mb-3">
     <label for="password" class="form-label">Contraseña</label>
     <input type="password" class="form-control @error('password') is-invalid @enderror"

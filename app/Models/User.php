@@ -19,8 +19,7 @@ class User extends Authenticatable
      */
    protected $fillable = [
         'nombre','apellido','correo_electronico','password',
-        'ci','telefono',
-        'email_verified_at','remember_token',
+        'ci','telefono','email_verified_at','remember_token','administrador', 'activo'
     ];
      public function getEmailForPasswordReset()
     {
@@ -50,4 +49,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+   public function getAdminlteProfileAttribute()
+    {
+        return trim($this->nombre . ' ' . $this->apellido);
+    }
+    public function getNameAttribute()
+    {
+        return trim($this->nombre . ' ' . $this->apellido);
+    }
+
+
+
 }

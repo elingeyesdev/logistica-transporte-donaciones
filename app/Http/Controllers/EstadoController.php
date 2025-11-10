@@ -71,7 +71,7 @@ class EstadoController extends Controller
         $estado->update($request->validated());
 
         return Redirect::route('estado.index')
-            ->with('success', 'Estado updated successfully');
+            ->with('success', 'Estado actualizado correctamente');
     }
 
     public function destroy($id): RedirectResponse
@@ -79,6 +79,6 @@ class EstadoController extends Controller
         Estado::find($id)->delete();
 
         return Redirect::route('estado.index')
-            ->with('success', 'Estado deleted successfully');
+            ->with('success', 'Estado eliminado');
     }
 }

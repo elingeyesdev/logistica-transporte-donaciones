@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    Reportes
+    Reporte
 @endsection
 
 @section('content')
@@ -13,7 +13,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Reportes') }}
+                                {{ __('Reporte') }}
                             </span>
 
                              <div class="float-right">

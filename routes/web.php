@@ -44,3 +44,10 @@ Route::resource('reporte', ReporteController::class);
 use App\Http\Controllers\HistorialSeguimientoDonacioneController;
 
 Route::resource('seguimiento', HistorialSeguimientoDonacioneController::class);
+
+use App\Http\Controllers\UserAdminController;
+
+Route::get('/usuario', [UserAdminController::class, 'index'])->name('usuarios.index');
+Route::post('/usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAdmin'])->name('usuarios.toggleAdmin');
+Route::post('/usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo'])->name('usuarios.toggleActivo');
+

@@ -33,7 +33,7 @@ class paquete extends Model
      * @var array<int, string>
      */
     protected $primaryKey = 'id_paquete';
-    protected $fillable = ['id_paquete', 'id_solicitud', 'estado_id','cantidad_total', 'ubicacion_actual', 'fecha_creacion', 'fecha_entrega'];
+    protected $fillable = ['id_paquete', 'id_solicitud', 'estado_id','imagen', 'ubicacion_actual', 'fecha_creacion', 'fecha_entrega'];
 
 
     /**

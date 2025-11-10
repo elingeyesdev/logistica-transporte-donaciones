@@ -22,9 +22,10 @@ class paqueteRequest extends FormRequest
    public function rules(): array
     {
         return [
-             'id_solicitud'   => ['required','integer','exists:solicitud,id_solicitud'],
+            'id_solicitud'   => ['required','integer','exists:solicitud,id_solicitud'],
             'estado_id'      => ['required','integer','exists:estado,id_estado'],
             'imagen'         => ['required','string','max:255'],
+            'ubicacion_actual' => ['nullable','string'],    
             'latitud'        => ['nullable','numeric'],
             'longitud'       => ['nullable','numeric'],
             'zona'           => ['nullable','string','max:255'],

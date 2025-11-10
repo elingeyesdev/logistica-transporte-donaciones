@@ -22,14 +22,7 @@
 
                         @include('paquete.form')
 
-                        <div class="mt-3 text-right">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save"></i> Guardar Cambios
-                            </button>
-                            <a href="{{ route('paquete.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Volver
-                            </a>
-                        </div>
+                        
                     </form>
                 </div>
             </div>

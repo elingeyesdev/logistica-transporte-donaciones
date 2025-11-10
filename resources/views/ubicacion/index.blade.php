@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    ubicacion
+    Ubicacion
 @endsection
 
 @section('content')
@@ -13,7 +13,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('ubicacion') }}
+                                {{ __('Ubicacion') }}
                             </span>
 
                              <div class="float-right">

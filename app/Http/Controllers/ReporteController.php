@@ -71,7 +71,7 @@ class ReporteController extends Controller
         $reporte->update($request->validated());
 
         return Redirect::route('reporte.index')
-            ->with('success', 'Reporte updated successfully');
+            ->with('success', 'Reporte actualizado correctamente');
     }
 
     public function destroy($id): RedirectResponse
@@ -79,6 +79,6 @@ class ReporteController extends Controller
         Reporte::find($id)->delete();
 
         return Redirect::route('reporte.index')
-            ->with('success', 'Reporte deleted successfully');
+            ->with('success', 'Reporte eliminado');
     }
 }
