@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ __('Create') }} Destino
+    {{ __('Crear') }} Destino
 @endsection
 
 @section('content')
@@ -11,7 +11,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Create') }} Destino</span>
+                        <span class="card-title">{{ __('Crear') }} Destino</span>
                     </div>
                     <div class="card-body bg-white">
                         <form method="POST" action="{{ route('destino.store') }}"  role="form" enctype="multipart/form-data">

@@ -40,7 +40,7 @@ class SolicitanteController extends Controller
         Solicitante::create($request->validated());
 
         return Redirect::route('solicitante.index')
-            ->with('success', 'Solicitante created successfully.');
+            ->with('success', 'Solicitante creado exitosamente.');
     }
 
     /**

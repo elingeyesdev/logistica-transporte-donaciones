@@ -40,7 +40,7 @@ class EstadoController extends Controller
         Estado::create($request->validated());
 
         return Redirect::route('estado.index')
-            ->with('success', 'Estado created successfully.');
+            ->with('success', 'Estado creado exitosamente.');
     }
 
     /**

@@ -42,7 +42,7 @@ class ReporteController extends Controller
         Reporte::create($request->validated());
 
         return Redirect::route('reporte.index')
-            ->with('success', 'Reporte created successfully.');
+            ->with('success', 'Reporte creado exitosamente.');
     }
 
     /**

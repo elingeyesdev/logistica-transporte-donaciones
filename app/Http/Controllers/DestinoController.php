@@ -40,7 +40,7 @@ class DestinoController extends Controller
         Destino::create($request->validated());
 
         return Redirect::route('destino.index')
-            ->with('success', 'Destino created successfully.');
+            ->with('success', 'Destino creado exitosamente.');
     }
 
     /**

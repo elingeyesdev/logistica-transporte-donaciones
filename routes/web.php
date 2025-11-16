@@ -38,12 +38,26 @@ Route::resource('destino', controller: DestinoController::class);
 
 
 use App\Http\Controllers\ReporteController;
-
 Route::resource('reporte', ReporteController::class);
 
 use App\Http\Controllers\HistorialSeguimientoDonacioneController;
 
 Route::resource('seguimiento', HistorialSeguimientoDonacioneController::class);
+
+use App\Http\Controllers\TipoLicenciaController;
+Route::resource('tipo-licencia', TipoLicenciaController::class);
+
+use App\Http\Controllers\ConductorController;
+Route::resource('conductor', ConductorController::class);
+
+use App\Http\Controllers\TipoVehiculoController;
+Route::resource('tipo-vehiculo', TipoVehiculoController::class);
+
+use App\Http\Controllers\VehiculoController;
+Route::resource('vehiculo', VehiculoController::class);
+
+use App\Http\Controllers\TipoEmergenciaController;
+Route::resource('tipo-emergencia', TipoEmergenciaController::class);
 
 use App\Http\Controllers\UserAdminController;
 

@@ -40,7 +40,7 @@ class UbicacionController extends Controller
         Ubicacion::create($request->validated());
 
         return Redirect::route('ubicacion.index')
-            ->with('success', 'Ubicacion created successfully.');
+            ->with('success', 'Ubicacion creado exitosamente.');
     }
 
     /**

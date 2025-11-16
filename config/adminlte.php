@@ -329,6 +329,11 @@ return [
             'icon' => 'fas fa-fw fa-box',
         ],
         [
+            'text' => 'Tipo de Emergencia',
+            'url'  => 'tipo-emergencia',
+            'icon' => 'fas fa-fw fa-plus',
+        ],
+        [
             'text' => 'Estados',
             'url'  => 'estado',
             'icon' => 'fas fa-flag',
@@ -363,7 +368,26 @@ return [
             'url'  => 'seguimiento',
             'icon' => 'fas fa-map',
         ],
-
+         [
+            'text' => 'Licencias',
+            'url'  => 'tipo-licencia',
+            'icon' => 'fas fa-id-card',
+        ],
+         [
+            'text' => 'Conductores',
+            'url'  => 'conductor',
+            'icon' => 'fas fa-users',
+        ],
+        [
+            'text' => 'Vehiculos',
+            'url'  => 'vehiculo',
+            'icon' => 'fas fa-car',
+        ],
+         [
+            'text' => 'Tipo de Vehiculo',
+            'url'  => 'tipo-vehiculo',
+            'icon' => 'fas fa-th-large',
+        ],
         ['header' => 'Ajustes'],
 
         [

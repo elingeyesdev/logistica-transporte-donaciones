@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 @section('template_title')
-    {{ $usuario->name ?? __('Mostrar') . " " . __('Usuario') }}
+    {{ $user->name ?? __('Mostrar') . " " . __('Usuario') }}
 @endsection
 
 @section('content')
@@ -13,7 +13,7 @@
                             <span class="card-title">{{ __('Mostrar') }} Usuario</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('usuario.index') }}"> {{ __('Volver') }}</a>
+                            <a class="btn btn-primary btn-sm" href="{{ route('user.index') }}"> {{ __('Volver') }}</a>
                         </div>
                     </div>
 
@@ -21,39 +21,39 @@
                         
                                 <div class="form-group mb-2 mb20">
                                     <strong>Id Usuario:</strong>
-                                    {{ $usuario->id_usuario }}
+                                    {{ $user->id_usuario }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Active:</strong>
-                                    {{ $usuario->active }}
+                                    {{ $user->active }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Admin:</strong>
-                                    {{ $usuario->admin }}
+                                    {{ $user->admin }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Apellido:</strong>
-                                    {{ $usuario->apellido }}
+                                    {{ $user->apellido }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Ci:</strong>
-                                    {{ $usuario->ci }}
+                                    {{ $user->ci }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Contrasena:</strong>
-                                    {{ $usuario->contrasena }}
+                                    {{ $user->contrasena }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Correo Electronico:</strong>
-                                    {{ $usuario->correo_electronico }}
+                                    {{ $user->correo_electronico }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Nombre:</strong>
-                                    {{ $usuario->nombre }}
+                                    {{ $user->nombre }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Telefono:</strong>
-                                    {{ $usuario->telefono }}
+                                    {{ $user->telefono }}
                                 </div>
 
                     </div>
