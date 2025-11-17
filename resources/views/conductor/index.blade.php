@@ -56,7 +56,7 @@
 										<td >{{ $conductor->fecha_nacimiento }}</td>
 										<td >{{ $conductor->ci }}</td>
 										<td >{{ $conductor->celular }}</td>
-										<td >{{ $conductor->TipoLicencia?->licencia??'Sin Tipo' }}</td>
+										<td >{{ $conductor->tipoLicencium?->licencia??'Sin Tipo' }}</td>
                                             <td>
                                                 <form action="{{ route('conductor.destroy', $conductor) }}" method="POST">
                                                     <a class="btn btn-sm btn-primary" href="{{ route('conductor.show', $conductor) }}">
