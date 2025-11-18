@@ -63,7 +63,7 @@
                         </div>
                     </div>
                 </div>
-                {!! $rol->withQueryString()->links() !!}
+               
             </div>
         </div>
     </div>
