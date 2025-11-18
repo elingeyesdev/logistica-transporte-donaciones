@@ -24,7 +24,8 @@ class SolicitudController extends Controller
     public function create(): View
     {
         $solicitud = new Solicitud();
-        return view('solicitud.create', compact('solicitud'));
+        $tipoEmergencia = \App\Models\TipoEmergencia::orderBy('prioridad', 'desc')->get();
+        return view('solicitud.create', compact('solicitud', 'tipoEmergencia'));
     }
 
     public function store(SolicitudRequest $request): RedirectResponse
@@ -81,7 +82,8 @@ class SolicitudController extends Controller
     public function edit($id): View
     {
         $solicitud = Solicitud::with(['solicitante','destino'])->findOrFail($id);
-        return view('solicitud.edit', compact('solicitud'));
+        $tipoEmergencia = \App\Models\TipoEmergencia::orderBy('prioridad', 'desc')->get();
+        return view('solicitud.edit', compact('solicitud', 'tipoEmergencia'));
     }
 
     public function update(SolicitudRequest $request, Solicitud $solicitud): RedirectResponse
@@ -109,7 +111,7 @@ class SolicitudController extends Controller
             $solicitud->update([
                 'cantidad_personas'  => $data['cantidad_personas'],
                 'fecha_inicio'       => $data['fecha_inicio'],
-                'tipo_emergencia'    => $data['tipo_emergencia'],
+                'id_tipoemergencia'    => $data['id_tipoemergencia'],
                 'insumos_necesarios' => $data['insumos_necesarios'],
                 'codigo_seguimiento' => $data['codigo_seguimiento'] ?? $solicitud->codigo_seguimiento,
                 'fecha_solicitud'    => $data['fecha_solicitud'] ?? $solicitud->fecha_solicitud,

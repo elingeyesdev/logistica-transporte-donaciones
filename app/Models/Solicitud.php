@@ -18,6 +18,7 @@ class Solicitud extends Model
         'cantidad_personas',
         'fecha_inicio',
         'tipo_emergencia',
+        'id_tipoemergencia',
         'insumos_necesarios',
         'codigo_seguimiento',
         'estado',
@@ -38,5 +39,9 @@ class Solicitud extends Model
     public function destino()
     {
         return $this->belongsTo(\App\Models\Destino::class, 'id_destino', 'id_destino');
+    }
+     public function tipoEmergencia()
+    {
+        return $this->belongsTo(\App\Models\TipoEmergencia::class, 'id_tipoemergencia', 'id_emergencia');
     }
 }

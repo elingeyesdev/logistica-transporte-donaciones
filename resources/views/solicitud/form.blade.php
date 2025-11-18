@@ -136,14 +136,23 @@
 
     <div class="col-md-4">
         <div class="form-group mb-3">
-            <label for="tipo_emergencia">Tipo de Emergencia</label>
-            <input required type="text" name="tipo_emergencia" id="tipo_emergencia"
-                   class="form-control @error('tipo_emergencia') is-invalid @enderror"
-                   value="{{ old('tipo_emergencia', $solicitud->tipo_emergencia) }}"
-                   placeholder="Ej. Inundación, incendio...">
-            @error('tipo_emergencia') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            <label for="id_tipoemergencia">Tipo de Emergencia</label>
+            <select required name="id_tipoemergencia" id="id_tipoemergencia"
+                    class="form-select @error('id_tipoemergencia') is-invalid @enderror">
+                <option value="">Seleccione un tipo</option>
+                @foreach($tipoEmergencia as $tipo)
+                    <option value="{{ $tipo->id_emergencia }}"
+                        {{ old('id_tipoemergencia', $solicitud->id_tipoemergencia) == $tipo->id_emergencia ? 'selected' : '' }}>
+                        {{ $tipo->emergencia }} (Prioridad: {{ $tipo->prioridad }})
+                    </option>
+                @endforeach
+            </select>
+            @error('id_tipoemergencia') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
+        <input type="hidden" name="tipo_emergencia"
+            value="{{ old('tipo_emergencia', optional($solicitud->tipoEmergencia)->emergencia) }}">
     </div>
+
 
     <div class="col-md-12">
         <div class="form-group mb-3">

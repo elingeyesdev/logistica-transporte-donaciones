@@ -31,7 +31,7 @@ class Vehiculo extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['placa', 'capacidad_aproximada', 'id_tipovehiculo', 'modelo_anio', 'modelo', 'marca'];
+    protected $fillable = ['placa', 'capacidad_aproximada', 'id_tipovehiculo', 'modelo_anio', 'modelo', 'marca', 'id_marca',];
 
 
     /**
@@ -41,5 +41,8 @@ class Vehiculo extends Model
     {
         return $this->belongsTo(\App\Models\TipoVehiculo::class, 'id_tipovehiculo', 'id_tipovehiculo');
     }
-    
+        public function marca()
+    {
+        return $this->belongsTo(\App\Models\Marca::class, 'id_marca', 'id_marca');
+    }
 }

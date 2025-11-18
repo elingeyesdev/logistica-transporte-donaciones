@@ -15,6 +15,9 @@ use App\Models\Estado;
 use App\Models\HistorialSeguimientoDonacione;
 use App\Models\Solicitud;
 use App\Models\Ubicacion;
+use App\Models\Conductor;
+use App\Models\Vehiculo;
+
 
 class PaqueteController extends Controller
 {
@@ -54,8 +57,8 @@ class PaqueteController extends Controller
                 $paq->update(['fecha_entrega' => now()->toDateString()]);
             }
 
-            $lat = $request->input('latitud');
-            $lng = $request->input('longitud');
+            $lat  = $request->input('latitud');
+            $lng  = $request->input('longitud');
             $zona = $request->input('zona');
 
             $ubicacionId = null;
@@ -69,17 +72,37 @@ class PaqueteController extends Controller
             }
 
             $ubicacionString = $this->buildUbicacionString($zona, $lat, $lng);
-            $data['ubicacion_actual'] = $ubicacionString;
+            $paq->update(['ubicacion_actual' => $ubicacionString]);
 
-            $paq = Paquete::create($data);
+            $conductorNombre = null;
+            $conductorCi     = null;
+            $vehiculoPlaca   = null;
+
+            if ($paq->id_conductor) {
+                $conductor = Conductor::find($paq->id_conductor);
+                if ($conductor) {
+                    $conductorNombre = trim(($conductor->nombre ?? '') . ' ' . ($conductor->apellido ?? ''));
+                    $conductorCi     = $conductor->ci;
+                }
+            }
+
+            if ($paq->id_vehiculo) {
+                $vehiculo = Vehiculo::find($paq->id_vehiculo);
+                if ($vehiculo) {
+                    $vehiculoPlaca = $vehiculo->placa;
+                }
+            }
 
             HistorialSeguimientoDonacione::create([
                 'ci_usuario'          => optional(Auth::user())->ci,
-                'estado'              => optional($paq->estado)->nombre_estado ?? 'Pendiente',
+                'estado'              => $estadoNombre,
                 'imagen_evidencia'    => $request->input('imagen_evidencia'),
                 'id_paquete'          => $paq->id_paquete,
                 'id_ubicacion'        => $ubicacionId,
                 'fecha_actualizacion' => now(),
+                'conductor_nombre'    => $conductorNombre,
+                'conductor_ci'        => $conductorCi,
+                'vehiculo_placa'      => $vehiculoPlaca,
             ]);
 
             return $paq->getKey();
@@ -141,8 +164,8 @@ class PaqueteController extends Controller
                     $paquete->update(['fecha_entrega' => now()->toDateString()]);
                 }
 
-                $lat = $request->input('latitud');
-                $lng = $request->input('longitud');
+                $lat  = $request->input('latitud');
+                $lng  = $request->input('longitud');
                 $zona = $request->input('zona');
 
                 $ubicacionId = null;
@@ -158,6 +181,25 @@ class PaqueteController extends Controller
                 $ubicacionString = $this->buildUbicacionString($zona, $lat, $lng);
                 $paquete->update(['ubicacion_actual' => $ubicacionString]);
 
+                $conductorNombre = null;
+                $conductorCi     = null;
+                $vehiculoPlaca   = null;
+
+                if ($paquete->id_conductor) {
+                    $conductor = Conductor::find($paquete->id_conductor);
+                    if ($conductor) {
+                        $conductorNombre = trim(($conductor->nombre ?? '') . ' ' . ($conductor->apellido ?? ''));
+                        $conductorCi     = $conductor->ci;
+                    }
+                }
+
+                if ($paquete->id_vehiculo) {
+                    $vehiculo = Vehiculo::find($paquete->id_vehiculo);
+                    if ($vehiculo) {
+                        $vehiculoPlaca = $vehiculo->placa;
+                    }
+                }
+
                 HistorialSeguimientoDonacione::create([
                     'ci_usuario'          => optional(Auth::user())->ci,
                     'estado'              => $newNombre,
@@ -165,6 +207,9 @@ class PaqueteController extends Controller
                     'id_paquete'          => $paquete->id_paquete,
                     'id_ubicacion'        => $ubicacionId,
                     'fecha_actualizacion' => now(),
+                    'conductor_nombre'    => $conductorNombre,
+                    'conductor_ci'        => $conductorCi,
+                    'vehiculo_placa'      => $vehiculoPlaca,
                 ]);
 
             }

@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var list<string>
      */
    protected $fillable = [
-        'nombre','apellido','correo_electronico','password', 'ci','telefono','email_verified_at','remember_token','administrador', 'activo'
+        'nombre','apellido','correo_electronico','password', 'ci','telefono','email_verified_at','remember_token','administrador', 'activo','id_rol',
     ];
      public function getEmailForPasswordReset()
     {
@@ -56,7 +56,9 @@ class User extends Authenticatable
     {
         return trim($this->nombre . ' ' . $this->apellido);
     }
-
-
+      public function rol()
+    {
+        return $this->belongsTo(\App\Models\Rol::class, 'id_rol', 'id_rol');
+    }
 
 }

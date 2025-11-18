@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Rol;
 
 class RegisterController extends Controller
 {
@@ -55,8 +56,17 @@ class RegisterController extends Controller
             'ci'           => ['required','string'],
             'correo_electronico' => ['required','string','email','max:255','unique:users,correo_electronico'],
             'password'           => ['required','string','min:8','confirmed'],
+            'rol'=>['required', 'integer','exists:rol,id_rol'],
         ]);
     }
+     public function showRegistrationForm()
+    {
+        $roles = Rol::orderBy('titulo_rol')->get();
+
+        // vista por defecto de Laravel (puede ser auth.register o la tuya)
+        return view('auth.register', compact('roles'));
+    }
+
 
     /**
      * Create a new user instance after a valid registration.
@@ -74,6 +84,11 @@ class RegisterController extends Controller
             'telefono' => $data['telefono'], 
             'ci' => $data['ci'], 
             'password'           => Hash::make($data['password']),
+            'id_rol'             => $data['id_rol'] ?? null,
+
+            'activo'             => true,
+            'administrador'      => false,
+
         ]);
     }
 }

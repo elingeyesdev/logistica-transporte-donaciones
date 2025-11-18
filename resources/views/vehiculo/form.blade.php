@@ -38,11 +38,20 @@
             {!! $errors->first('modelo_anio', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
         <div class="form-group mb-2 mb20">
-            <label for="marca" class="form-label">Marca</label>
-            <input type="text" name="marca" class="form-control @error('marca') is-invalid @enderror"
-                value="{{ old('marca', $vehiculo?->marca) }}" id="marca" placeholder="Ej: Toyota, Nissan, Ford">
-            {!! $errors->first('marca', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+            <label for="id_marca" class="form-label">Marca</label>
+            <select name="id_marca" id="id_marca"
+                    class="form-select @error('id_marca') is-invalid @enderror">
+                <option value="">Seleccione una marca</option>
+                @foreach($marcas as $marca)
+                    <option value="{{ $marca->id_marca }}"
+                        {{ old('id_marca', $vehiculo?->id_marca) == $marca->id_marca ? 'selected' : '' }}>
+                        {{ $marca->nombre_marca }}
+                    </option>
+                @endforeach
+            </select>
+            {!! $errors->first('id_marca', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
+
     </div>
     <div class="col-md-12 mt20 mt-2">
         <button type="submit" class="btn btn-primary">{{ __('Guardar') }}</button>

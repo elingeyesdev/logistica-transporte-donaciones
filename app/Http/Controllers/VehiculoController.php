@@ -28,9 +28,10 @@ class VehiculoController extends Controller
     public function create(): View
     {
         $vehiculo = new Vehiculo();
-        $tipos = \App\Models\TipoVehiculo::all(); 
-        return view('vehiculo.create', compact('vehiculo', 'tipos'));
+        $tipos  = \App\Models\TipoVehiculo::orderBy('nombre_tipo_vehiculo')->get();
+        $marcas = \App\Models\Marca::orderBy('nombre_marca')->get();
 
+        return view('vehiculo.create', compact('vehiculo', 'tipos', 'marcas'));
     }
 
     /**
@@ -61,9 +62,10 @@ class VehiculoController extends Controller
     {
         $vehiculo = Vehiculo::find($id);
 
-        $tipos = \App\Models\TipoVehiculo::all();
+        $tipos  = \App\Models\TipoVehiculo::orderBy('nombre_tipo_vehiculo')->get();
+        $marcas = \App\Models\Marca::orderBy('nombre_marca')->get();
 
-        return view('vehiculo.edit', compact('vehiculo', 'tipos'));
+        return view('vehiculo.edit', compact('vehiculo', 'tipos', 'marcas'));
     }
 
     /**
@@ -72,7 +74,7 @@ class VehiculoController extends Controller
     public function update(VehiculoRequest $request, Vehiculo $vehiculo): RedirectResponse
     {
         $vehiculo->update($request->validated());
-
+        
         return Redirect::route('vehiculo.index')
             ->with('success', 'Vehiculo actualizado exitosamente');
     }

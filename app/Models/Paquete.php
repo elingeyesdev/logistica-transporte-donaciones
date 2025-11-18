@@ -33,7 +33,7 @@ class paquete extends Model
      * @var array<int, string>
      */
     protected $primaryKey = 'id_paquete';
-    protected $fillable = ['id_paquete', 'id_solicitud', 'estado_id','imagen', 'ubicacion_actual', 'fecha_creacion', 'fecha_entrega'];
+    protected $fillable = ['id_paquete', 'id_solicitud', 'estado_id','imagen', 'ubicacion_actual', 'fecha_creacion','fecha_entrega','id_conductor','id_vehiculo',];
 
 
     /**
@@ -50,6 +50,15 @@ class paquete extends Model
     public function encargado()
     {
         return $this->belongsTo(\App\Models\User::class, 'id_encargado', 'ci');
+    }
+    public function conductor()
+    {
+        return $this->belongsTo(\App\Models\Conductor::class, 'id_conductor', 'conductor_id');
+    }
+
+    public function vehiculo()
+    {
+        return $this->belongsTo(\App\Models\Vehiculo::class, 'id_vehiculo', 'id_vehiculo');
     }
 
 }

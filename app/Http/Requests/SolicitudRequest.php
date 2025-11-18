@@ -39,14 +39,15 @@ class SolicitudRequest extends FormRequest
         // SOLICITUD 
         'cantidad_personas'  => ['required','integer','min:0'],
         'fecha_inicio'       => ['required','date'],
-        'tipo_emergencia'    => ['required','string','max:255'],
         'insumos_necesarios' => ['required','string'],
         'codigo_seguimiento' => ['required','string','max:255'],
         'estado'             => ['nullable','string','max:255'],
         'fecha_solicitud'    => ['nullable','date'],
         'aprobada'           => ['nullable','boolean'], 
         'apoyoaceptado'      => ['nullable','boolean'],
-        'justificacion'      => ['nullable','string','max:255']
+        'justificacion'      => ['nullable','string','max:255'],
+
+        'id_tipoemergencia'  => ['required','integer','exists:tipo_emergencia,id_emergencia'],
     ];
 }
 

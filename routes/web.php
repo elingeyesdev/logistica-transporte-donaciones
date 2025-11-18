@@ -59,6 +59,12 @@ Route::resource('vehiculo', VehiculoController::class);
 use App\Http\Controllers\TipoEmergenciaController;
 Route::resource('tipo-emergencia', TipoEmergenciaController::class);
 
+use App\Http\Controllers\MarcaController;
+Route::resource('marca', MarcaController::class);
+
+use App\Http\Controllers\RolController;
+Route::resource('rol', RolController::class);
+
 use App\Http\Controllers\UserAdminController;
 
 Route::get('/usuario', [UserAdminController::class, 'index'])->name('usuarios.index');

@@ -43,6 +43,9 @@ class HistorialSeguimientoDonacione extends Model
         'id_paquete',
         'id_ubicacion',
         'user_id',
+        'conductor_nombre',
+        'conductor_ci',
+        'vehiculo_placa',
     ];
 
 

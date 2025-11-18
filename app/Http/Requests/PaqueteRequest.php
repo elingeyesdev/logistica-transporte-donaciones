@@ -29,6 +29,8 @@ class paqueteRequest extends FormRequest
             'latitud'        => ['nullable','numeric'],
             'longitud'       => ['nullable','numeric'],
             'zona'           => ['nullable','string','max:255'],
+            'id_conductor'      => ['nullable','integer','exists:conductor,conductor_id'],
+            'id_vehiculo'       => ['nullable','integer','exists:vehiculo,id_vehiculo'],
         ];
     }
        public function withValidator($validator)
