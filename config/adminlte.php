@@ -378,6 +378,11 @@ return [
             'url'  => 'conductor',
             'icon' => 'fas fa-users',
         ],
+         [
+            'text' => 'Marcas',
+            'url'  => 'marca',
+            'icon' => 'fas fa-flag-checkered',
+        ],
         [
             'text' => 'Vehiculos',
             'url'  => 'vehiculo',
@@ -388,6 +393,12 @@ return [
             'url'  => 'tipo-vehiculo',
             'icon' => 'fas fa-th-large',
         ],
+         [
+            'text' => 'Roles',
+            'url'  => 'rol',
+            'icon' => 'fas fa-user-shield',
+        ],
+
         ['header' => 'Ajustes'],
 
         [
