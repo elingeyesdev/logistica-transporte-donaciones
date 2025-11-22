@@ -52,12 +52,15 @@ class SolicitudController extends Controller
                 'longitud'  => $data['longitud'] ?? null,
             ]);
 
+            $tipoEmergencia = \App\Models\TipoEmergencia::find($data['id_tipoemergencia']);
+            
             $solicitud = Solicitud::create([
                 'id_solicitante'     => $solicitante->id_solicitante,
                 'id_destino'         => $destino->id_destino,
                 'cantidad_personas'  => $data['cantidad_personas'],
                 'fecha_inicio'       => $data['fecha_inicio'],
-                'tipo_emergencia'    => $data['tipo_emergencia'],
+                'id_tipoemergencia'  => $data['id_tipoemergencia'],
+                'tipo_emergencia'    => $tipoEmergencia->emergencia ?? null,
                 'insumos_necesarios' => $data['insumos_necesarios'],
                 'codigo_seguimiento' => $data['codigo_seguimiento'] ?? null,
                 'estado'             => 'pendiente',

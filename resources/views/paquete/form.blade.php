@@ -64,6 +64,19 @@
         <strong>Ubicación Actual</strong>
       </div>
       <div class="card-body">
+        {{-- Mapa interactivo --}}
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <div class="form-group mb-2 mb20">
+              <label for="mapa-ubicacion-paquete">Seleccione la Ubicación en el Mapa</label>
+              <div id="mapa-ubicacion-paquete" style="height: 400px; width: 100%; border: 1px solid #ddd; border-radius: 4px;"></div>
+              <small class="form-text text-muted">Haga clic en el mapa para seleccionar la ubicación. La latitud y longitud se llenarán automáticamente.</small>
+              {!! $errors->first('latitud', '<div class="invalid-feedback d-block"><strong>:message</strong></div>') !!}
+              {!! $errors->first('longitud', '<div class="invalid-feedback d-block"><strong>:message</strong></div>') !!}
+            </div>
+          </div>
+        </div>
+
         <div class="row">
           <div class="col-md-4">
             <div class="form-group mb-2 mb20">
@@ -79,7 +92,7 @@
           <div class="col-md-4">
             <div class="form-group mb-2 mb20">
               <label for="latitud" class="form-label">Latitud</label>
-              <input type="number" step="any" name="latitud" id="latitud"
+              <input type="number" step="any" name="latitud" id="latitud" readonly
                     class="form-control @error('latitud') is-invalid @enderror"
                     value="{{ old('latitud') }}"
                     placeholder="-17.7833">
@@ -90,7 +103,7 @@
           <div class="col-md-4">
             <div class="form-group mb-2 mb20">
               <label for="longitud" class="form-label">Longitud</label>
-              <input type="number" step="any" name="longitud" id="longitud"
+              <input type="number" step="any" name="longitud" id="longitud" readonly
                     class="form-control @error('longitud') is-invalid @enderror"
                     value="{{ old('longitud') }}"
                     placeholder="-63.1821">
@@ -133,3 +146,92 @@
     </div>
   </div>
 </div>
+
+<script>
+(function() {
+  // Inicializar el mapa cuando el DOM y Leaflet estén listos
+  function initMap() {
+    // Verificar que Leaflet esté disponible
+    if (typeof L === 'undefined') {
+      console.warn('Leaflet no está cargado. Reintentando...');
+      setTimeout(initMap, 100);
+      return;
+    }
+
+    const mapContainer = document.getElementById('mapa-ubicacion-paquete');
+    if (!mapContainer) return;
+
+    // Coordenadas por defecto (Bolivia - Santa Cruz)
+    @php
+        $latValue = old('latitud');
+        $lngValue = old('longitud');
+        
+        // Si no hay valores en old, intentar extraer de ubicacion_actual del paquete (si existe)
+        if (!$latValue && isset($paquete->ubicacion_actual) && $paquete->ubicacion_actual) {
+            // Si ubicacion_actual está en formato "lat,lng"
+            if (strpos($paquete->ubicacion_actual, ',') !== false) {
+                $parts = explode(',', $paquete->ubicacion_actual);
+                $latValue = trim($parts[0] ?? null);
+                $lngValue = trim($parts[1] ?? null);
+            }
+        }
+        
+        $defaultLat = (is_numeric($latValue) && $latValue) ? floatval($latValue) : -17.8146;
+        $defaultLng = (is_numeric($lngValue) && $lngValue) ? floatval($lngValue) : -63.1561;
+        $hasCoords = (is_numeric($latValue) && $latValue && is_numeric($lngValue) && $lngValue);
+        $defaultZoom = $hasCoords ? 13 : 6;
+    @endphp
+    const defaultLat = {{ $defaultLat }};
+    const defaultLng = {{ $defaultLng }};
+    const defaultZoom = {{ $defaultZoom }};
+
+    // Inicializar el mapa
+    const map = L.map('mapa-ubicacion-paquete').setView([defaultLat, defaultLng], defaultZoom);
+
+    // Agregar capa de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Variables para el marcador y los campos del formulario
+    let marker = null;
+    const latInput = document.getElementById('latitud');
+    const lngInput = document.getElementById('longitud');
+
+    // Si hay valores iniciales, colocar el marcador
+    if (latInput && lngInput && latInput.value && lngInput.value) {
+      const lat = parseFloat(latInput.value);
+      const lng = parseFloat(lngInput.value);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        marker = L.marker([lat, lng]).addTo(map);
+        map.setView([lat, lng], 13);
+      }
+    }
+
+    // Manejar clic en el mapa
+    map.on('click', function(e) {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+
+      // Actualizar campos de latitud y longitud
+      if (latInput) latInput.value = lat.toFixed(6);
+      if (lngInput) lngInput.value = lng.toFixed(6);
+
+      // Actualizar o crear marcador
+      if (marker) {
+        marker.setLatLng([lat, lng]);
+      } else {
+        marker = L.marker([lat, lng]).addTo(map);
+      }
+    });
+  }
+
+  // Inicializar cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMap);
+  } else {
+    initMap();
+  }
+})();
+</script>

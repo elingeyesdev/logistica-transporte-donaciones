@@ -11,9 +11,7 @@ use Illuminate\View\View;
 
 class TipoEmergenciaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+ 
     public function index(Request $request): View
     {
         $tipoEmergencia = TipoEmergencia::paginate();
@@ -22,9 +20,6 @@ class TipoEmergenciaController extends Controller
             ->with('i', ($request->input('page', 1) - 1) * $tipoEmergencia->perPage());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
         $tipoEmergencia = new TipoEmergencia();
@@ -32,9 +27,6 @@ class TipoEmergenciaController extends Controller
         return view('tipo-emergencia.create', compact('tipoEmergencia'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(TipoEmergenciaRequest $request): RedirectResponse
     {
         TipoEmergencia::create($request->validated());
@@ -42,10 +34,6 @@ class TipoEmergenciaController extends Controller
         return Redirect::route('tipo-emergencia.index')
             ->with('success', 'TipoEmergencia creado exitosamente');
     }
-
-    /**
-     * Display the specified resource.
-     */
     public function show($id): View
     {
         $tipoEmergencia = TipoEmergencia::find($id);
@@ -53,19 +41,12 @@ class TipoEmergenciaController extends Controller
         return view('tipo-emergencia.show', compact('tipoEmergencia'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id): View
     {
         $tipoEmergencia = TipoEmergencia::find($id);
 
         return view('tipo-emergencia.edit', compact('tipoEmergencia'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(TipoEmergenciaRequest $request, TipoEmergencia $tipoEmergencia): RedirectResponse
     {
         $tipoEmergencia->update($request->validated());

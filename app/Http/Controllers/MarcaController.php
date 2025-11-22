@@ -11,9 +11,7 @@ use Illuminate\View\View;
 
 class MarcaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index(Request $request): View
     {
         $marcas = Marca::paginate();
@@ -22,19 +20,12 @@ class MarcaController extends Controller
             ->with('i', ($request->input('page', 1) - 1) * $marcas->perPage());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
         $marca = new Marca();
 
         return view('marca.create', compact('marca'));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(MarcaRequest $request): RedirectResponse
     {
         Marca::create($request->validated());
@@ -43,9 +34,6 @@ class MarcaController extends Controller
             ->with('success', 'Marca creada exitosamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id): View
     {
         $marca = Marca::find($id);
@@ -53,9 +41,7 @@ class MarcaController extends Controller
         return view('marca.show', compact('marca'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit($id): View
     {
         $marca = Marca::find($id);
@@ -63,9 +49,7 @@ class MarcaController extends Controller
         return view('marca.edit', compact('marca'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(MarcaRequest $request, Marca $marca): RedirectResponse
     {
         $marca->update($request->validated());

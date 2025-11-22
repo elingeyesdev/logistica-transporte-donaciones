@@ -83,13 +83,24 @@
         </div>
     </div>
 
+    <div class="col-md-12">
+        <div class="form-group mb-3">
+            <label for="mapa-ubicacion">Seleccione la Ubicación en el Mapa</label>
+            <div id="mapa-ubicacion" style="height: 400px; width: 100%; border: 1px solid #ddd; border-radius: 4px;"></div>
+            <small class="form-text text-muted">Haga clic en el mapa para seleccionar la ubicación. La provincia, latitud y longitud se llenarán automáticamente.</small>
+            @error('ubicacion') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+            @error('latitud') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+            @error('longitud') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+        </div>
+    </div>
+
     <div class="col-md-6">
         <div class="form-group mb-3">
             <label for="ubicacion">Ubicación (dirección/zona)</label>
-            <input required type="text" name="ubicacion" id="ubicacion"
+            <input required type="text" name="ubicacion" id="ubicacion" readonly
                    class="form-control @error('ubicacion') is-invalid @enderror"
                    value="{{ old('ubicacion', $dest->direccion) }}"
-                   placeholder="Dirección o zona">
+                   placeholder="Se seleccionará automáticamente del mapa">
             @error('ubicacion') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
     </div>
@@ -97,7 +108,7 @@
     <div class="col-md-3">
         <div class="form-group mb-3">
             <label for="latitud">Latitud</label>
-            <input required type="number" step="any" name="latitud" id="latitud"
+            <input required type="number" step="any" name="latitud" id="latitud" readonly
                    class="form-control @error('latitud') is-invalid @enderror"
                    value="{{ old('latitud', $dest->latitud) }}" placeholder="-17.78">
             @error('latitud') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -107,7 +118,7 @@
     <div class="col-md-3">
         <div class="form-group mb-3">
             <label for="longitud">Longitud</label>
-            <input required type="number" step="any" name="longitud" id="longitud"
+            <input required type="number" step="any" name="longitud" id="longitud" readonly
                    class="form-control @error('longitud') is-invalid @enderror"
                    value="{{ old('longitud', $dest->longitud) }}" placeholder="-63.18">
             @error('longitud') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -210,6 +221,137 @@
   document.addEventListener('DOMContentLoaded', updateCode);
   $com?.addEventListener('input', updateCode);
   $com?.addEventListener('blur', updateCode);
+})();
+</script>
+
+<script>
+(function() {
+  // Inicializar el mapa cuando el DOM y Leaflet estén listos
+  function initMap() {
+    // Verificar que Leaflet esté disponible
+    if (typeof L === 'undefined') {
+      console.warn('Leaflet no está cargado. Reintentando...');
+      setTimeout(initMap, 100);
+      return;
+    }
+
+    const mapContainer = document.getElementById('mapa-ubicacion');
+    if (!mapContainer) return;
+
+    // Coordenadas por defecto (Bolivia - Santa Cruz)
+    @php
+        $latValue = old('latitud', $dest->latitud ?? null);
+        $lngValue = old('longitud', $dest->longitud ?? null);
+        $defaultLat = $latValue ?: -17.8146;
+        $defaultLng = $lngValue ?: -63.1561;
+        $defaultZoom = $latValue ? 13 : 6;
+    @endphp
+    const defaultLat = {{ $defaultLat }};
+    const defaultLng = {{ $defaultLng }};
+    const defaultZoom = {{ $defaultZoom }};
+
+    // Inicializar el mapa
+    const map = L.map('mapa-ubicacion').setView([defaultLat, defaultLng], defaultZoom);
+
+    // Agregar capa de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Variables para el marcador y los campos del formulario
+    let marker = null;
+    const latInput = document.getElementById('latitud');
+    const lngInput = document.getElementById('longitud');
+    const ubicacionInput = document.getElementById('ubicacion');
+    const provinciaInput = document.getElementById('provincia');
+
+    // Si hay valores iniciales, colocar el marcador
+    if (latInput.value && lngInput.value) {
+      marker = L.marker([parseFloat(latInput.value), parseFloat(lngInput.value)]).addTo(map);
+      map.setView([parseFloat(latInput.value), parseFloat(lngInput.value)], 13);
+      // Obtener información de la ubicación inicial
+      reverseGeocode(parseFloat(latInput.value), parseFloat(lngInput.value));
+    }
+
+    // Función para geocodificación inversa (obtener dirección y provincia desde coordenadas)
+    function reverseGeocode(lat, lng) {
+      // Mostrar indicador de carga
+      ubicacionInput.value = 'Cargando...';
+      provinciaInput.value = 'Cargando...';
+
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+        headers: {
+          'User-Agent': 'DAS-Sistema/1.0'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.address) {
+          const address = data.address;
+          
+          // Obtener dirección completa
+          let direccion = '';
+          if (address.road) direccion += address.road;
+          if (address.house_number) direccion += ' ' + address.house_number;
+          if (address.neighbourhood || address.suburb) {
+            direccion += (direccion ? ', ' : '') + (address.neighbourhood || address.suburb);
+          }
+          if (address.city || address.town || address.village) {
+            direccion += (direccion ? ', ' : '') + (address.city || address.town || address.village);
+          }
+          
+          ubicacionInput.value = direccion || address.display_name || '';
+
+          // Obtener provincia (state en OpenStreetMap para Bolivia)
+          if (address.state) {
+            provinciaInput.value = address.state;
+          } else if (address.region) {
+            provinciaInput.value = address.region;
+          } else if (address.county) {
+            provinciaInput.value = address.county;
+          }
+        } else {
+          ubicacionInput.value = `${lat}, ${lng}`;
+        }
+      })
+      .catch(error => {
+        console.error('Error en geocodificación inversa:', error);
+        ubicacionInput.value = `${lat}, ${lng}`;
+        provinciaInput.value = '';
+      });
+    }
+
+    // Manejar clic en el mapa
+    map.on('click', function(e) {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+
+      // Actualizar campos de latitud y longitud
+      latInput.value = lat.toFixed(6);
+      lngInput.value = lng.toFixed(6);
+
+      // Actualizar o crear marcador
+      if (marker) {
+        marker.setLatLng([lat, lng]);
+      } else {
+        marker = L.marker([lat, lng]).addTo(map);
+      }
+
+      // Obtener información de la ubicación (geocodificación inversa)
+      reverseGeocode(lat, lng);
+    });
+
+    // Permitir buscar ubicación por nombre (opcional - usando búsqueda)
+    // Esto se puede agregar después si se desea
+  }
+
+  // Inicializar cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMap);
+  } else {
+    initMap();
+  }
 })();
 </script>
 

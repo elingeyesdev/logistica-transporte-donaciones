@@ -12,9 +12,7 @@ use Illuminate\View\View;
 
 class ReporteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+ 
     public function index(Request $request): View
     {
         $reportes = Reporte::paginate();
@@ -23,9 +21,6 @@ class ReporteController extends Controller
             ->with('i', ($request->input('page', 1) - 1) * $reportes->perPage());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
         $reporte = new Reporte();
@@ -34,9 +29,6 @@ class ReporteController extends Controller
         return view('reporte.create', compact('reporte', 'paquetes'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(ReporteRequest $request): RedirectResponse
     {
         Reporte::create($request->validated());
@@ -45,19 +37,12 @@ class ReporteController extends Controller
             ->with('success', 'Reporte creado exitosamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id): View
     {
         $reporte = Reporte::find($id);
 
         return view('reporte.show', compact('reporte'));
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id): View
     {
         $reporte = Reporte::findOrFail($id);
@@ -66,9 +51,7 @@ class ReporteController extends Controller
         return view('reporte.edit', compact('reporte', 'paquetes'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(ReporteRequest $request, Reporte $reporte): RedirectResponse
     {
         $reporte->update($request->validated());
