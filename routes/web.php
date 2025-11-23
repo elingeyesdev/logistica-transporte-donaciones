@@ -6,69 +6,70 @@ use App\Http\Controllers\paqueteController;
 use App\Http\Controllers\EstadoController;
 use App\Http\Controllers\SolicitanteController;
 use App\Http\Controllers\UbicacionController;
+use App\Http\Controllers\DestinoController;
+use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\HistorialSeguimientoDonacioneController;
+use App\Http\Controllers\TipoLicenciaController;
+use App\Http\Controllers\ConductorController;
+use App\Http\Controllers\TipoVehiculoController;
+use App\Http\Controllers\VehiculoController;
+use App\Http\Controllers\TipoEmergenciaController;
+use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\RolController;
+use App\Http\Controllers\UserAdminController;
 
-// Página de bienvenida o raíz
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Rutas de autenticación (login, registro, logout)
 Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
+Route::get('solicitud/buscar', [SolicitudController::class, 'buscarPorCodigo'])->name('solicitud.buscar');
 Route::resource('solicitud', SolicitudController::class);
-
-//Donacion
-
-
 Route::resource('paquete', paqueteController::class);
-//estados
 Route::resource('estado', EstadoController::class);
-
-
-
 Route::resource('solicitante', SolicitanteController::class);
-
-
-
 Route::resource('ubicacion', UbicacionController::class);
-
-use App\Http\Controllers\DestinoController;
-
 Route::resource('destino', controller: DestinoController::class);
 
 
-use App\Http\Controllers\ReporteController;
 Route::resource('reporte', ReporteController::class);
 
-use App\Http\Controllers\HistorialSeguimientoDonacioneController;
 
 Route::resource('seguimiento', HistorialSeguimientoDonacioneController::class);
 
-use App\Http\Controllers\TipoLicenciaController;
 Route::resource('tipo-licencia', TipoLicenciaController::class);
 
-use App\Http\Controllers\ConductorController;
 Route::resource('conductor', ConductorController::class);
 
-use App\Http\Controllers\TipoVehiculoController;
 Route::resource('tipo-vehiculo', TipoVehiculoController::class);
 
-use App\Http\Controllers\VehiculoController;
 Route::resource('vehiculo', VehiculoController::class);
 
-use App\Http\Controllers\TipoEmergenciaController;
 Route::resource('tipo-emergencia', TipoEmergenciaController::class);
 
-use App\Http\Controllers\MarcaController;
 Route::resource('marca', MarcaController::class);
 
-use App\Http\Controllers\RolController;
 Route::resource('rol', RolController::class);
 
-use App\Http\Controllers\UserAdminController;
+
+Route::post('/api/solicitud', [SolicitudController::class, 'store']);
+
+Route::get('/api/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'service' => 'logistica',
+    ]);
+});
 
 Route::get('/usuario', [UserAdminController::class, 'index'])->name('usuarios.index');
 Route::post('/usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAdmin'])->name('usuarios.toggleAdmin');
 Route::post('/usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo'])->name('usuarios.toggleActivo');
+
+//MANEJO DE SOLICITUDES
+
+Route::post('solicitud/{id}/aprobar', [SolicitudController::class, 'aprobar'])->name('solicitud.aprobar');
+
+Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar'])->name('solicitud.negar');
+
 

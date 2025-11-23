@@ -10,6 +10,19 @@
 @php
   $pers = optional($solicitud->solicitante);
   $dest = optional($solicitud->destino);
+
+  $estado = $solicitud->estado ?? 'pendiente';
+  $isNegada = $estado === 'negada';
+  $respondida = $estado !== 'pendiente';
+
+  $badgeClass = 'badge-secondary';
+  if ($estado === 'pendiente') {
+      $badgeClass = 'badge-warning';   
+  } elseif ($estado === 'aprobada') {
+      $badgeClass = 'badge-success'; 
+  } elseif ($estado === 'negada') {
+      $badgeClass = 'badge-danger';
+  }
 @endphp
 
 <style>
@@ -21,13 +34,21 @@
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
     <span><i class="fas fa-file-alt mr-2"></i>Detalle</span>
-    <span class="badge badge-{{ ($solicitud->estado ?? 'pendiente')==='pendiente' ? 'warning' : 'success' }}">
-      {{ $solicitud->estado ?? 'pendiente' }}
+    <span class="badge {{ $badgeClass }}">
+      {{ ucfirst($estado) }}
     </span>
   </div>
 
   <div class="card-body">
-    {{-- Row 1: Identificación / Seguimiento --}}
+
+    @if($isNegada && $solicitud->justificacion)
+      <div class="alert alert-warning">
+        <strong>Justificación de la negación:</strong>
+        <div class="mt-1">{{ $solicitud->justificacion }}</div>
+      </div>
+      <div class="divider"></div>
+    @endif
+
     <div class="row kv">
       <div class="col-md-4 mb-3">
         <span class="label">Código de seguimiento</span>
@@ -35,9 +56,10 @@
       </div>
       <div class="col-md-4 mb-3">
         <span class="label">Fecha de inicio</span>
-    <div class="value">
-    {{ $solicitud->fecha_inicio ? (\Illuminate\Support\Carbon::parse($solicitud->fecha_inicio)->format('Y-m-d')) : '—' }}
-    </div>      </div>
+        <div class="value">
+          {{ $solicitud->fecha_inicio ? (\Illuminate\Support\Carbon::parse($solicitud->fecha_inicio)->format('Y-m-d')) : '—' }}
+        </div>
+      </div>
       <div class="col-md-4 mb-3">
         <span class="label">Tipo de emergencia</span>
         <div class="value">{{ $solicitud->tipo_emergencia ?? '—' }}</div>
@@ -46,7 +68,6 @@
 
     <div class="divider"></div>
 
-    {{-- Row 2: Solicitante --}}
     <h5 class="mb-3"><i class="fas fa-user mr-2"></i>Solicitante</h5>
     <div class="row kv">
       <div class="col-md-3 mb-3">
@@ -69,7 +90,6 @@
 
     <div class="divider"></div>
 
-    {{-- Row 3: Destino --}}
     <h5 class="mb-3"><i class="fas fa-map-marker-alt mr-2"></i>Destino</h5>
     <div class="row kv">
       <div class="col-md-3 mb-3">
@@ -97,8 +117,6 @@
     </div>
 
     <div class="divider"></div>
-
-    {{-- Row 4: Necesidades --}}
     <h5 class="mb-3"><i class="fas fa-box-open mr-2"></i>Necesidades</h5>
     <div class="row kv">
       <div class="col-md-3 mb-3">
@@ -117,15 +135,25 @@
       <i class="fas fa-arrow-left"></i> Volver
     </a>
     <div>
-      <a href="{{ route('solicitud.edit', $solicitud->id_solicitud) }}" class="btn btn-primary">
-        <i class="fa fa-edit"></i> Editar
+      @if($respondida)
+        <button class="btn btn-primary" disabled
+                title="No se puede editar una solicitud {{ $estado }}">
+          <i class="fa fa-edit"></i> Editar
+        </button>
+        <button class="btn btn-danger" disabled
+                title="No se puede eliminar una solicitud {{ $estado }}">
+          <i class="fa fa-trash"></i> Eliminar
+        </button>
+      @else
+        <a href="{{ route('solicitud.edit', $solicitud->id_solicitud) }}" class="btn btn-primary">
+          <i class="fa fa-edit"></i> Editar
         </a>
         <form action="{{ route('solicitud.destroy', $solicitud->id_solicitud) }}" method="POST" class="d-inline"
-            onsubmit="return confirm('¿Eliminar esta solicitud?')">
-        @csrf @method('DELETE')
-        <button class="btn btn-danger"><i class="fa fa-trash"></i> Eliminar</button>
+              onsubmit="return confirm('¿Eliminar esta solicitud?')">
+          @csrf @method('DELETE')
+          <button class="btn btn-danger"><i class="fa fa-trash"></i> Eliminar</button>
         </form>
-
+      @endif
     </div>
   </div>
 </div>
