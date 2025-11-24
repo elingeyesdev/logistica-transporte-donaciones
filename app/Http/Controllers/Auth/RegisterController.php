@@ -8,20 +8,10 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Rol;
+use Illuminate\Validation\Rule;
 
 class RegisterController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
-
     use RegistersUsers;
 
     /**
@@ -31,11 +21,6 @@ class RegisterController extends Controller
      */
     protected $redirectTo = '/home';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest');
@@ -43,36 +28,40 @@ class RegisterController extends Controller
 
     /**
      * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data)
     {
-         return Validator::make($data, [
+        return Validator::make($data, [
             'nombre'             => ['required','string','max:255'],
             'apellido'           => ['required','string','max:255'],
             'telefono'           => ['required','integer'],
-            'ci'           => ['required','string'],
+            'ci'                 => ['required','string'],
             'correo_electronico' => ['required','string','email','max:255','unique:users,correo_electronico'],
             'password'           => ['required','string','min:8','confirmed'],
-            'rol'=>['required', 'integer','exists:rol,id_rol'],
+
+            // Se mantiene la validación de rol NO administrador
+            'id_rol' => [
+                'required',
+                'integer',
+                Rule::exists('rol', 'id_rol')->where(function ($q) {
+                    $q->where('titulo_rol', '!=', 'Administrador');
+                }),
+            ],
         ]);
     }
-     public function showRegistrationForm()
-    {
-        $roles = Rol::orderBy('titulo_rol')->get();
 
-        // vista por defecto de Laravel (puede ser auth.register o la tuya)
+    public function showRegistrationForm()
+    {
+        // Solo roles que no sean Administrador
+        $roles = Rol::where('titulo_rol', '!=', 'Administrador')
+            ->orderBy('titulo_rol')
+            ->get();
+
         return view('auth.register', compact('roles'));
     }
 
-
     /**
      * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\Models\User
      */
     protected function create(array $data)
     {
@@ -80,15 +69,13 @@ class RegisterController extends Controller
             'nombre'             => $data['nombre'],
             'apellido'           => $data['apellido'],
             'correo_electronico' => $data['correo_electronico'],
-            'email'              => $data['correo_electronico'], 
-            'telefono' => $data['telefono'], 
-            'ci' => $data['ci'], 
+            'email'              => $data['correo_electronico'],
+            'telefono'           => $data['telefono'],
+            'ci'                 => $data['ci'],
             'password'           => Hash::make($data['password']),
             'id_rol'             => $data['id_rol'] ?? null,
-
             'activo'             => true,
             'administrador'      => false,
-
         ]);
     }
 }

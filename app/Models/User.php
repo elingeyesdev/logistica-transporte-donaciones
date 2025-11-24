@@ -61,4 +61,9 @@ class User extends Authenticatable
         return $this->belongsTo(\App\Models\Rol::class, 'id_rol', 'id_rol');
     }
 
+    public function conductor()
+    {
+        return $this->hasOne(\App\Models\Conductor::class, 'ci', 'ci');
+    }
+
 }

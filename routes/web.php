@@ -65,6 +65,7 @@ Route::get('/api/health', function () {
 Route::get('/usuario', [UserAdminController::class, 'index'])->name('usuarios.index');
 Route::post('/usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAdmin'])->name('usuarios.toggleAdmin');
 Route::post('/usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo'])->name('usuarios.toggleActivo');
+Route::post('/usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRol'])->name('usuarios.cambiarRol');
 
 //MANEJO DE SOLICITUDES
 

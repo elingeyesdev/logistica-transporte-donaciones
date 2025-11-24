@@ -51,7 +51,19 @@
     <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
     <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
   </div>
-
+  <div class="mb-3">
+      <label for="id_rol" class="form-label">Rol</label>
+      <select name="id_rol" id="id_rol"
+              class="form-control @error('id_rol') is-invalid @enderror">
+          @foreach($roles as $rol)
+              <option value="{{ $rol->id_rol }}"
+                  {{ old('id_rol') == $rol->id_rol ? 'selected' : '' }}>
+                  {{ $rol->titulo_rol }}
+              </option>
+          @endforeach
+      </select>
+      @error('id_rol') <div class="invalid-feedback">{{ $message }}</div> @enderror
+  </div>
   <button type="submit" class="btn btn-primary w-100">Registrar</button>
 </form>
 @endsection

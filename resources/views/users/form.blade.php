@@ -62,11 +62,11 @@
         {{-- Rol --}}
         <div class="form-group mb-2 mb20">
             <label for="id_rol" class="form-label">Rol</label>
-           <select name="id_rol" class="form-select @error('id_rol') is-invalid @enderror">
+            <select name="id_rol" id="id_rol" class="form-select @error('id_rol') is-invalid @enderror">
                 <option value="">Seleccione un rol</option>
                 @foreach($roles as $rol)
                     <option value="{{ $rol->id_rol }}"
-                        {{ old('id_rol') == $rol->id_rol ? 'selected' : '' }}>
+                        {{ old('id_rol', $user?->id_rol) == $rol->id_rol ? 'selected' : '' }}>
                         {{ $rol->titulo_rol }}
                     </option>
                 @endforeach
@@ -74,6 +74,7 @@
 
             {!! $errors->first('id_rol', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
+
 
         {{-- Administrador --}}
         <div class="form-group mb-2 mb20">
@@ -101,4 +102,6 @@
     <div class="col-md-12 mt20 mt-2">
         <button type="submit" class="btn btn-primary">Guardar</button>
     </div>
+    <input type="hidden" name="conductor_fecha_nacimiento" id="conductor_fecha_nacimiento">
+    <input type="hidden" name="conductor_id_licencia" id="conductor_id_licencia">
 </div>
