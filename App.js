@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { adminlteColors } from './src/theme/adminlte';
 import DashboardScreen from './src/screens/DashboardScreen';
 import SolicitudScreen from './src/screens/SolicitudScreen';
+import ListadoSolicitudScreen from './src/screens/ListadoSolicitudScreen';
 import PaqueteScreen from './src/screens/PaqueteScreen';
 import TipoEmergenciaScreen from './src/screens/TipoEmergenciaScreen';
 import EstadoScreen from './src/screens/EstadoScreen';
@@ -49,6 +50,11 @@ export default function App() {
         <Stack.Screen
           name="Paquete"
           component={PaqueteScreen}
+          options={{ title: 'Gestión de Paquetes' }}
+        />
+        <Stack.Screen
+          name="ListadoSolicitud"
+          component={ListadoSolicitudScreen}
           options={{ title: 'Listado de Solicitudes' }}
         />
         <Stack.Screen

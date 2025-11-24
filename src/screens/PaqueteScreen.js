@@ -1,634 +1,201 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
-  Alert,
-} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 
-// Datos de solicitudes de ejemplo
-const solicitudesIniciales = [
+// Datos iniciales de paquetes
+const paquetesIniciales = [
   {
     id: 1,
-    numero: '001',
-    estado: 'sin_contestar',
-    fecha: '2025-01-10',
-    solicitante: 'María González López',
-    email: 'maria.gonzalez@email.com',
-    ci: '12345678',
-    direccion: 'Comunidad San José, Chiquitos',
-    fechaTexto: '10 de Enero, 2025',
-    productos: ['Agua potable', 'Alimentos', 'Frazadas'],
+    estadoEntrega: 'pendiente',
+    ubicacionActual: 'Almacén Central',
+    fechaCreacion: '2025-11-24',
+    fechaEntrega: '',
   },
   {
     id: 2,
-    numero: '002',
-    estado: 'aprobadas',
-    fecha: '2025-01-09',
-    solicitante: 'Carlos Rodríguez Vega',
-    email: 'carlos.rodriguez@email.com',
-    ci: '87654321',
-    direccion: 'Comunidad El Carmen, Ñuflo de Chávez',
-    fechaTexto: '9 de Enero, 2025',
-    productos: ['Kit primeros auxilios', 'Medicamentos', 'Carpas'],
-  },
-  {
-    id: 3,
-    numero: '003',
-    estado: 'rechazadas',
-    fecha: '2025-01-08',
-    solicitante: 'Ana María Silva',
-    email: 'ana.silva@email.com',
-    ci: '11223344',
-    direccion: 'Comunidad Santa Ana, Velasco',
-    fechaTexto: '8 de Enero, 2025',
-    productos: ['Ropa', 'Calzado', 'Colchones'],
-  },
-  {
-    id: 4,
-    numero: '004',
-    estado: 'sin_contestar',
-    fecha: '2025-01-11',
-    solicitante: 'Pedro Martínez Cruz',
-    email: 'pedro.martinez@email.com',
-    ci: '55667788',
-    direccion: 'Comunidad San Pedro, Guarayos',
-    fechaTexto: '11 de Enero, 2025',
-    productos: ['Artículos de higiene', 'Utensilios de cocina', 'Linternas'],
+    estadoEntrega: 'en_transito',
+    ubicacionActual: 'Ruta a Comunidad San José',
+    fechaCreacion: '2025-11-23',
+    fechaEntrega: '',
   },
 ];
 
 export default function PaqueteScreen() {
-  const [filtroActivo, setFiltroActivo] = useState('todas');
-  const [solicitudes, setSolicitudes] = useState(solicitudesIniciales);
-  const [modalDetalleVisible, setModalDetalleVisible] = useState(false);
-  const [modalRechazoVisible, setModalRechazoVisible] = useState(false);
-  const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
-  const [motivoRechazo, setMotivoRechazo] = useState('');
-  const [motivoSeleccionado, setMotivoSeleccionado] = useState('');
+  const [paquetes, setPaquetes] = useState(paquetesIniciales);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [estadoEntrega, setEstadoEntrega] = useState('');
+  const [ubicacionActual, setUbicacionActual] = useState('');
+  const [fechaEntrega, setFechaEntrega] = useState(''); // Vacío inicialmente
 
-  const filtros = [
-    { id: 'todas', label: 'Todas', icon: 'list' },
-    { id: 'recientes', label: 'Recientes', icon: 'clock' },
-    { id: 'antiguas', label: 'Antiguas', icon: 'history' },
-    { id: 'aprobadas', label: 'Aprobadas', icon: 'check' },
-    { id: 'rechazadas', label: 'Rechazadas', icon: 'times' },
-    { id: 'sin_contestar', label: 'Sin Contestar', icon: 'question' },
-  ];
-
-  const motivosRechazo = [
-    { value: '', label: 'Seleccione un motivo...' },
-    {
-      value: 'informacion_incompleta',
-      label:
-        'La solicitud presenta información incompleta o inconsistente',
-    },
-    {
-      value: 'destino_atendido',
-      label:
-        'El destino reportado ya fue atendido recientemente con recursos similares',
-    },
-    {
-      value: 'cantidad_insuficiente',
-      label:
-        'La cantidad de personas afectadas es insuficiente para justificar la asignación de recursos',
-    },
-    {
-      value: 'no_emergencia',
-      label:
-        'La situación reportada no califica como una emergencia según los criterios establecidos',
-    },
-  ];
-
-  const filtrarSolicitudes = filtro => {
-    setFiltroActivo(filtro);
+  const resetForm = () => {
+    setEstadoEntrega('');
+    setUbicacionActual('');
+    setFechaEntrega('');
   };
 
-  const obtenerSolicitudesFiltradas = () => {
-    if (filtroActivo === 'todas') {
-      return solicitudes;
-    } else if (filtroActivo === 'recientes') {
-      return solicitudes.filter(
-        s => s.fecha === '2025-01-11' || s.fecha === '2025-01-10',
-      );
-    } else if (filtroActivo === 'antiguas') {
-      return solicitudes.filter(
-        s => s.fecha === '2025-01-08' || s.fecha === '2025-01-09',
-      );
-    } else {
-      return solicitudes.filter(s => s.estado === filtroActivo);
-    }
+  const crearPaquete = () => {
+    const nuevo = {
+      id: Date.now(),
+      estadoEntrega: estadoEntrega.trim(),
+      ubicacionActual: ubicacionActual.trim(),
+      fechaCreacion: new Date().toISOString().slice(0, 10),
+      fechaEntrega: fechaEntrega.trim(), // puede quedar vacío
+    };
+    setPaquetes(prev => [nuevo, ...prev]);
+    setModalVisible(false);
+    resetForm();
   };
 
-  const verDetalle = solicitud => {
-    setSolicitudSeleccionada(solicitud);
-    setModalDetalleVisible(true);
+  const obtenerColorBorde = index => {
+    const colors = [
+      adminlteColors.primary,
+      adminlteColors.success,
+      adminlteColors.warning,
+      adminlteColors.info,
+      adminlteColors.secondary,
+      adminlteColors.danger,
+    ];
+    return colors[index % colors.length];
   };
-
-  const aprobar = id => {
-    setSolicitudes(prev =>
-      prev.map(s =>
-        s.id === id
-          ? { ...s, estado: 'aprobadas' }
-          : s,
-      ),
-    );
-    Alert.alert(
-      'Éxito',
-      `Solicitud #${String(id).padStart(3, '0')} aprobada exitosamente`,
-    );
-  };
-
-  const rechazar = id => {
-    const solicitud = solicitudes.find(s => s.id === id);
-    setSolicitudSeleccionada(solicitud);
-    setMotivoRechazo('');
-    setMotivoSeleccionado('');
-    setModalRechazoVisible(true);
-  };
-
-  const actualizarMotivoSeleccionado = value => {
-    setMotivoRechazo(value);
-    if (value) {
-      const motivo = motivosRechazo.find(m => m.value === value);
-      setMotivoSeleccionado(motivo ? motivo.label : '');
-    } else {
-      setMotivoSeleccionado('');
-    }
-  };
-
-  const confirmarRechazo = () => {
-    if (!motivoRechazo) {
-      Alert.alert('Error', 'Por favor selecciona un motivo de rechazo');
-      return;
-    }
-
-    if (solicitudSeleccionada) {
-      setSolicitudes(prev =>
-        prev.map(s =>
-          s.id === solicitudSeleccionada.id
-            ? { ...s, estado: 'rechazadas' }
-            : s,
-        ),
-      );
-      Alert.alert(
-        'Éxito',
-        `Solicitud #${solicitudSeleccionada.numero} rechazada exitosamente`,
-      );
-      setModalRechazoVisible(false);
-      setMotivoRechazo('');
-      setMotivoSeleccionado('');
-      setSolicitudSeleccionada(null);
-    }
-  };
-
-  const obtenerColorBorde = estado => {
-    switch (estado) {
-      case 'aprobadas':
-        return adminlteColors.success;
-      case 'rechazadas':
-        return adminlteColors.danger;
-      case 'sin_contestar':
-        return adminlteColors.secondary;
-      default:
-        return '#dee2e6';
-    }
-  };
-
-  const obtenerBadgeColor = estado => {
-    switch (estado) {
-      case 'aprobadas':
-        return adminlteColors.success;
-      case 'rechazadas':
-        return adminlteColors.danger;
-      case 'sin_contestar':
-        return adminlteColors.secondary;
-      default:
-        return adminlteColors.secondary;
-    }
-  };
-
-  const obtenerBadgeTexto = estado => {
-    switch (estado) {
-      case 'aprobadas':
-        return 'Aprobada';
-      case 'rechazadas':
-        return 'Rechazada';
-      case 'sin_contestar':
-        return 'Sin Contestar';
-      default:
-        return 'Sin Contestar';
-    }
-  };
-
-  const solicitudesFiltradas = obtenerSolicitudesFiltradas();
 
   return (
     <AdminLayout>
-      <Text style={styles.pageTitle}>Listado de Solicitudes</Text>
+      <Text style={styles.pageTitle}>Gestión de Paquetes</Text>
 
-      {/* Filtros */}
+      {/* Card Crear Paquete */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderContent}>
-            <FontAwesome5
-              name="filter"
-              size={16}
-              color={adminlteColors.dark}
-              style={{ marginRight: 8 }}
-            />
-            <Text style={styles.cardHeaderTitle}>Filtros</Text>
+            <FontAwesome5 name="box" size={16} color={adminlteColors.dark} style={{ marginRight: 8 }} />
+            <Text style={styles.cardHeaderTitle}>Crear Paquete</Text>
           </View>
+          <TouchableOpacity style={styles.btnCrear} onPress={() => setModalVisible(true)}>
+            <FontAwesome5 name="plus" size={12} color="#ffffff" style={{ marginRight: 6 }} />
+            <Text style={styles.btnCrearText}>Nuevo</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.cardBody}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filtrosContainer}
-          >
-            {filtros.map(filtro => (
-              <TouchableOpacity
-                key={filtro.id}
-                style={[
-                  styles.filtroButton,
-                  filtroActivo === filtro.id && styles.filtroButtonActive,
-                ]}
-                onPress={() => filtrarSolicitudes(filtro.id)}
-              >
-                <FontAwesome5
-                  name={filtro.icon}
-                  size={14}
-                  color={
-                    filtroActivo === filtro.id ? '#ffffff' : adminlteColors.primary
-                  }
-                  style={{ marginRight: 6 }}
-                />
-                <Text
-                  style={[
-                    styles.filtroButtonText,
-                    filtroActivo === filtro.id && styles.filtroButtonTextActive,
-                  ]}
-                >
-                  {filtro.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <Text style={styles.cardBodyHelper}>Administra los paquetes y su estado de entrega.</Text>
         </View>
       </View>
 
-      {/* Lista de Solicitudes */}
-      <ScrollView style={styles.solicitudesContainer}>
-        <View style={styles.solicitudesGrid}>
-          {solicitudesFiltradas.map(solicitud => (
+      {/* Lista de Paquetes */}
+      <ScrollView style={styles.listaContainer}>
+        <View style={styles.grid}>
+          {paquetes.map((p, idx) => (
             <View
-              key={solicitud.id}
+              key={p.id}
               style={[
-                styles.solicitudCard,
-                {
-                  borderTopWidth: 3,
-                  borderTopColor: obtenerColorBorde(solicitud.estado),
-                },
+                styles.itemCard,
+                { borderTopWidth: 3, borderTopColor: obtenerColorBorde(idx) },
               ]}
             >
-              <View style={styles.solicitudCardHeader}>
-                <View style={styles.solicitudCardHeaderContent}>
-                  <FontAwesome5
-                    name="file-alt"
-                    size={14}
-                    color={adminlteColors.dark}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.solicitudCardTitle}>
-                    Solicitud #{solicitud.numero}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.badge,
-                    {
-                      backgroundColor: obtenerBadgeColor(solicitud.estado),
-                    },
-                  ]}
-                >
-                  <Text style={styles.badgeText}>
-                    {obtenerBadgeTexto(solicitud.estado)}
-                  </Text>
+              <View style={styles.itemHeader}>
+                <View style={styles.itemHeaderContent}>
+                  <FontAwesome5 name="box" size={14} color={adminlteColors.dark} style={{ marginRight: 6 }} />
+                  <Text style={styles.itemTitle}>Paquete #{String(p.id).slice(-4)}</Text>
                 </View>
               </View>
-
-              <View style={styles.solicitudCardBody}>
-                <View style={styles.solicitudInfoRow}>
-                  <FontAwesome5
-                    name="user"
-                    size={12}
-                    color={adminlteColors.primary}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.solicitudInfoLabel}>Solicitante:</Text>
+              <View style={styles.itemBody}>
+                <View style={styles.row}>
+                  <FontAwesome5 name="shipping-fast" size={12} color={adminlteColors.primary} style={{ marginRight: 6 }} />
+                  <Text style={styles.label}>Estado de Entrega:</Text>
                 </View>
-                <Text style={styles.solicitudInfoValue}>
-                  {solicitud.solicitante}
-                </Text>
+                <Text style={styles.valuePrimary}>{p.estadoEntrega || '—'}</Text>
 
-                <View style={styles.solicitudInfoRow}>
-                  <FontAwesome5
-                    name="envelope"
-                    size={12}
-                    color={adminlteColors.muted}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.solicitudInfoLabel}>Email:</Text>
+                <View style={styles.row}>
+                  <FontAwesome5 name="map-marker-alt" size={12} color={adminlteColors.muted} style={{ marginRight: 6 }} />
+                  <Text style={styles.label}>Ubicación Actual:</Text>
                 </View>
-                <Text style={styles.solicitudInfoValueMuted}>
-                  {solicitud.email}
-                </Text>
+                <Text style={styles.valueMuted}>{p.ubicacionActual || '—'}</Text>
 
-                <View style={styles.solicitudInfoRow}>
-                  <FontAwesome5
-                    name="id-card"
-                    size={12}
-                    color={adminlteColors.muted}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.solicitudInfoLabel}>CI:</Text>
+                <View style={styles.row}>
+                  <FontAwesome5 name="calendar-plus" size={12} color={adminlteColors.muted} style={{ marginRight: 6 }} />
+                  <Text style={styles.label}>Fecha Creación:</Text>
                 </View>
-                <Text style={styles.solicitudInfoValueMuted}>
-                  {solicitud.ci}
-                </Text>
+                <Text style={styles.valueMuted}>{p.fechaCreacion}</Text>
 
-                <View style={styles.solicitudInfoRow}>
-                  <FontAwesome5
-                    name="map-marker-alt"
-                    size={12}
-                    color={adminlteColors.muted}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.solicitudInfoLabel}>Dirección:</Text>
+                <View style={styles.row}>
+                  <FontAwesome5 name="calendar-check" size={12} color={adminlteColors.muted} style={{ marginRight: 6 }} />
+                  <Text style={styles.label}>Fecha Entrega:</Text>
                 </View>
-                <Text style={styles.solicitudInfoValueMuted}>
-                  {solicitud.direccion}
-                </Text>
-
-                <View style={styles.solicitudInfoRow}>
-                  <FontAwesome5
-                    name="calendar"
-                    size={12}
-                    color={adminlteColors.muted}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.solicitudInfoLabel}>Fecha:</Text>
-                </View>
-                <Text style={styles.solicitudInfoValueMuted}>
-                  {solicitud.fechaTexto}
-                </Text>
-
-                <View style={styles.solicitudInfoRow}>
-                  <FontAwesome5
-                    name="boxes"
-                    size={12}
-                    color={adminlteColors.muted}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.solicitudInfoLabel}>Productos:</Text>
-                </View>
-                <View style={styles.productosContainer}>
-                  {solicitud.productos.map((producto, index) => (
-                    <View key={index} style={styles.productoBadge}>
-                      <Text style={styles.productoBadgeText}>{producto}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-
-              <View style={styles.solicitudCardFooter}>
-                <TouchableOpacity
-                  style={styles.btnVerDetalle}
-                  onPress={() => verDetalle(solicitud)}
-                >
-                  <FontAwesome5
-                    name="eye"
-                    size={12}
-                    color="#ffffff"
-                    style={{ marginRight: 4 }}
-                  />
-                  <Text style={styles.btnVerDetalleText}>Ver Detalle</Text>
-                </TouchableOpacity>
-
-                {solicitud.estado === 'sin_contestar' && (
-                  <>
-                    <TouchableOpacity
-                      style={styles.btnAprobar}
-                      onPress={() => aprobar(solicitud.id)}
-                    >
-                      <FontAwesome5
-                        name="check"
-                        size={12}
-                        color={adminlteColors.secondary}
-                        style={{ marginRight: 4 }}
-                      />
-                      <Text style={styles.btnAprobarText}>Aprobar</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={styles.btnRechazar}
-                      onPress={() => rechazar(solicitud.id)}
-                    >
-                      <FontAwesome5
-                        name="times"
-                        size={12}
-                        color="#ffffff"
-                        style={{ marginRight: 4 }}
-                      />
-                      <Text style={styles.btnRechazarText}>Rechazar</Text>
-                    </TouchableOpacity>
-                  </>
-                )}
+                <Text style={styles.valueMuted}>{p.fechaEntrega || '(vacío)'}</Text>
               </View>
             </View>
           ))}
         </View>
       </ScrollView>
 
-      {/* Modal Detalle de Solicitud */}
+      {/* Modal Crear Paquete */}
       <Modal
-        visible={modalDetalleVisible}
+        visible={modalVisible}
         animationType="slide"
         transparent={false}
-        onRequestClose={() => setModalDetalleVisible(false)}
+        onRequestClose={() => { setModalVisible(false); resetForm(); }}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <View style={styles.modalHeaderContent}>
-              <FontAwesome5
-                name="file-alt"
-                size={18}
-                color="#ffffff"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.modalHeaderTitle}>Detalle de Solicitud</Text>
+              <FontAwesome5 name="box" size={18} color="#ffffff" style={{ marginRight: 8 }} />
+              <Text style={styles.modalHeaderTitle}>Nuevo Paquete</Text>
             </View>
-            <TouchableOpacity
-              onPress={() => setModalDetalleVisible(false)}
-              style={styles.modalCloseButton}
-            >
+            <TouchableOpacity onPress={() => { setModalVisible(false); resetForm(); }} style={styles.modalCloseButton}>
               <MaterialIcons name="close" size={24} color="#ffffff" />
             </TouchableOpacity>
           </View>
-
           <ScrollView style={styles.modalBody}>
-            {solicitudSeleccionada ? (
-              <View style={styles.detalleContent}>
-                <View style={styles.alertInfo}>
-                  <Text style={styles.alertInfoTitle}>
-                    Detalles de la Solicitud #{solicitudSeleccionada.numero}
-                  </Text>
-                  <Text style={styles.alertInfoText}>
-                    Aquí se mostrarían todos los detalles completos de la
-                    solicitud...
-                  </Text>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Solicitante:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.solicitante}
-                    </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Email:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.email}
-                    </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>CI:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.ci}
-                    </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Dirección:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.direccion}
-                    </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Fecha:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.fechaTexto}
-                    </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Productos:</Text>
-                    <View style={styles.productosContainer}>
-                      {solicitudSeleccionada.productos.map((producto, index) => (
-                        <View key={index} style={styles.productoBadge}>
-                          <Text style={styles.productoBadgeText}>
-                            {producto}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                </View>
-              </View>
-            ) : (
-              <Text>Cargando detalles...</Text>
-            )}
-          </ScrollView>
-
-          <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={styles.modalFooterButtonSecondary}
-              onPress={() => setModalDetalleVisible(false)}
-            >
-              <Text style={styles.modalFooterButtonText}>Cerrar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalFooterButtonPrimary}
-              onPress={() => {
-                Alert.alert('Imprimir', 'Funcionalidad de impresión');
-              }}
-            >
-              <Text style={styles.modalFooterButtonText}>Imprimir</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal Confirmar Rechazo */}
-      <Modal
-        visible={modalRechazoVisible}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setModalRechazoVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalHeaderTitle}>Confirmar Rechazo</Text>
-            <TouchableOpacity
-              onPress={() => setModalRechazoVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <MaterialIcons name="close" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView style={styles.modalBody}>
-            <Text style={styles.modalBodyText}>
-              ¿Estás seguro que deseas rechazar la solicitud?
-            </Text>
-
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Motivo del rechazo:</Text>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  selectedValue={motivoRechazo}
-                  onValueChange={actualizarMotivoSeleccionado}
-                  style={styles.picker}
-                >
-                  {motivosRechazo.map((motivo, index) => (
-                    <Picker.Item
-                      key={index}
-                      label={motivo.label}
-                      value={motivo.value}
-                    />
-                  ))}
-                </Picker>
-              </View>
+              <Text style={styles.label}>Estado de Entrega *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="pendiente / en_transito / entregado"
+                value={estadoEntrega}
+                onChangeText={setEstadoEntrega}
+                placeholderTextColor={adminlteColors.muted}
+              />
             </View>
-
-            {motivoSeleccionado ? (
-              <View style={styles.motivoSeleccionadoContainer}>
-                <Text style={styles.motivoSeleccionadoText}>
-                  Motivo seleccionado: {motivoSeleccionado}
-                </Text>
-              </View>
-            ) : null}
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Ubicación Actual *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ej: Almacén Central"
+                value={ubicacionActual}
+                onChangeText={setUbicacionActual}
+                placeholderTextColor={adminlteColors.muted}
+              />
+            </View>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Fecha Entrega (opcional)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="YYYY-MM-DD (o dejar vacío)"
+                value={fechaEntrega}
+                onChangeText={setFechaEntrega}
+                placeholderTextColor={adminlteColors.muted}
+              />
+            </View>
+            <View style={styles.helperBox}>
+              <Text style={styles.helperText}>La fecha de creación se asignará automáticamente al guardar.</Text>
+            </View>
           </ScrollView>
-
           <View style={styles.modalFooter}>
             <TouchableOpacity
               style={styles.modalFooterButtonSecondary}
-              onPress={() => setModalRechazoVisible(false)}
+              onPress={() => { setModalVisible(false); resetForm(); }}
             >
               <Text style={styles.modalFooterButtonText}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
-                styles.modalFooterButtonDanger,
-                !motivoRechazo && styles.modalFooterButtonDisabled,
+                styles.modalFooterButtonPrimary,
+                (!estadoEntrega.trim() || !ubicacionActual.trim()) && styles.modalFooterButtonDisabled,
               ]}
-              onPress={confirmarRechazo}
-              disabled={!motivoRechazo}
+              disabled={!estadoEntrega.trim() || !ubicacionActual.trim()}
+              onPress={crearPaquete}
             >
-              <Text style={styles.modalFooterButtonText}>Confirmar</Text>
+              <Text style={styles.modalFooterButtonText}>Crear</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -638,12 +205,42 @@ export default function PaqueteScreen() {
 }
 
 const styles = StyleSheet.create({
-  pageTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 12,
-    color: adminlteColors.dark,
-  },
+  pageTitle: { fontSize: 22, fontWeight: '700', marginBottom: 12, color: adminlteColors.dark },
+  listaContainer: { flex: 1 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  itemCard: { width: '100%', backgroundColor: adminlteColors.cardBg, borderRadius: 8, marginBottom: 16, elevation: 3, overflow: 'hidden' },
+  itemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#dee2e6' },
+  itemHeaderContent: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  itemTitle: { fontSize: 15, fontWeight: '600', color: adminlteColors.dark },
+  itemBody: { padding: 12 },
+  row: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  label: { fontSize: 13, fontWeight: '600', color: adminlteColors.dark },
+  valuePrimary: { fontSize: 13, color: adminlteColors.primary, marginBottom: 8, marginLeft: 20 },
+  valueMuted: { fontSize: 13, color: adminlteColors.muted, marginBottom: 8, marginLeft: 20 },
+  card: { backgroundColor: adminlteColors.cardBg, borderRadius: 8, padding: 12, elevation: 3, marginBottom: 16 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  cardHeaderContent: { flexDirection: 'row', alignItems: 'center' },
+  cardHeaderTitle: { fontSize: 16, fontWeight: '600', color: adminlteColors.dark },
+  cardBody: { paddingTop: 4 },
+  cardBodyHelper: { fontSize: 13, color: adminlteColors.muted },
+  btnCrear: { flexDirection: 'row', alignItems: 'center', backgroundColor: adminlteColors.primary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 4 },
+  btnCrearText: { color: '#ffffff', fontSize: 13, fontWeight: '500' },
+  // Modal
+  modalContainer: { flex: 1, backgroundColor: adminlteColors.bodyBg },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: adminlteColors.primary, paddingHorizontal: 16, paddingVertical: 12 },
+  modalHeaderContent: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  modalHeaderTitle: { fontSize: 18, fontWeight: '600', color: '#ffffff' },
+  modalCloseButton: { padding: 4 },
+  modalBody: { flex: 1, padding: 16 },
+  formGroup: { marginBottom: 16 },
+  input: { borderWidth: 1, borderColor: '#ced4da', borderRadius: 4, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, backgroundColor: '#ffffff', color: adminlteColors.dark },
+  helperBox: { backgroundColor: '#f8f9fa', borderRadius: 4, padding: 12, marginBottom: 16 },
+  helperText: { fontSize: 12, color: adminlteColors.muted },
+  modalFooter: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingVertical: 12, backgroundColor: adminlteColors.primary, gap: 8 },
+  modalFooterButtonSecondary: { backgroundColor: adminlteColors.secondary, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 4 },
+  modalFooterButtonPrimary: { backgroundColor: adminlteColors.primary, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 4 },
+  modalFooterButtonDisabled: { opacity: 0.5 },
+  modalFooterButtonText: { color: '#ffffff', fontSize: 14, fontWeight: '500' },
   card: {
     backgroundColor: adminlteColors.cardBg,
     borderRadius: 8,

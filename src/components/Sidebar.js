@@ -18,9 +18,15 @@ const menuItems = [
   },
   {
     id: 'paquete',
+    label: 'Paquetes',
+    icon: 'box',
+    route: 'Paquete',
+  },
+  {
+    id: 'listadoSolicitud',
     label: 'Listado de Solicitudes',
     icon: 'list',
-    route: 'Paquete',
+    route: 'ListadoSolicitud',
   },
   {
     id: 'tipoEmergencia',
