@@ -44,7 +44,17 @@
                                     <tr>
                                         <td>{{ ++$i }}</td>
                                         <td>{{ $paquete->id_paquete }}</td>
-                                        <td>{{ $paquete->id_solicitud }}</td>
+                                        @php
+                                            $sol  = optional($paquete->solicitud);
+                                            $pers = optional($sol->solicitante);
+                                            $dest = optional($sol->destino);
+                                        @endphp
+                                        <td>
+                                            <div><strong>CI Sol.:</strong> {{ $pers->ci ?? '—' }}</div>
+                                            <div><strong>Solicitante:</strong> {{ $pers->nombre ?? '—' }} {{ $pers->apellido ?? '—' }}</div>
+                                            <div><strong>Comunidad:</strong> {{ $dest->comunidad ?? '—' }}</div>
+                                            <div><strong>Emergencia:</strong> {{ $sol->tipo_emergencia ?? '—' }}</div>
+                                        </td>
     
                                        @php $nombre = optional($paquete->estado)->nombre_estado; @endphp
                                         <td>

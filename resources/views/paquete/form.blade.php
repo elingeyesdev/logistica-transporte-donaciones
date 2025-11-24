@@ -28,7 +28,6 @@
       {!! $errors->first('id_solicitud', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
     </div>
 
-    {{-- ESTADO (dropdown by id) --}}
     <div class="form-group mb-2 mb20">
       <label for="estado_id" class="form-label">Estado</label>
       <select name="estado_id" id="estado_id"
@@ -44,7 +43,57 @@
       {!! $errors->first('estado_id', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
     </div>
 
-    {{-- IMAGEN (URL) --}}
+    <div class="card mt-3 mb-3">
+      <div class="card-header">
+        <strong>Datos de Transporte</strong>
+      </div>
+      <div class="card-body">
+
+        <div class="form-group mb-2 mb20">
+          <label for="id_conductor" class="form-label">Conductor asignado</label>
+          <select name="id_conductor" id="id_conductor"
+                  class="form-control @error('id_conductor') is-invalid @enderror">
+            <option value="">-- Sin asignar / Seleccionar --</option>
+            @foreach($conductores as $c)
+              @php
+                  $nombreConductor = trim(($c->nombre ?? '').' '.($c->apellido ?? ''));
+              @endphp
+              <option value="{{ $c->conductor_id }}"
+                {{ (string) old('id_conductor', $paquete->id_conductor ?? '') === (string) $c->conductor_id ? 'selected' : '' }}>
+                {{ $nombreConductor ?: 'Sin nombre' }} (CI {{ $c->ci ?? '—' }})
+              </option>
+            @endforeach
+          </select>
+          {!! $errors->first('id_conductor', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
+          <small class="form-text text-muted">
+            ¿No existe el conductor? 
+            <a href="{{ route('conductor.create') }}" target="_blank">Crear nuevo conductor</a>
+          </small>
+        </div>
+
+        <div class="form-group mb-2 mb20">
+          <label for="id_vehiculo" class="form-label">Vehículo asignado</label>
+          <select name="id_vehiculo" id="id_vehiculo"
+                  class="form-control @error('id_vehiculo') is-invalid @enderror">
+            <option value="">-- Sin asignar / Seleccionar --</option>
+            @foreach($vehiculos as $v)
+              <option value="{{ $v->id_vehiculo }}"
+                {{ (string) old('id_vehiculo', $paquete->id_vehiculo ?? '') === (string) $v->id_vehiculo ? 'selected' : '' }}>
+                {{ $v->placa ?? 'Sin placa' }}
+              </option>
+            @endforeach
+          </select>
+          {!! $errors->first('id_vehiculo', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
+          <small class="form-text text-muted">
+            ¿No existe el vehículo? 
+            <a href="{{ route('vehiculo.create') }}" target="_blank">Crear nuevo vehículo</a>
+          </small>
+        </div>
+
+      </div>
+    </div>
+
+
     <div class="form-group mb-2 mb20">
       <label for="imagen" class="form-label">Imagen (URL)</label>
       <input type="url" name="imagen" id="imagen"
@@ -64,7 +113,6 @@
         <strong>Ubicación Actual</strong>
       </div>
       <div class="card-body">
-        {{-- Mapa interactivo --}}
         <div class="row mb-3">
           <div class="col-md-12">
             <div class="form-group mb-2 mb20">
@@ -112,7 +160,6 @@
           </div>
         </div>
 
-        {{-- Campo generado automáticamente --}}
         <div class="form-group mb-2 mb20" hidden>
           <label for="ubicacion_actual" class="form-label">Ubicación (generada automáticamente)</label>
           <input type="text" name="ubicacion_actual" id="ubicacion_actual"
@@ -146,12 +193,27 @@
     </div>
   </div>
 </div>
+@php
+    $latValue = old('latitud');
+    $lngValue = old('longitud');
+
+    if (!$latValue && isset($paquete->ubicacion_actual) && $paquete->ubicacion_actual) {
+        if (strpos($paquete->ubicacion_actual, ',') !== false) {
+            $parts = explode(',', $paquete->ubicacion_actual);
+            $latValue = trim($parts[0] ?? null);
+            $lngValue = trim($parts[1] ?? null);
+        }
+    }
+
+    $defaultLat = (is_numeric($latValue) && $latValue) ? (float) $latValue : -17.8146;
+    $defaultLng = (is_numeric($lngValue) && $lngValue) ? (float) $lngValue : -63.1561;
+    $hasCoords  = (is_numeric($latValue) && $latValue && is_numeric($lngValue) && $lngValue);
+    $defaultZoom = $hasCoords ? 13 : 6;
+@endphp
 
 <script>
 (function() {
-  // Inicializar el mapa cuando el DOM y Leaflet estén listos
   function initMap() {
-    // Verificar que Leaflet esté disponible
     if (typeof L === 'undefined') {
       console.warn('Leaflet no está cargado. Reintentando...');
       setTimeout(initMap, 100);
@@ -161,45 +223,21 @@
     const mapContainer = document.getElementById('mapa-ubicacion-paquete');
     if (!mapContainer) return;
 
-    // Coordenadas por defecto (Bolivia - Santa Cruz)
-    @php
-        $latValue = old('latitud');
-        $lngValue = old('longitud');
-        
-        // Si no hay valores en old, intentar extraer de ubicacion_actual del paquete (si existe)
-        if (!$latValue && isset($paquete->ubicacion_actual) && $paquete->ubicacion_actual) {
-            // Si ubicacion_actual está en formato "lat,lng"
-            if (strpos($paquete->ubicacion_actual, ',') !== false) {
-                $parts = explode(',', $paquete->ubicacion_actual);
-                $latValue = trim($parts[0] ?? null);
-                $lngValue = trim($parts[1] ?? null);
-            }
-        }
-        
-        $defaultLat = (is_numeric($latValue) && $latValue) ? floatval($latValue) : -17.8146;
-        $defaultLng = (is_numeric($lngValue) && $lngValue) ? floatval($lngValue) : -63.1561;
-        $hasCoords = (is_numeric($latValue) && $latValue && is_numeric($lngValue) && $lngValue);
-        $defaultZoom = $hasCoords ? 13 : 6;
-    @endphp
-    const defaultLat = {{ $defaultLat }};
-    const defaultLng = {{ $defaultLng }};
-    const defaultZoom = {{ $defaultZoom }};
+    const defaultLat  = Number("{{ $defaultLat }}");
+    const defaultLng  = Number("{{ $defaultLng }}");
+    const defaultZoom = Number("{{ $defaultZoom }}");
 
-    // Inicializar el mapa
     const map = L.map('mapa-ubicacion-paquete').setView([defaultLat, defaultLng], defaultZoom);
 
-    // Agregar capa de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
     }).addTo(map);
 
-    // Variables para el marcador y los campos del formulario
     let marker = null;
     const latInput = document.getElementById('latitud');
     const lngInput = document.getElementById('longitud');
 
-    // Si hay valores iniciales, colocar el marcador
     if (latInput && lngInput && latInput.value && lngInput.value) {
       const lat = parseFloat(latInput.value);
       const lng = parseFloat(lngInput.value);
@@ -209,16 +247,13 @@
       }
     }
 
-    // Manejar clic en el mapa
     map.on('click', function(e) {
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
 
-      // Actualizar campos de latitud y longitud
       if (latInput) latInput.value = lat.toFixed(6);
       if (lngInput) lngInput.value = lng.toFixed(6);
 
-      // Actualizar o crear marcador
       if (marker) {
         marker.setLatLng([lat, lng]);
       } else {
@@ -227,7 +262,6 @@
     });
   }
 
-  // Inicializar cuando el DOM esté listo
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initMap);
   } else {

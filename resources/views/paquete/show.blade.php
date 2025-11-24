@@ -20,33 +20,63 @@
 
                     <div class="card-body bg-white">
                         
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Id Paquete:</strong>
-                                    {{ $paquete->id_paquete }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Id Solicitud:</strong>
-                                    {{ $paquete->id_solicitud }}
-                                </div>
-                                
-                               <div class="form-group mb-2 mb20">
-                                    <strong>Estado:</strong>
-                                    {{ optional($paquete->estado)->nombre_estado ?? '—' }}
-                                </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Id Paquete:</strong>
+                            {{ $paquete->id_paquete }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Id Solicitud:</strong>
+                            {{ $paquete->id_solicitud }}
+                        </div>
+                        
+                        <div class="form-group mb-2 mb20">
+                            <strong>Estado:</strong>
+                            {{ optional($paquete->estado)->nombre_estado ?? '—' }}
+                        </div>
 
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Ubicacion Actual:</strong>
-                                    {{ $paquete->ubicacion_actual }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Fecha Creacion:</strong>
-                                    {{ $paquete->fecha_creacion }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Fecha Entrega:</strong>
-                                    {{ $paquete->fecha_entrega }}
-                                </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Ubicacion Actual:</strong>
+                            {{ $paquete->ubicacion_actual }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Fecha Creacion:</strong>
+                            {{ $paquete->fecha_creacion }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Fecha Entrega:</strong>
+                            {{ $paquete->fecha_entrega }}
+                        </div>
 
+                        @php
+                            $conductor = optional($paquete->conductor);
+                        @endphp
+                        <div class="form-group mb-2 mb20">
+                            <strong>Conductor:</strong>
+                            @if($conductor->conductor_id)
+                                {{ trim(($conductor->nombre ?? '').' '.($conductor->apellido ?? '')) ?: 'Sin nombre' }}
+                                @if($conductor->ci)
+                                    (CI {{ $conductor->ci }})
+                                @endif
+                            @else
+                                —
+                            @endif
+                        </div>
+                        @php
+                            $vehiculo = optional($paquete->vehiculo);
+                            $marca    = optional($vehiculo->marcaVehiculo);
+                        @endphp
+                        <div class="form-group mb-2 mb20">
+                            <strong>Vehículo:</strong>
+                            @if($vehiculo->id_vehiculo)
+                                {{ $vehiculo->placa ?? 'Sin placa' }}
+                                 @if($marca->id_marca || !empty($vehiculo->modelo)) 
+                                    — {{ $marca->nombre_marca ?? $marca->nombre ?? 'Sin marca' }}
+                                    {{ $vehiculo->modelo ?? '' }}
+                                @endif
+                            @else
+                                —
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

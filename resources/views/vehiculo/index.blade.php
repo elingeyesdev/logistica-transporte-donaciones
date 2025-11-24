@@ -54,9 +54,12 @@
 										<td >{{ $veh->capacidad_aproximada }}</td>
 										<td >{{ $veh->tipoVehiculo?->nombre_tipo_vehiculo ?? 'Sin tipo asignado' }}</td>
 										<td >{{ $veh->modelo_anio }}</td>
-										<td >{{ $veh->modelo }}</td>
-                                        <td >{{ $veh->marca }}</td>
-
+										<td >{{ $veh-> modelo }}</td>
+                                        <td>
+                                            {{ optional($veh->marcaVehiculo)->nombre_marca
+                                                ?? optional($veh->marcaVehiculo)->nombre
+                                                ?? 'Sin marca' }}
+                                        </td>
 
                                             <td>
                                                 <form action="{{ route('vehiculo.destroy', $veh->id_vehiculo) }}" method="POST">

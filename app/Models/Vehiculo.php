@@ -41,7 +41,7 @@ class Vehiculo extends Model
     {
         return $this->belongsTo(\App\Models\TipoVehiculo::class, 'id_tipovehiculo', 'id_tipovehiculo');
     }
-        public function marca()
+        public function marcaVehiculo()
     {
         return $this->belongsTo(\App\Models\Marca::class, 'id_marca', 'id_marca');
     }

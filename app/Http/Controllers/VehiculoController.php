@@ -14,7 +14,7 @@ class VehiculoController extends Controller
 
     public function index(Request $request): View
     {
-        $vehiculo = Vehiculo::paginate();
+        $vehiculo = Vehiculo::with('marcaVehiculo')->paginate();
 
         return view('vehiculo.index', compact('vehiculo'))
             ->with('i', ($request->input('page', 1) - 1) * $vehiculo->perPage());

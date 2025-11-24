@@ -17,7 +17,9 @@ use App\Models\Solicitud;
 use App\Models\Ubicacion;
 use App\Models\Conductor;
 use App\Models\Vehiculo;
-
+use App\Models\TipoLicencia;
+use App\Models\Marca;
+use App\Models\TipoVehiculo;
 
 class PaqueteController extends Controller
 {
@@ -31,11 +33,25 @@ class PaqueteController extends Controller
 
     public function create(): View
     {
-        $paquete = new Paquete();
-        $estados  = Estado::orderBy('nombre_estado')->pluck('nombre_estado','id_estado');
-        $solicitudes = Solicitud::with(['solicitante', 'destino'])->get();
+        $paquete      = new Paquete();
+        $estados      = Estado::orderBy('nombre_estado')->pluck('nombre_estado','id_estado');
+        $solicitudes  = Solicitud::with(['solicitante', 'destino'])->get();
+        $conductores  = Conductor::orderBy('nombre')->orderBy('apellido')->get();
+        $vehiculos    = Vehiculo::with(['marcaVehiculo','tipoVehiculo'])->orderBy('placa')->get();
+        $licencias    = TipoLicencia::orderBy('licencia')->get();
+        $marcas       = Marca::orderBy('nombre_marca')->get();
+        $tiposVehiculo = TipoVehiculo::orderBy('nombre_tipo_vehiculo')->get();
 
-        return view('paquete.create', compact('paquete','estados', 'solicitudes'));
+        return view('paquete.create', compact(
+            'paquete',
+            'estados',
+            'solicitudes',
+            'conductores',
+            'vehiculos',
+            'licencias',
+            'marcas',
+            'tiposVehiculo'
+        ));
     }
 
     public function store(PaqueteRequest $request): RedirectResponse
@@ -133,16 +149,30 @@ class PaqueteController extends Controller
 
     public function show($id): View
     {
-        $paquete = Paquete::with(['estado','solicitud.solicitante','solicitud.destino'])->findOrFail($id);
+        $paquete = Paquete::with(['estado','solicitud.solicitante','solicitud.destino', 'conductor', 'vehiculo.marcaVehiculo',])->findOrFail($id);
         return view('paquete.show', compact('paquete'));
     }
 
     public function edit(Paquete $paquete): View
     {
         $paquete->load(['estado','solicitud.solicitante','solicitud.destino']);
-        $estados = Estado::orderBy('nombre_estado')->pluck('nombre_estado','id_estado');
-            $solicitudes = Solicitud::with(['solicitante', 'destino'])->get();
-        return view('paquete.edit', compact('paquete','estados', 'solicitudes'));
+        $estados      = Estado::orderBy('nombre_estado')->pluck('nombre_estado','id_estado');
+        $solicitudes  = Solicitud::with(['solicitante', 'destino'])->get();
+        $conductores  = Conductor::orderBy('nombre')->orderBy('apellido')->get();
+        $vehiculos    = Vehiculo::with(['marcaVehiculo','tipoVehiculo'])->orderBy('placa')->get();
+        $licencias    = TipoLicencia::orderBy('licencia')->get();
+        $marcas       = Marca::orderBy('nombre_marca')->get();
+        $tiposVehiculo = TipoVehiculo::orderBy('nombre_tipo_vehiculo')->get();
+        return view('paquete.edit', compact(
+            'paquete',
+            'estados',
+            'solicitudes',
+            'conductores',
+            'vehiculos',
+            'licencias',
+            'marcas',
+            'tiposVehiculo'
+        ));
     }
 
     public function update(PaqueteRequest $request, Paquete $paquete): RedirectResponse
