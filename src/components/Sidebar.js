@@ -94,6 +94,18 @@ const menuItems = [
     icon: 'car',
     route: 'Vehiculos',
   },
+  {
+    id: 'tipoVehiculo',
+    label: 'Tipos de Vehículo',
+    icon: 'truck-monster',
+    route: 'TipoVehiculo',
+  },
+  {
+    id: 'roles',
+    label: 'Gestión de Roles',
+    icon: 'user-shield',
+    route: 'Roles',
+  },
 ];
 
 export default function Sidebar({ isVisible, onClose, navigation }) {

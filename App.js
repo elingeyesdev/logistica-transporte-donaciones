@@ -19,6 +19,8 @@ import LicenciasScreen from './src/screens/LicenciasScreen';
 import ConductoresScreen from './src/screens/ConductoresScreen';
 import MarcasScreen from './src/screens/MarcasScreen';
 import VehiculosScreen from './src/screens/VehiculosScreen';
+import TipoVehiculoScreen from './src/screens/TipoVehiculoScreen';
+import RolesScreen from './src/screens/RolesScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -108,6 +110,16 @@ export default function App() {
           name="Vehiculos"
           component={VehiculosScreen}
           options={{ title: 'Gestión de Vehículos' }}
+        />
+        <Stack.Screen
+          name="TipoVehiculo"
+          component={TipoVehiculoScreen}
+          options={{ title: 'Gestión de Tipos de Vehículo' }}
+        />
+        <Stack.Screen
+          name="Roles"
+          component={RolesScreen}
+          options={{ title: 'Gestión de Roles' }}
         />
       </Stack.Navigator>
       </NavigationContainer>
