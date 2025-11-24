@@ -46,6 +46,24 @@ const menuItems = [
     icon: 'map-marked-alt',
     route: 'Destino',
   },
+  {
+    id: 'ubicaciones',
+    label: 'Gestión de Ubicaciones',
+    icon: 'location-arrow',
+    route: 'Ubicaciones',
+  },
+  {
+    id: 'voluntario',
+    label: 'Gestión de Voluntarios',
+    icon: 'hands-helping',
+    route: 'Voluntario',
+  },
+  {
+    id: 'reporte',
+    label: 'Gestión de Reportes',
+    icon: 'file-invoice',
+    route: 'Reporte',
+  },
 ];
 
 export default function Sidebar({ isVisible, onClose, navigation }) {

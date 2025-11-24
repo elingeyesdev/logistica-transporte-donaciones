@@ -4,95 +4,100 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Modal,
   ScrollView,
+  Modal,
   TextInput,
   Alert,
 } from 'react-native';
-import { adminlteColors } from '../theme/adminlte';
-import AdminLayout from '../components/AdminLayout';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import AdminLayout from '../components/AdminLayout';
+import { adminlteColors } from '../theme/adminlte';
 
-const ubicacionesIniciales = [
+const reportesIniciales = [
   {
     id: 1,
-    latitud: '-17.7833',
-    longitud: '-63.1821',
-    zona: 'Zona Norte',
+    direccionArchivo: '/reportes/2024/reporte_enero.pdf',
+    fechaReporte: '15/01/2024',
+    gestion: '2024',
   },
   {
     id: 2,
-    latitud: '-15.5000',
-    longitud: '-62.8500',
-    zona: 'Zona Sur',
+    direccionArchivo: '/reportes/2024/reporte_febrero.pdf',
+    fechaReporte: '15/02/2024',
+    gestion: '2024',
   },
   {
     id: 3,
-    latitud: '-16.2500',
-    longitud: '-61.5000',
-    zona: 'Zona Centro',
+    direccionArchivo: '/reportes/2023/reporte_diciembre.pdf',
+    fechaReporte: '31/12/2023',
+    gestion: '2023',
+  },
+  {
+    id: 4,
+    direccionArchivo: '/reportes/2024/reporte_marzo.pdf',
+    fechaReporte: '15/03/2024',
+    gestion: '2024',
   },
 ];
 
-export default function UbicacionesScreen() {
-  const [ubicaciones, setUbicaciones] = useState(ubicacionesIniciales);
+const obtenerColorBorde = index => {
+  const colores = [
+    adminlteColors.primary,
+    adminlteColors.success,
+    adminlteColors.info,
+    adminlteColors.warning,
+    adminlteColors.danger,
+  ];
+  return colores[index % colores.length];
+};
+
+export default function ReporteScreen() {
+  const [reportes, setReportes] = useState(reportesIniciales);
   const [modalCrearVisible, setModalCrearVisible] = useState(false);
   const [formData, setFormData] = useState({
-    latitud: '',
-    longitud: '',
-    zona: '',
+    direccionArchivo: '',
+    fechaReporte: '',
+    gestion: '',
   });
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCrearUbicacion = () => {
+  const handleCrearReporte = () => {
     if (
-      !formData.latitud.trim() ||
-      !formData.longitud.trim() ||
-      !formData.zona.trim()
+      !formData.direccionArchivo.trim() ||
+      !formData.fechaReporte.trim() ||
+      !formData.gestion.trim()
     ) {
       Alert.alert('Error', 'Por favor completa todos los campos');
       return;
     }
 
-    const nuevaUbicacion = {
+    const nuevoReporte = {
       id: Date.now(),
       ...formData,
     };
 
-    setUbicaciones(prev => [nuevaUbicacion, ...prev]);
+    setReportes(prev => [nuevoReporte, ...prev]);
     setFormData({
-      latitud: '',
-      longitud: '',
-      zona: '',
+      direccionArchivo: '',
+      fechaReporte: '',
+      gestion: '',
     });
     setModalCrearVisible(false);
-    Alert.alert('Éxito', 'Ubicación creada exitosamente');
-  };
-
-  const obtenerColorBorde = index => {
-    const colores = [
-      adminlteColors.primary,
-      adminlteColors.success,
-      adminlteColors.info,
-      adminlteColors.warning,
-      adminlteColors.danger,
-      adminlteColors.secondary,
-    ];
-    return colores[index % colores.length];
+    Alert.alert('Éxito', 'Reporte creado exitosamente');
   };
 
   return (
     <AdminLayout>
-      <Text style={styles.pageTitle}>Gestión de Ubicaciones</Text>
+      <Text style={styles.pageTitle}>Gestión de Reportes</Text>
 
-      {/* Botón Crear Ubicación */}
+      {/* Botón Crear Reporte */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardHeaderTitle}>
-            Listado de Ubicaciones Registradas
+            Listado de Reportes Registrados
           </Text>
           <TouchableOpacity
             style={styles.btnCrear}
@@ -104,77 +109,77 @@ export default function UbicacionesScreen() {
               color="#ffffff"
               style={{ marginRight: 6 }}
             />
-            <Text style={styles.btnCrearText}>Crear Ubicación</Text>
+            <Text style={styles.btnCrearText}>Crear Reporte</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Lista de Ubicaciones */}
-      <ScrollView style={styles.ubicacionesContainer}>
-        <View style={styles.ubicacionesGrid}>
-          {ubicaciones.map((ubicacion, index) => (
+      {/* Lista de Reportes */}
+      <ScrollView style={styles.reportesContainer}>
+        <View style={styles.reportesGrid}>
+          {reportes.map((reporte, index) => (
             <View
-              key={ubicacion.id}
+              key={reporte.id}
               style={[
-                styles.ubicacionCard,
+                styles.reporteCard,
                 {
                   borderTopWidth: 3,
                   borderTopColor: obtenerColorBorde(index),
                 },
               ]}
             >
-              <View style={styles.ubicacionCardHeader}>
-                <View style={styles.ubicacionCardHeaderContent}>
+              <View style={styles.reporteCardHeader}>
+                <View style={styles.reporteCardHeaderContent}>
                   <FontAwesome5
-                    name="map-pin"
+                    name="file-alt"
                     size={14}
                     color={adminlteColors.dark}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.ubicacionCardTitle}>
-                    {ubicacion.zona}
+                  <Text style={styles.reporteCardTitle}>
+                    Reporte {reporte.gestion}
                   </Text>
                 </View>
               </View>
 
-              <View style={styles.ubicacionCardBody}>
-                <View style={styles.ubicacionInfoRow}>
+              <View style={styles.reporteCardBody}>
+                <View style={styles.reporteInfoRow}>
                   <FontAwesome5
-                    name="compass"
+                    name="folder-open"
                     size={12}
                     color={adminlteColors.primary}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.ubicacionInfoLabel}>Latitud:</Text>
+                  <Text style={styles.reporteInfoLabel}>Dirección Archivo:</Text>
                 </View>
-                <Text style={styles.ubicacionInfoValue}>
-                  {ubicacion.latitud}
+                <Text style={styles.reporteInfoValue}>
+                  {reporte.direccionArchivo}
                 </Text>
 
-                <View style={styles.ubicacionInfoRow}>
+                <View style={styles.reporteInfoRow}>
                   <FontAwesome5
-                    name="globe"
+                    name="calendar-alt"
                     size={12}
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.ubicacionInfoLabel}>Longitud:</Text>
+                  <Text style={styles.reporteInfoLabel}>Fecha Reporte:</Text>
                 </View>
-                <Text style={styles.ubicacionInfoValueMuted}>
-                  {ubicacion.longitud}
+                <Text style={styles.reporteInfoValueMuted}>
+                  {reporte.fechaReporte}
                 </Text>
 
-                <View style={styles.ubicacionInfoRow}>
+                <View style={styles.reporteInfoRow}>
                   <FontAwesome5
-                    name="map-marked-alt"
+                    name="calendar-check"
                     size={12}
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.ubicacionInfoLabel}>Zona:</Text>
+                  <Text style={styles.reporteInfoLabel}>Gestión:</Text>
                 </View>
-                <Text style={styles.ubicacionInfoValueMuted}>
-                  {ubicacion.zona}
+                <Text style={styles.reporteInfoValueMuted}>
+                  {reporte.gestion}
                 </Text>
               </View>
             </View>
@@ -182,7 +187,7 @@ export default function UbicacionesScreen() {
         </View>
       </ScrollView>
 
-      {/* Modal Crear Ubicación */}
+      {/* Modal Crear Reporte */}
       <Modal
         visible={modalCrearVisible}
         animationType="slide"
@@ -193,12 +198,12 @@ export default function UbicacionesScreen() {
           <View style={styles.modalHeader}>
             <View style={styles.modalHeaderContent}>
               <FontAwesome5
-                name="map-marker-alt"
+                name="file-medical"
                 size={18}
                 color="#ffffff"
                 style={{ marginRight: 8 }}
               />
-              <Text style={styles.modalHeaderTitle}>Crear Nueva Ubicación</Text>
+              <Text style={styles.modalHeaderTitle}>Crear Nuevo Reporte</Text>
             </View>
             <TouchableOpacity
               onPress={() => setModalCrearVisible(false)}
@@ -211,39 +216,38 @@ export default function UbicacionesScreen() {
           <ScrollView style={styles.modalBody}>
             <View style={styles.formGroup}>
               <Text style={styles.label}>
-                Latitud <Text style={styles.required}>*</Text>
+                Dirección Archivo <Text style={styles.required}>*</Text>
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ej. -17.7833"
-                value={formData.latitud}
-                onChangeText={text => handleChange('latitud', text)}
-                keyboardType="numeric"
+                placeholder="Ej. /reportes/2024/reporte_abril.pdf"
+                value={formData.direccionArchivo}
+                onChangeText={text => handleChange('direccionArchivo', text)}
               />
             </View>
 
             <View style={styles.formGroup}>
               <Text style={styles.label}>
-                Longitud <Text style={styles.required}>*</Text>
+                Fecha Reporte <Text style={styles.required}>*</Text>
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ej. -63.1821"
-                value={formData.longitud}
-                onChangeText={text => handleChange('longitud', text)}
-                keyboardType="numeric"
+                placeholder="Ej. 15/04/2024"
+                value={formData.fechaReporte}
+                onChangeText={text => handleChange('fechaReporte', text)}
               />
             </View>
 
             <View style={styles.formGroup}>
               <Text style={styles.label}>
-                Zona <Text style={styles.required}>*</Text>
+                Gestión <Text style={styles.required}>*</Text>
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ej. Zona Este"
-                value={formData.zona}
-                onChangeText={text => handleChange('zona', text)}
+                placeholder="Ej. 2024"
+                value={formData.gestion}
+                onChangeText={text => handleChange('gestion', text)}
+                keyboardType="numeric"
               />
             </View>
           </ScrollView>
@@ -258,16 +262,16 @@ export default function UbicacionesScreen() {
             <TouchableOpacity
               style={[
                 styles.modalFooterButtonSuccess,
-                (!formData.latitud.trim() ||
-                  !formData.longitud.trim() ||
-                  !formData.zona.trim()) &&
+                (!formData.direccionArchivo.trim() ||
+                  !formData.fechaReporte.trim() ||
+                  !formData.gestion.trim()) &&
                   styles.modalFooterButtonDisabled,
               ]}
-              onPress={handleCrearUbicacion}
+              onPress={handleCrearReporte}
               disabled={
-                !formData.latitud.trim() ||
-                !formData.longitud.trim() ||
-                !formData.zona.trim()
+                !formData.direccionArchivo.trim() ||
+                !formData.fechaReporte.trim() ||
+                !formData.gestion.trim()
               }
             >
               <FontAwesome5
@@ -276,7 +280,7 @@ export default function UbicacionesScreen() {
                 color="#ffffff"
                 style={{ marginRight: 6 }}
               />
-              <Text style={styles.modalFooterButtonText}>Crear Ubicación</Text>
+              <Text style={styles.modalFooterButtonText}>Crear Reporte</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -308,103 +312,101 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: adminlteColors.dark,
-    flex: 1,
   },
   btnCrear: {
+    backgroundColor: adminlteColors.primary,
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: adminlteColors.success,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 4,
   },
   btnCrearText: {
     color: '#ffffff',
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
   },
-  ubicacionesContainer: {
+  reportesContainer: {
     flex: 1,
+    marginBottom: 16,
   },
-  ubicacionesGrid: {
+  reportesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
   },
-  ubicacionCard: {
-    width: '100%',
+  reporteCard: {
     backgroundColor: adminlteColors.cardBg,
     borderRadius: 8,
-    marginBottom: 16,
-    elevation: 3,
-    overflow: 'hidden',
+    width: '48%',
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
   },
-  ubicacionCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+  reporteCardHeader: {
+    padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#dee2e6',
+    borderBottomColor: '#e0e0e0',
   },
-  ubicacionCardHeaderContent: {
+  reporteCardHeaderContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
   },
-  ubicacionCardTitle: {
-    fontSize: 15,
+  reporteCardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: adminlteColors.dark,
+  },
+  reporteCardBody: {
+    padding: 10,
+  },
+  reporteInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  reporteInfoLabel: {
+    fontSize: 12,
     fontWeight: '600',
     color: adminlteColors.dark,
   },
-  ubicacionCardBody: {
-    padding: 12,
-  },
-  ubicacionInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  reporteInfoValue: {
+    fontSize: 12,
+    color: adminlteColors.dark,
+    marginTop: 2,
     marginBottom: 4,
+    marginLeft: 18,
   },
-  ubicacionInfoLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: adminlteColors.dark,
-  },
-  ubicacionInfoValue: {
-    fontSize: 15,
-    color: adminlteColors.primary,
-    marginBottom: 8,
-    marginLeft: 20,
-    fontWeight: '600',
-  },
-  ubicacionInfoValueMuted: {
-    fontSize: 13,
+  reporteInfoValueMuted: {
+    fontSize: 12,
     color: adminlteColors.muted,
-    marginBottom: 8,
-    marginLeft: 20,
+    marginTop: 2,
+    marginBottom: 4,
+    marginLeft: 18,
   },
-  // Modal styles
   modalContainer: {
     flex: 1,
-    backgroundColor: adminlteColors.bodyBg,
+    backgroundColor: adminlteColors.lightBg,
   },
   modalHeader: {
+    backgroundColor: adminlteColors.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: adminlteColors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    elevation: 4,
   },
   modalHeaderContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
   },
   modalHeaderTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#ffffff',
   },
   modalCloseButton: {
@@ -418,53 +420,54 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    fontSize: 13,
-    fontWeight: '500',
-    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: '600',
     color: adminlteColors.dark,
+    marginBottom: 6,
   },
   required: {
     color: adminlteColors.danger,
   },
   input: {
-    backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#ced4da',
-    borderRadius: 4,
+    borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
+    backgroundColor: '#ffffff',
+    color: adminlteColors.dark,
   },
   modalFooter: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: adminlteColors.primary,
-    gap: 8,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    backgroundColor: '#ffffff',
   },
   modalFooterButtonSecondary: {
     backgroundColor: adminlteColors.secondary,
+    borderRadius: 6,
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginRight: 8,
   },
   modalFooterButtonSuccess: {
     backgroundColor: adminlteColors.success,
+    borderRadius: 6,
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 4,
     flexDirection: 'row',
     alignItems: 'center',
   },
   modalFooterButtonDisabled: {
-    opacity: 0.5,
+    backgroundColor: '#cccccc',
   },
   modalFooterButtonText: {
     color: '#ffffff',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });
