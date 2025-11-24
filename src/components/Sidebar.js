@@ -64,6 +64,18 @@ const menuItems = [
     icon: 'file-invoice',
     route: 'Reporte',
   },
+  {
+    id: 'seguimientoPaquete',
+    label: 'Seguimiento de Paquetes',
+    icon: 'truck',
+    route: 'SeguimientoPaquete',
+  },
+  {
+    id: 'licencias',
+    label: 'Gestión de Licencias',
+    icon: 'certificate',
+    route: 'Licencias',
+  },
 ];
 
 export default function Sidebar({ isVisible, onClose, navigation }) {

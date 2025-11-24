@@ -14,6 +14,8 @@ import DestinoScreen from './src/screens/DestinoScreen';
 import UbicacionesScreen from './src/screens/UbicacionesScreen';
 import VoluntarioScreen from './src/screens/VoluntarioScreen';
 import ReporteScreen from './src/screens/ReporteScreen';
+import SeguimientoPaqueteScreen from './src/screens/SeguimientoPaqueteScreen';
+import LicenciasScreen from './src/screens/LicenciasScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -78,6 +80,16 @@ export default function App() {
           name="Reporte"
           component={ReporteScreen}
           options={{ title: 'Gestión de Reportes' }}
+        />
+        <Stack.Screen
+          name="SeguimientoPaquete"
+          component={SeguimientoPaqueteScreen}
+          options={{ title: 'Seguimiento de Paquetes' }}
+        />
+        <Stack.Screen
+          name="Licencias"
+          component={LicenciasScreen}
+          options={{ title: 'Gestión de Licencias' }}
         />
       </Stack.Navigator>
       </NavigationContainer>
