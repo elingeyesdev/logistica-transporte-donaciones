@@ -23,9 +23,15 @@ use App\Models\TipoVehiculo;
 
 class PaqueteController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $paquetes = Paquete::with(['estado','solicitud.solicitante','solicitud.destino'])->paginate();
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $paquetes
+            ]);
+        }
 
         return view('paquete.index', compact('paquetes'))
             ->with('i', ($request->input('page', 1) - 1) * $paquetes->perPage());
@@ -54,9 +60,9 @@ class PaqueteController extends Controller
         ));
     }
 
-    public function store(PaqueteRequest $request): RedirectResponse
+    public function store(PaqueteRequest $request)  
     {
-        $id = DB::transaction(function () use ($request) {
+        $paq = DB::transaction(function () use ($request) {
 
             $data = $request->validated();
 
@@ -124,8 +130,15 @@ class PaqueteController extends Controller
             return $paq->getKey();
         });
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $paq
+            ], 201);
+        }
+
         return Redirect::route('paquete.index')
-            ->with('success', "Paquete creado (ID {$id}).");
+            ->with('success', "Paquete creado (ID {$paq->id_paquete}).");
     }
 
     private function makeCodigoPaquete(): string
@@ -147,9 +160,17 @@ class PaqueteController extends Controller
     }
 
 
-    public function show($id): View
+    public function show(Request $request, $id)
     {
         $paquete = Paquete::with(['estado','solicitud.solicitante','solicitud.destino', 'conductor', 'vehiculo.marcaVehiculo',])->findOrFail($id);
+        
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $paquete
+            ]);
+        }
+
         return view('paquete.show', compact('paquete'));
     }
 
@@ -175,9 +196,9 @@ class PaqueteController extends Controller
         ));
     }
 
-    public function update(PaqueteRequest $request, Paquete $paquete): RedirectResponse
+    public function update(PaqueteRequest $request, Paquete $paquete)
     {
-        DB::transaction(function () use ($request, $paquete) {
+        $paq = DB::transaction(function () use ($request, $paquete) {
 
             $oldEstadoId = $paquete->estado_id;
 
@@ -245,14 +266,41 @@ class PaqueteController extends Controller
             }
         });
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data'    => $paq
+            ]);
+        }
+
         return Redirect::route('paquete.index')
             ->with('success', 'Paquete actualizado correctamente');
     }
 
-    public function destroy($id): RedirectResponse
+    public function destroy(Request $request, $id)
     {
-        Paquete::find($id)?->delete();
+        $paquete = Paquete::find($id);
 
+        if (!$paquete) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => 'Paquete no encontrado'
+                ], 404);
+            }
+
+            return Redirect::route('paquete.index')
+                ->with('error', 'Paquete no encontrado');
+        }
+
+        $paquete->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Paquete eliminado correctamente'
+            ]);
+        }
         return Redirect::route('paquete.index')
             ->with('success', 'Paquete eliminado correctamente');
     }

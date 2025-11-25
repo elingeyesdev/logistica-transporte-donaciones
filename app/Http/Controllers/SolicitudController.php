@@ -16,9 +16,16 @@ use App\Models\Estado;
 
 class SolicitudController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $solicituds = Solicitud::with(['solicitante','destino'])->paginate();
+        
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $solicituds
+            ]);
+        }
         return view('solicitud.index', compact('solicituds'))
             ->with('i', ($request->input('page', 1) - 1) * $solicituds->perPage());
     }
@@ -77,6 +84,7 @@ class SolicitudController extends Controller
     // JSON TEST PARA EL GATEWAY
     if ($request->is('api/*')) {
         return response()->json([
+            'success' => true,
             'data'    => $solicitud,
             'message' => 'Solicitud creada correctamente.',
         ], 201);
@@ -99,11 +107,11 @@ class SolicitudController extends Controller
         return view('solicitud.edit', compact('solicitud', 'tipoEmergencia'));
     }
 
-    public function update(SolicitudRequest $request, Solicitud $solicitud): RedirectResponse
+    public function update(SolicitudRequest $request, Solicitud $solicitud)
     {
         $data = $request->validated();
 
-         return DB::transaction(function () use ($data, $solicitud) {
+        $solicitud = DB::transaction(function () use ($data, $solicitud) {
 
             $solicitud->solicitante?->update([
                 'nombre'  => $data['nombre'],
@@ -133,25 +141,49 @@ class SolicitudController extends Controller
                 'justificacion'      => $data['justificacion'] ?? $solicitud->justificacion,
             ]);
 
-            return redirect()
-                ->route('solicitud.show', $solicitud->id_solicitud)
-                ->with('success', 'Solicitud actualizada correctamente.');
-        });
+            return $solicitud;
 
+        });
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $solicitud,
+                'message' => 'Solicitud actualizada correctamente'
+            ]);
+        }
+
+        return redirect()
+            ->route('solicitud.show', $solicitud->id_solicitud)
+            ->with('success', 'Solicitud actualizada correctamente.');
     }
 
-    public function destroy($id_solicitud): RedirectResponse
+    public function destroy(Request $request, $id)
     {
-        $solicitud = Solicitud::find($id_solicitud);
+        $solicitud = Solicitud::find($id);
+
         if (!$solicitud) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Solicitud no encontrada'
+                ], 404);
+            }
+
             return redirect()->route('solicitud.index')
-                ->with('error', 'La solicitud no existe o ya fue eliminada.');
+                ->with('error', 'Solicitud no existe.');
         }
+
         $solicitud->delete();
-        return redirect()->route('solicitud.index')
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()
+            ->route('solicitud.index')
             ->with('success', 'Solicitud eliminada correctamente.');
     }
-    public function aprobar(int $id): RedirectResponse
+    public function aprobar(Request $request, int $id)
     {
         $solicitud = Solicitud::with(['solicitante', 'destino'])->findOrFail($id);
 
@@ -188,12 +220,20 @@ class SolicitudController extends Controller
             return $paq;
         });
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Solicitud aprobada correctamente',
+                'paquete' => $paquete
+            ]);
+        }
+
          return redirect()
             ->route('paquete.show', $paquete->id_paquete)
             ->with('success', 'Solicitud aprobada y paquete creado correctamente.');
     }
 
-    public function negar(Request $request, int $id): RedirectResponse
+    public function negar(Request $request, int $id)
     {
         $request->validate([
             'justificacion' => ['required', 'string', 'max:255'],
@@ -211,8 +251,14 @@ class SolicitudController extends Controller
             'justificacion' => $request->justificacion,
         ]);
 
-        return redirect()
-            ->back()
+          if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Solicitud negada correctamente'
+            ]);
+        }
+
+        return redirect()->back()
             ->with('success', 'Solicitud negada correctamente.');
     }
 

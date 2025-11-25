@@ -12,9 +12,16 @@ use Illuminate\View\View;
 class VehiculoController extends Controller
 {
 
-    public function index(Request $request): View
+    public function index(Request $request)
     {
-        $vehiculo = Vehiculo::with('marcaVehiculo')->paginate();
+        $vehiculo = Vehiculo::with(['marcaVehiculo', 'tipoVehiculo'])->paginate();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $vehiculo
+            ]);
+        }
 
         return view('vehiculo.index', compact('vehiculo'))
             ->with('i', ($request->input('page', 1) - 1) * $vehiculo->perPage());
@@ -27,16 +34,31 @@ class VehiculoController extends Controller
 
         return view('vehiculo.create', compact('vehiculo', 'tipos', 'marcas'));
     }
-    public function store(VehiculoRequest $request): RedirectResponse
+    public function store(VehiculoRequest $request)
     {
-        Vehiculo::create($request->validated());
-        
+        $vehiculo = Vehiculo::create($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Vehículo creado exitosamente.',
+                'data' => $vehiculo
+            ], 201);
+        }
+
         return Redirect::route('vehiculo.index')
-            ->with('success', 'Vehiculo creado exitosamente.');
+            ->with('success', 'Vehículo creado exitosamente.');
     }
-    public function show($id): View
+    public function show(Request $request, $id)
     {
-        $vehiculo = Vehiculo::find($id);
+        $vehiculo = Vehiculo::with(['marcaVehiculo', 'tipoVehiculo'])->findOrFail($id);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $vehiculo
+            ]);
+        }
 
         return view('vehiculo.show', compact('vehiculo'));
     }
@@ -49,19 +71,30 @@ class VehiculoController extends Controller
 
         return view('vehiculo.edit', compact('vehiculo', 'tipos', 'marcas'));
     }
-    public function update(VehiculoRequest $request, Vehiculo $vehiculo): RedirectResponse
+    public function update(VehiculoRequest $request, Vehiculo $vehiculo)
     {
         $vehiculo->update($request->validated());
-        
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Vehículo actualizado exitosamente.',
+                'data' => $vehiculo
+            ]);
+        }
+
         return Redirect::route('vehiculo.index')
-            ->with('success', 'Vehiculo actualizado exitosamente');
+            ->with('success', 'Vehículo actualizado exitosamente.');
     }
-
-    public function destroy($id): RedirectResponse
+    public function destroy(Request $request, $id)
     {
-        Vehiculo::find($id)->delete();
+        Vehiculo::findOrFail($id)->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return Redirect::route('vehiculo.index')
-            ->with('success', 'Vehiculo eliminado exitosamente');
+            ->with('success', 'Vehículo eliminado exitosamente.');
     }
 }

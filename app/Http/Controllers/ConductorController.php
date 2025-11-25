@@ -11,12 +11,18 @@ use Illuminate\View\View;
 
 class ConductorController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
-        $conductor = Conductor::paginate();
+        $conductores = Conductor::paginate();
 
-        return view('conductor.index', compact('conductor'))
-            ->with('i', ($request->input('page', 1) - 1) * $conductor->perPage());
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $conductores
+            ]);
+        }
+        return view('conductor.index', compact('conductores'))
+            ->with('i', ($request->input('page', 1) - 1) * $conductores->perPage());
     }
     public function create(): View
     {
@@ -26,16 +32,31 @@ class ConductorController extends Controller
         return view('conductor.create', compact('conductor', 'licencia'));
     }
     
-    public function store(ConductorRequest $request): RedirectResponse
+    public function store(ConductorRequest $request)
     {
-        Conductor::create($request->validated());
+        $conductor = Conductor::create($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Conductor creado correctamente.',
+                'data' => $conductor
+            ], 201);
+        }
 
         return Redirect::route('conductor.index')
             ->with('success', 'Conductor creado exitosamente.');
     }
-    public function show($id): View
+    public function show(Request $request, $id)
     {
-        $conductor = Conductor::find($id);
+        $conductor = Conductor::findOrFail($id);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $conductor
+            ]);
+        }
 
         return view('conductor.show', compact('conductor'));
     }
@@ -46,17 +67,30 @@ class ConductorController extends Controller
 
         return view('conductor.edit', compact('conductor', 'licencia'));
     }
-    public function update(ConductorRequest $request, Conductor $conductor): RedirectResponse
+    public function update(ConductorRequest $request, Conductor $conductor)
     {
         $conductor->update($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Conductor actualizado correctamente.',
+                'data' => $conductor
+            ]);
+        }
 
         return Redirect::route('conductor.index')
             ->with('success', 'Conductor actualizado exitosamente');
     }
 
-    public function destroy($id_conductor): RedirectResponse
+    public function destroy(Request $request, $id_conductor)
     {
-        Conductor::find($id_conductor)->delete();
+        $conductor = Conductor::findOrFail($id_conductor);
+        $conductor->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return Redirect::route('conductor.index')
             ->with('success', 'Conductor eliminado exitosamente');

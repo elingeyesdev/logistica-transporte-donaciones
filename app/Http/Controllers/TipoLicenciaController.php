@@ -12,9 +12,16 @@ use Illuminate\View\View;
 class TipoLicenciaController extends Controller
 {
   
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $tipoLicencia = TipoLicencia::paginate();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $tipoLicencia
+            ]);
+        }
 
         return view('tipo-licencia.index', compact('tipoLicencia'))
             ->with('i', ($request->input('page', 1) - 1) * $tipoLicencia->perPage());
@@ -27,38 +34,67 @@ class TipoLicenciaController extends Controller
         return view('tipo-licencia.create', compact('tipoLicencia'));
     }
 
-    public function store(TipoLicenciaRequest $request): RedirectResponse
+    public function store(TipoLicenciaRequest $request)
     {
-        TipoLicencia::create($request->validated());
+        $tipoLicencia = TipoLicencia::create($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipo de licencia creado con éxito.',
+                'data' => $tipoLicencia
+            ], 201);
+        }
 
         return Redirect::route('tipo-licencia.index')
-            ->with('success', 'Tipo de licencia creado con éxito');
+            ->with('success', 'Tipo de licencia creado con éxito.');
     }
-    public function show($id_licencia): View
-    {
-        $tipoLicencia = TipoLicencia::find($id_licencia);
 
-        return view('tipo-licencia.show', compact('tipoLicencium'));
+    public function show(Request $request, $id)
+    {
+        $tipoLicencia = TipoLicencia::findOrFail($id);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $tipoLicencia
+            ]);
+        }
+
+        return view('tipo-licencia.show', compact('tipoLicencia'));
     }
+
     public function edit($id_licencia): View
     {
         $tipoLicencia = TipoLicencia::find($id_licencia);
 
         return view('tipo-licencia.edit', compact('tipoLicencium'));
     }
-    public function update(TipoLicenciaRequest $request, TipoLicencia $tipoLicencia): RedirectResponse
+    public function update(TipoLicenciaRequest $request, TipoLicencia $tipoLicencia)
     {
         $tipoLicencia->update($request->validated());
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipo de licencia actualizado.',
+                'data' => $tipoLicencia
+            ]);
+        }
+
         return Redirect::route('tipo-licencia.index')
-            ->with('success', 'Tipo de Licencia actualizado exitosamente.');
+            ->with('success', 'Tipo de licencia actualizado exitosamente.');
     }
 
-    public function destroy($id): RedirectResponse
+    public function destroy(Request $request, $id)
     {
-        TipoLicencia::find($id)->delete();
+        TipoLicencia::findOrFail($id)->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return Redirect::route('tipo-licencia.index')
-            ->with('success', 'Tipo de Licencia eliminado exitosamente');
+            ->with('success', 'Tipo de licencia eliminado exitosamente.');
     }
 }

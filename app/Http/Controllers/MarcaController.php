@@ -12,9 +12,16 @@ use Illuminate\View\View;
 class MarcaController extends Controller
 {
     
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $marcas = Marca::paginate();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $marcas
+            ]);
+        }
 
         return view('marca.index', compact('marcas'))
             ->with('i', ($request->input('page', 1) - 1) * $marcas->perPage());
@@ -26,17 +33,32 @@ class MarcaController extends Controller
 
         return view('marca.create', compact('marca'));
     }
-    public function store(MarcaRequest $request): RedirectResponse
+    public function store(MarcaRequest $request)
     {
-        Marca::create($request->validated());
+        $marca = Marca::create($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Marca creada correctamente.',
+                'data' => $marca
+            ], 201);
+        }
 
         return Redirect::route('marca.index')
             ->with('success', 'Marca creada exitosamente.');
     }
 
-    public function show($id): View
+    public function show(Request $request, $id)
     {
-        $marca = Marca::find($id);
+        $marca = Marca::findOrFail($id);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $marca
+            ]);
+        }
 
         return view('marca.show', compact('marca'));
     }
@@ -49,18 +71,30 @@ class MarcaController extends Controller
         return view('marca.edit', compact('marca'));
     }
 
-
-    public function update(MarcaRequest $request, Marca $marca): RedirectResponse
+    public function update(MarcaRequest $request, Marca $marca)
     {
         $marca->update($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Marca actualizada correctamente.',
+                'data' => $marca
+            ]);
+        }
 
         return Redirect::route('marca.index')
             ->with('success', 'Marca actualizada exitosamente.');
     }
 
-    public function destroy($id): RedirectResponse
+    public function destroy(Request $request, $id)
     {
-        Marca::find($id)->delete();
+        $marca = Marca::findOrFail($id);
+        $marca->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return Redirect::route('marca.index')
             ->with('success', 'Marca eliminada exitosamente.');
