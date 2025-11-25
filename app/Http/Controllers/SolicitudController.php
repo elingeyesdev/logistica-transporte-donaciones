@@ -203,6 +203,8 @@ class SolicitudController extends Controller
             $paq = Paquete::create([
                 'id_solicitud'      => $solicitud->id_solicitud,
                 'estado_id'         => $estadoPendiente->id_estado,
+                'codigo'            => $solicitud->codigo_seguimiento,
+                'fecha_aprobacion'  => now()->toDateString(),
                 'imagen'            => 'SIN_IMAGEN',
                 'ubicacion_actual'  => null,
                 'latitud'           => null,
