@@ -189,17 +189,32 @@
             @error('insumos_necesarios') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
     </div>
+    @php
+        $codigoSeguimiento = old('codigo_seguimiento', $solicitud->codigo_seguimiento);
+        if (empty($codigoSeguimiento)) {
+            $codigoSeguimiento =
+                \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(3))
+                . '-' .
+                rand(1000, 9999);
+        }
+    @endphp
 
     <div class="col-md-6">
         <div class="form-group mb-3">
             <label for="codigo_seguimiento">Código de Seguimiento</label>
-            <input type="text" name="codigo_seguimiento" id="codigo_seguimiento"
-                   class="form-control @error('codigo_seguimiento') is-invalid @enderror"
-                   value="{{ old('codigo_seguimiento', $solicitud->codigo_seguimiento) }}"
-                   placeholder="Ej. SOL-001" readonly>
-            @error('codigo_seguimiento') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            <input type="text"
+                  name="codigo_seguimiento"
+                  id="codigo_seguimiento"
+                  class="form-control @error('codigo_seguimiento') is-invalid @enderror"
+                  value="{{ $codigoSeguimiento }}"
+                  placeholder="Ej. SOL-001"
+                  readonly>
+            @error('codigo_seguimiento')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
         </div>
     </div>
+
 </div>
 
 <div class="text-right">
@@ -210,34 +225,6 @@
         <i class="fas fa-arrow-left"></i> Volver
     </a>
 </div>
-<script>
-(function () {
-  const $com = document.getElementById('comunidad_solicitante');
-  const $code = document.getElementById('codigo_seguimiento');
-
-  function initialsFrom(text) {
-    if (!text) return '';
-    const words = text.trim().toUpperCase().replace(/[^A-Z0-9\s]/g,'').split(/\s+/);
-    return words.map(w => w[0]).join('').slice(0,4);
-  }
-
-  function genCode(base) {
-    const n = Math.floor(100 + Math.random() * 900);
-    return `${base || 'SOL'}-${n}`;
-  }
-
-  function updateCode() {
-    const ini = initialsFrom($com.value) || 'SOL';
-    if (!$code.value || /^[A-Z0-9]{1,4}-\d{3}$/.test($code.value)) {
-      $code.value = genCode(ini);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', updateCode);
-  $com?.addEventListener('input', updateCode);
-  $com?.addEventListener('blur', updateCode);
-})();
-</script>
 
 <script>
 (function() {

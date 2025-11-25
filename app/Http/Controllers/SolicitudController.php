@@ -205,7 +205,7 @@ class SolicitudController extends Controller
                 'estado_id'         => $estadoPendiente->id_estado,
                 'codigo'            => $solicitud->codigo_seguimiento,
                 'fecha_aprobacion'  => now()->toDateString(),
-                'imagen'            => 'SIN_IMAGEN',
+                'imagen'            => null,
                 'ubicacion_actual'  => null,
                 'latitud'           => null,
                 'longitud'          => null,

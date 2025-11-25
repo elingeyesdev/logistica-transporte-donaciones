@@ -24,7 +24,7 @@ class paqueteRequest extends FormRequest
         return [
             'id_solicitud'   => ['required','integer','exists:solicitud,id_solicitud'],
             'estado_id'      => ['required','integer','exists:estado,id_estado'],
-            'imagen'         => ['required', 'image', 'max:4096'],
+            'imagen'         => ['nullable', 'image', 'max:4096'],
             'codigo'         => ['required', 'string'],
             'ubicacion_actual' => ['nullable','string'],    
             'latitud'        => ['nullable','numeric'],
