@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,86 +8,113 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
-
-const vehiculosIniciales = [
-  {
-    id: 1,
-    placa: 'ABC-1234',
-    capacidadMaxKg: '1500',
-    tipo: 'Camioneta',
-    modeloAnio: '2020',
-    modelo: 'Hilux',
-    marca: 'Toyota',
-  },
-  {
-    id: 2,
-    placa: 'XYZ-5678',
-    capacidadMaxKg: '2000',
-    tipo: 'Camión',
-    modeloAnio: '2019',
-    modelo: 'Ranger',
-    marca: 'Ford',
-  },
-  {
-    id: 3,
-    placa: 'LMN-9012',
-    capacidadMaxKg: '1200',
-    tipo: 'Van',
-    modeloAnio: '2021',
-    modelo: 'H100',
-    marca: 'Hyundai',
-  },
-];
+import * as vehiculoService from '../services/vehiculoService';
+import * as tipoVehiculoService from '../services/tipoVehiculoService';
+import * as marcaService from '../services/marcaService';
 
 export default function VehiculosScreen() {
-  const [vehiculos, setVehiculos] = useState(vehiculosIniciales);
+  const [vehiculos, setVehiculos] = useState([]);
+  const [tiposVehiculo, setTiposVehiculo] = useState([]);
+  const [marcas, setMarcas] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [modalCrearVisible, setModalCrearVisible] = useState(false);
+  const [modalTipoVisible, setModalTipoVisible] = useState(false);
+  const [modalMarcaVisible, setModalMarcaVisible] = useState(false);
   const [formData, setFormData] = useState({
     placa: '',
-    capacidadMaxKg: '',
-    tipo: '',
-    modeloAnio: '',
+    capacidad_aproximada: '',
+    id_tipovehiculo: '',
+    modelo_anio: '',
     modelo: '',
-    marca: '',
+    id_marca: '',
   });
+
+  useEffect(() => {
+    cargarVehiculos();
+    cargarTiposVehiculo();
+    cargarMarcas();
+  }, []);
+
+  const cargarVehiculos = async () => {
+    setLoading(true);
+    try {
+      const data = await vehiculoService.getVehiculos();
+      setVehiculos(data);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudieron cargar los vehículos');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cargarTiposVehiculo = async () => {
+    try {
+      const data = await tipoVehiculoService.getTiposVehiculo();
+      setTiposVehiculo(data);
+    } catch (error) {
+      console.error('Error al cargar tipos de vehículo:', error);
+    }
+  };
+
+  const cargarMarcas = async () => {
+    try {
+      const data = await marcaService.getMarcas();
+      setMarcas(data);
+    } catch (error) {
+      console.error('Error al cargar marcas:', error);
+    }
+  };
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCrearVehiculo = () => {
+  const handleCrearVehiculo = async () => {
     if (
       !formData.placa.trim() ||
-      !formData.capacidadMaxKg.trim() ||
-      !formData.tipo.trim() ||
-      !formData.modeloAnio.trim() ||
+      !formData.capacidad_aproximada ||
+      !formData.id_tipovehiculo ||
+      !formData.modelo_anio ||
       !formData.modelo.trim() ||
-      !formData.marca.trim()
+      !formData.id_marca
     ) {
       Alert.alert('Error', 'Por favor completa todos los campos');
       return;
     }
 
-    const nuevoVehiculo = {
-      id: Date.now(),
-      ...formData,
-    };
-
-    setVehiculos(prev => [nuevoVehiculo, ...prev]);
-    setFormData({
-      placa: '',
-      capacidadMaxKg: '',
-      tipo: '',
-      modeloAnio: '',
-      modelo: '',
-      marca: '',
-    });
-    setModalCrearVisible(false);
-    Alert.alert('Éxito', 'Vehículo creado exitosamente');
+    setLoading(true);
+    try {
+      await vehiculoService.createVehiculo({
+        placa: formData.placa.trim().toUpperCase(),
+        capacidad_aproximada: formData.capacidad_aproximada.toString(),
+        id_tipovehiculo: formData.id_tipovehiculo,
+        modelo_anio: formData.modelo_anio.toString(),
+        modelo: formData.modelo.trim(),
+        id_marca: formData.id_marca,
+      });
+      Alert.alert('Éxito', 'Vehículo creado exitosamente');
+      setFormData({
+        placa: '',
+        capacidad_aproximada: '',
+        id_tipovehiculo: '',
+        modelo_anio: '',
+        modelo: '',
+        id_marca: '',
+      });
+      setModalCrearVisible(false);
+      await cargarVehiculos();
+    } catch (error) {
+      Alert.alert('Error', 'Error de conexión con el servidor');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const obtenerColorBorde = index => {
@@ -129,18 +156,32 @@ export default function VehiculosScreen() {
 
       {/* Lista de Vehículos */}
       <ScrollView style={styles.vehiculosContainer}>
-        <View style={styles.vehiculosGrid}>
-          {vehiculos.map((vehiculo, index) => (
-            <View
-              key={vehiculo.id}
-              style={[
-                styles.vehiculoCard,
-                {
-                  borderTopWidth: 3,
-                  borderTopColor: obtenerColorBorde(index),
-                },
-              ]}
-            >
+        {loading ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={adminlteColors.primary} />
+            <Text style={{ marginTop: 10, color: adminlteColors.muted }}>
+              Cargando vehículos...
+            </Text>
+          </View>
+        ) : vehiculos.length === 0 ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <Text style={{ color: adminlteColors.muted }}>
+              No hay vehículos registrados
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.vehiculosGrid}>
+            {vehiculos.map((vehiculo, index) => (
+              <View
+                key={vehiculo.id_vehiculo ? `vehiculo-${vehiculo.id_vehiculo}` : `vehiculo-index-${index}`}
+                style={[
+                  styles.vehiculoCard,
+                  {
+                    borderTopWidth: 3,
+                    borderTopColor: obtenerColorBorde(index),
+                  },
+                ]}
+              >
               <View style={styles.vehiculoCardHeader}>
                 <View style={styles.vehiculoCardHeaderContent}>
                   <FontAwesome5
@@ -176,10 +217,10 @@ export default function VehiculosScreen() {
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.vehiculoInfoLabel}>Capacidad Máx (kg):</Text>
+                  <Text style={styles.vehiculoInfoLabel}>Capacidad:</Text>
                 </View>
                 <Text style={styles.vehiculoInfoValueMuted}>
-                  {vehiculo.capacidadMaxKg}
+                  {vehiculo.capacidad_aproximada} Kg
                 </Text>
 
                 <View style={styles.vehiculoInfoRow}>
@@ -192,7 +233,7 @@ export default function VehiculosScreen() {
                   <Text style={styles.vehiculoInfoLabel}>Tipo:</Text>
                 </View>
                 <Text style={styles.vehiculoInfoValueMuted}>
-                  {vehiculo.tipo}
+                  {vehiculo.tipo_vehiculo?.nombre_tipo_vehiculo || 'N/A'}
                 </Text>
 
                 <View style={styles.vehiculoInfoRow}>
@@ -202,10 +243,10 @@ export default function VehiculosScreen() {
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.vehiculoInfoLabel}>Modelo Año:</Text>
+                  <Text style={styles.vehiculoInfoLabel}>Año:</Text>
                 </View>
                 <Text style={styles.vehiculoInfoValueMuted}>
-                  {vehiculo.modeloAnio}
+                  {vehiculo.modelo_anio}
                 </Text>
 
                 <View style={styles.vehiculoInfoRow}>
@@ -231,12 +272,13 @@ export default function VehiculosScreen() {
                   <Text style={styles.vehiculoInfoLabel}>Marca:</Text>
                 </View>
                 <Text style={styles.vehiculoInfoValueMuted}>
-                  {vehiculo.marca}
+                  {vehiculo.marca?.nombre_marca || 'N/A'}
                 </Text>
               </View>
             </View>
           ))}
-        </View>
+          </View>
+        )}
       </ScrollView>
 
       {/* Modal Crear Vehículo */}
@@ -281,38 +323,43 @@ export default function VehiculosScreen() {
 
             <View style={styles.formGroup}>
               <Text style={styles.label}>
-                Capacidad Máxima (kg) <Text style={styles.required}>*</Text>
+                Capacidad Aproximada (kg) <Text style={styles.required}>*</Text>
               </Text>
               <TextInput
                 style={styles.input}
                 placeholder="Ej. 1500"
-                value={formData.capacidadMaxKg}
-                onChangeText={text => handleChange('capacidadMaxKg', text)}
+                value={formData.capacidad_aproximada}
+                onChangeText={text => handleChange('capacidad_aproximada', text)}
                 keyboardType="numeric"
               />
             </View>
 
             <View style={styles.formGroup}>
               <Text style={styles.label}>
-                Tipo <Text style={styles.required}>*</Text>
+                Tipo de Vehículo <Text style={styles.required}>*</Text>
               </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. Camioneta"
-                value={formData.tipo}
-                onChangeText={text => handleChange('tipo', text)}
-              />
+              <TouchableOpacity
+                style={styles.selectButton}
+                onPress={() => setModalTipoVisible(true)}
+              >
+                <Text style={styles.selectButtonText}>
+                  {formData.id_tipovehiculo 
+                    ? tiposVehiculo.find(t => t.id_tipovehiculo === formData.id_tipovehiculo)?.nombre_tipo_vehiculo || 'Seleccionar tipo'
+                    : 'Seleccionar tipo de vehículo'}
+                </Text>
+                <FontAwesome5 name="chevron-down" size={14} color={adminlteColors.muted} />
+              </TouchableOpacity>
             </View>
 
             <View style={styles.formGroup}>
               <Text style={styles.label}>
-                Modelo Año <Text style={styles.required}>*</Text>
+                Año de Fabricación <Text style={styles.required}>*</Text>
               </Text>
               <TextInput
                 style={styles.input}
                 placeholder="Ej. 2020"
-                value={formData.modeloAnio}
-                onChangeText={text => handleChange('modeloAnio', text)}
+                value={formData.modelo_anio}
+                onChangeText={text => handleChange('modelo_anio', text)}
                 keyboardType="numeric"
               />
             </View>
@@ -333,12 +380,17 @@ export default function VehiculosScreen() {
               <Text style={styles.label}>
                 Marca <Text style={styles.required}>*</Text>
               </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. Toyota"
-                value={formData.marca}
-                onChangeText={text => handleChange('marca', text)}
-              />
+              <TouchableOpacity
+                style={styles.selectButton}
+                onPress={() => setModalMarcaVisible(true)}
+              >
+                <Text style={styles.selectButtonText}>
+                  {formData.id_marca 
+                    ? marcas.find(m => m.id_marca === formData.id_marca)?.nombre_marca || 'Seleccionar marca'
+                    : 'Seleccionar marca'}
+                </Text>
+                <FontAwesome5 name="chevron-down" size={14} color={adminlteColors.muted} />
+              </TouchableOpacity>
             </View>
           </ScrollView>
 
@@ -353,21 +405,21 @@ export default function VehiculosScreen() {
               style={[
                 styles.modalFooterButtonSuccess,
                 (!formData.placa.trim() ||
-                  !formData.capacidadMaxKg.trim() ||
-                  !formData.tipo.trim() ||
-                  !formData.modeloAnio.trim() ||
+                  !formData.capacidad_aproximada ||
+                  !formData.id_tipovehiculo ||
+                  !formData.modelo_anio ||
                   !formData.modelo.trim() ||
-                  !formData.marca.trim()) &&
+                  !formData.id_marca) &&
                   styles.modalFooterButtonDisabled,
               ]}
               onPress={handleCrearVehiculo}
               disabled={
                 !formData.placa.trim() ||
-                !formData.capacidadMaxKg.trim() ||
-                !formData.tipo.trim() ||
-                !formData.modeloAnio.trim() ||
+                !formData.capacidad_aproximada ||
+                !formData.id_tipovehiculo ||
+                !formData.modelo_anio ||
                 !formData.modelo.trim() ||
-                !formData.marca.trim()
+                !formData.id_marca
               }
             >
               <FontAwesome5
@@ -379,6 +431,118 @@ export default function VehiculosScreen() {
               <Text style={styles.modalFooterButtonText}>Crear Vehículo</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Modal Seleccionar Tipo Vehículo */}
+          <Modal
+            visible={modalTipoVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setModalTipoVisible(false)}
+          >
+            <TouchableOpacity 
+              style={styles.modalOverlay}
+              activeOpacity={1}
+              onPress={() => setModalTipoVisible(false)}
+            >
+              <TouchableOpacity 
+                style={styles.modalSelectContainer}
+                activeOpacity={1}
+                onPress={(e) => e.stopPropagation()}
+              >
+                <View style={styles.modalSelectHeader}>
+                  <Text style={styles.modalSelectTitle}>Seleccionar Tipo de Vehículo</Text>
+                  <TouchableOpacity onPress={() => setModalTipoVisible(false)}>
+                    <MaterialIcons name="close" size={24} color={adminlteColors.dark} />
+                  </TouchableOpacity>
+                </View>
+                
+                <ScrollView style={styles.selectList}>
+                  {tiposVehiculo.map((item, index) => {
+                    const isSelected = formData.id_tipovehiculo === item.id_tipovehiculo;
+                    return (
+                      <TouchableOpacity
+                        key={item?.id_tipovehiculo ? item.id_tipovehiculo.toString() : `tipo-${index}`}
+                        style={[
+                          styles.selectOption,
+                          isSelected && styles.selectOptionSelected
+                        ]}
+                        onPress={() => {
+                          handleChange('id_tipovehiculo', item.id_tipovehiculo);
+                          setModalTipoVisible(false);
+                        }}
+                      >
+                        <Text style={[
+                          styles.selectOptionText,
+                          isSelected && styles.selectOptionTextSelected
+                        ]}>
+                          {item.nombre_tipo_vehiculo}
+                        </Text>
+                        {isSelected && (
+                          <FontAwesome5 name="check" size={16} color={adminlteColors.primary} />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </Modal>
+
+          {/* Modal Seleccionar Marca */}
+          <Modal
+            visible={modalMarcaVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setModalMarcaVisible(false)}
+          >
+            <TouchableOpacity 
+              style={styles.modalOverlay}
+              activeOpacity={1}
+              onPress={() => setModalMarcaVisible(false)}
+            >
+              <TouchableOpacity 
+                style={styles.modalSelectContainer}
+                activeOpacity={1}
+                onPress={(e) => e.stopPropagation()}
+              >
+                <View style={styles.modalSelectHeader}>
+                  <Text style={styles.modalSelectTitle}>Seleccionar Marca</Text>
+                  <TouchableOpacity onPress={() => setModalMarcaVisible(false)}>
+                    <MaterialIcons name="close" size={24} color={adminlteColors.dark} />
+                  </TouchableOpacity>
+                </View>
+                
+                <ScrollView style={styles.selectList}>
+                  {marcas.map((item, index) => {
+                    const isSelected = formData.id_marca === item.id_marca;
+                    return (
+                      <TouchableOpacity
+                        key={item?.id_marca ? item.id_marca.toString() : `marca-${index}`}
+                        style={[
+                          styles.selectOption,
+                          isSelected && styles.selectOptionSelected
+                        ]}
+                        onPress={() => {
+                          handleChange('id_marca', item.id_marca);
+                          setModalMarcaVisible(false);
+                        }}
+                      >
+                        <Text style={[
+                          styles.selectOptionText,
+                          isSelected && styles.selectOptionTextSelected
+                        ]}>
+                          {item.nombre_marca}
+                        </Text>
+                        {isSelected && (
+                          <FontAwesome5 name="check" size={16} color={adminlteColors.primary} />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </Modal>
         </View>
       </Modal>
     </AdminLayout>
@@ -531,6 +695,68 @@ const styles = StyleSheet.create({
     fontSize: 14,
     backgroundColor: '#ffffff',
     color: adminlteColors.dark,
+  },
+  selectButton: {
+    borderWidth: 1,
+    borderColor: '#ced4da',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  selectButtonText: {
+    fontSize: 14,
+    color: adminlteColors.dark,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalSelectContainer: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%',
+    paddingBottom: 20,
+  },
+  modalSelectHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  modalSelectTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: adminlteColors.dark,
+  },
+  selectList: {
+    maxHeight: 400,
+  },
+  selectOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  selectOptionSelected: {
+    backgroundColor: adminlteColors.lightBg,
+  },
+  selectOptionText: {
+    fontSize: 15,
+    color: adminlteColors.dark,
+  },
+  selectOptionTextSelected: {
+    fontWeight: '600',
+    color: adminlteColors.primary,
   },
   modalFooter: {
     flexDirection: 'row',

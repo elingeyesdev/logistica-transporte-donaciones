@@ -13,7 +13,7 @@ import {
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
-import { marcaService } from '../services/marcaService';
+import * as marcaService from '../services/marcaService';
 
 export default function MarcasScreen() {
   const [marcas, setMarcas] = useState([]);
@@ -31,16 +31,11 @@ export default function MarcasScreen() {
   const cargarMarcas = async () => {
     setLoading(true);
     try {
-      const result = await marcaService.getMarcas();
-      if (result.success) {
-        setMarcas(result.data || []); // Si data es null/undefined, usa array vacío
-      } else {
-        Alert.alert('Error', 'No se pudieron cargar las marcas');
-        setMarcas([]); // Asegura que marcas sea un array
-      }
+      const data = await marcaService.getMarcas();
+      setMarcas(data);
     } catch (error) {
-      Alert.alert('Error', 'Error de conexión con el servidor');
-      setMarcas([]); // Asegura que marcas sea un array
+      Alert.alert('Error', 'No se pudieron cargar las marcas');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -58,16 +53,11 @@ export default function MarcasScreen() {
 
     setLoading(true);
     try {
-      const result = await marcaService.createMarca(formData.nombreMarca.trim());
-      
-      if (result.success) {
-        Alert.alert('Éxito', 'Marca creada exitosamente');
-        setFormData({ nombreMarca: '' });
-        setModalCrearVisible(false);
-        cargarMarcas(); // Recargar lista
-      } else {
-        Alert.alert('Error', result.error || 'No se pudo crear la marca');
-      }
+      await marcaService.createMarca({ nombre_marca: formData.nombreMarca.trim() });
+      Alert.alert('Éxito', 'Marca creada exitosamente');
+      setFormData({ nombreMarca: '' });
+      setModalCrearVisible(false);
+      await cargarMarcas();
     } catch (error) {
       Alert.alert('Error', 'Error de conexión con el servidor');
     } finally {
