@@ -10,19 +10,22 @@ import {
   Alert,
   ActivityIndicator,
   FlatList,
+  Platform,
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { conductorService } from '../services/conductorService';
 import * as licenciaService from '../services/licenciaService';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function ConductoresScreen() {
   const [conductores, setConductores] = useState([]);
   const [licencias, setLicencias] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalCrearVisible, setModalCrearVisible] = useState(false);
-  const [modalLicenciaVisible, setModalLicenciaVisible] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [fechaNacimiento, setFechaNacimiento] = useState(new Date());
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -69,6 +72,15 @@ export default function ConductoresScreen() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const onDateChange = (event, selectedDate) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setFechaNacimiento(selectedDate);
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      handleChange('fecha_nacimiento', formattedDate);
+    }
+  };
+
   const handleCrearConductor = async () => {
     if (
       !formData.nombre.trim() ||
@@ -102,6 +114,7 @@ export default function ConductoresScreen() {
           celular: '',
           id_licencia: '',
         });
+        setFechaNacimiento(new Date());
         setModalCrearVisible(false);
         cargarConductores();
       } else {
@@ -282,209 +295,99 @@ export default function ConductoresScreen() {
         )}
       </ScrollView>
 
-      {/* Modal Crear Conductor */}
+      {/* Modal Crear Conductor (overlay centrado) */}
       <Modal
         visible={modalCrearVisible}
-        animationType="slide"
-        transparent={false}
+        animationType="fade"
+        transparent={true}
         onRequestClose={() => setModalCrearVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalHeaderContent}>
-              <FontAwesome5
-                name="user-plus"
-                size={18}
-                color="#ffffff"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.modalHeaderTitle}>Crear Nuevo Conductor</Text>
-            </View>
-            <TouchableOpacity
-              onPress={() => setModalCrearVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <MaterialIcons name="close" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Nombre <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. Carlos"
-                value={formData.nombre}
-                onChangeText={text => handleChange('nombre', text)}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Apellido <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. Rodríguez"
-                value={formData.apellido}
-                onChangeText={text => handleChange('apellido', text)}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Fecha Nacimiento <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. 15/03/1985"
-                value={formData.fecha_nacimiento}
-                onChangeText={text => handleChange('fecha_nacimiento', text)}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                CI <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. 12345678"
-                value={formData.ci}
-                onChangeText={text => handleChange('ci', text)}
-                keyboardType="numeric"
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Celular <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. 70123456"
-                value={formData.celular}
-                onChangeText={text => handleChange('celular', text)}
-                keyboardType="phone-pad"
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Tipo Licencia <Text style={styles.required}>*</Text>
-              </Text>
-              <TouchableOpacity
-                style={styles.selectButton}
-                onPress={() => setModalLicenciaVisible(true)}
-              >
-                <Text style={styles.selectButtonText}>
-                  {formData.id_licencia 
-                    ? licencias.find(l => l.id_licencia === formData.id_licencia)?.licencia || 'Seleccionar licencia'
-                    : 'Seleccionar licencia'}
-                </Text>
-                <FontAwesome5 name="chevron-down" size={14} color={adminlteColors.muted} />
+        <View style={styles.overlayBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderCard}>
+              <View style={styles.modalHeaderContent}>
+                <FontAwesome5 name="user-plus" size={18} color="#ffffff" style={{ marginRight: 8 }} />
+                <Text style={styles.modalHeaderTitle}>Crear Nuevo Conductor</Text>
+              </View>
+              <TouchableOpacity onPress={() => setModalCrearVisible(false)} style={styles.modalCloseButton}>
+                <MaterialIcons name="close" size={24} color="#ffffff" />
               </TouchableOpacity>
             </View>
-          </ScrollView>
-
-          <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={styles.modalFooterButtonSecondary}
-              onPress={() => setModalCrearVisible(false)}
-            >
-              <Text style={styles.modalFooterButtonText}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.modalFooterButtonSuccess,
-                (!formData.nombre.trim() ||
-                  !formData.apellido.trim() ||
-                  !formData.fecha_nacimiento.trim() ||
-                  !formData.ci.trim() ||
-                  !formData.celular.trim()) &&
-                  styles.modalFooterButtonDisabled,
-              ]}
-              onPress={handleCrearConductor}
-              disabled={
-                !formData.nombre.trim() ||
-                !formData.apellido.trim() ||
-                !formData.fecha_nacimiento.trim() ||
-                !formData.ci.trim() ||
-                !formData.celular.trim()
-              }
-            >
-              <FontAwesome5
-                name="check"
-                size={14}
-                color="#ffffff"
-                style={{ marginRight: 6 }}
-              />
-              <Text style={styles.modalFooterButtonText}>Crear Conductor</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Modal Seleccionar Licencia dentro del modal principal */}
-          <Modal
-            visible={modalLicenciaVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setModalLicenciaVisible(false)}
-          >
-            <TouchableOpacity 
-              style={styles.modalOverlay}
-              activeOpacity={1}
-              onPress={() => setModalLicenciaVisible(false)}
-            >
-              <TouchableOpacity 
-                style={styles.modalLicenciaContainer}
-                activeOpacity={1}
-                onPress={(e) => e.stopPropagation()}
-              >
-                <View style={styles.modalLicenciaHeader}>
-                  <Text style={styles.modalLicenciaTitle}>Seleccionar Licencia</Text>
-                  <TouchableOpacity onPress={() => setModalLicenciaVisible(false)}>
-                    <MaterialIcons name="close" size={24} color={adminlteColors.dark} />
-                  </TouchableOpacity>
-                </View>
-                
-                <ScrollView style={styles.licenciasList}>
+            <ScrollView style={styles.modalBodyCard}>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Nombre <Text style={styles.required}>*</Text></Text>
+                <TextInput style={styles.input} placeholder="Ej. Carlos" value={formData.nombre} onChangeText={text => handleChange('nombre', text)} />
+              </View>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Apellido <Text style={styles.required}>*</Text></Text>
+                <TextInput style={styles.input} placeholder="Ej. Rodríguez" value={formData.apellido} onChangeText={text => handleChange('apellido', text)} />
+              </View>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Fecha Nacimiento <Text style={styles.required}>*</Text></Text>
+                <TouchableOpacity 
+                  style={styles.input} 
+                  onPress={() => setShowDatePicker(!showDatePicker)}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Text style={formData.fecha_nacimiento ? styles.dateText : styles.datePlaceholder}>
+                      {formData.fecha_nacimiento || 'Seleccionar fecha'}
+                    </Text>
+                    <FontAwesome5 name="calendar-alt" size={16} color={adminlteColors.primary} />
+                  </View>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={fechaNacimiento}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={onDateChange}
+                    maximumDate={new Date()}
+                  />
+                )}
+              </View>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>CI <Text style={styles.required}>*</Text></Text>
+                <TextInput style={styles.input} placeholder="Ej. 12345678" value={formData.ci} onChangeText={text => handleChange('ci', text)} keyboardType="numeric" />
+              </View>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Celular <Text style={styles.required}>*</Text></Text>
+                <TextInput style={styles.input} placeholder="Ej. 70123456" value={formData.celular} onChangeText={text => handleChange('celular', text)} keyboardType="phone-pad" />
+              </View>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Tipo Licencia <Text style={styles.required}>*</Text></Text>
+                <View style={styles.licenciaInlineContainer}>
                   {licencias.map((item, index) => {
                     const isSelected = formData.id_licencia === item.id_licencia;
-                    console.log('Licencia:', item.licencia, 'ID:', item.id_licencia, 'Selected ID:', formData.id_licencia, 'isSelected:', isSelected);
                     return (
                       <TouchableOpacity
                         key={item?.id_licencia ? item.id_licencia.toString() : `licencia-${index}`}
-                        style={[
-                          styles.licenciaOption,
-                          isSelected && styles.licenciaOptionSelected
-                        ]}
-                        onPress={() => {
-                          console.log('Seleccionando licencia:', item.id_licencia);
-                          handleChange('id_licencia', item.id_licencia);
-                          setTimeout(() => {
-                            console.log('Nuevo valor de id_licencia:', formData.id_licencia);
-                            setModalLicenciaVisible(false);
-                          }, 100);
-                        }}
+                        style={[styles.licenciaInlineOption, isSelected && styles.licenciaInlineOptionSelected]}
+                        onPress={() => handleChange('id_licencia', item.id_licencia)}
                       >
-                        <Text style={[
-                          styles.licenciaOptionText,
-                          isSelected && styles.licenciaOptionTextSelected
-                        ]}>
+                        <Text style={[styles.licenciaInlineText, isSelected && styles.licenciaInlineTextSelected]}>
                           {item.licencia}
                         </Text>
-                        {isSelected && (
-                          <FontAwesome5 name="check" size={16} color={adminlteColors.primary} />
-                        )}
+                        {isSelected && (<FontAwesome5 name="check" size={14} color="#ffffff" style={{ marginLeft: 6 }} />)}
                       </TouchableOpacity>
                     );
                   })}
-                </ScrollView>
+                </View>
+              </View>
+            </ScrollView>
+            <View style={styles.modalFooterCard}>
+              <TouchableOpacity style={styles.modalFooterButtonSecondary} onPress={() => setModalCrearVisible(false)}>
+                <Text style={styles.modalFooterButtonText}>Cancelar</Text>
               </TouchableOpacity>
-            </TouchableOpacity>
-          </Modal>
+              <TouchableOpacity
+                style={[styles.modalFooterButtonSuccess, (!formData.nombre.trim() || !formData.apellido.trim() || !formData.fecha_nacimiento.trim() || !formData.ci.trim() || !formData.celular.trim()) && styles.modalFooterButtonDisabled]}
+                onPress={handleCrearConductor}
+                disabled={!formData.nombre.trim() || !formData.apellido.trim() || !formData.fecha_nacimiento.trim() || !formData.ci.trim() || !formData.celular.trim()}
+              >
+                <FontAwesome5 name="check" size={14} color="#ffffff" style={{ marginRight: 6 }} />
+                <Text style={styles.modalFooterButtonText}>Crear</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
     </AdminLayout>
@@ -587,34 +490,45 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     marginLeft: 18,
   },
-  modalContainer: {
+  // Overlay modal new styles replacing old full-screen modal
+  overlayBackdrop: {
     flex: 1,
-    backgroundColor: adminlteColors.lightBg,
-  },
-  modalHeader: {
-    backgroundColor: adminlteColors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4,
+    padding: 20,
+  },
+  modalCard: {
+    width: '92%',
+    maxHeight: '90%',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 6,
+  },
+  modalHeaderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: adminlteColors.primary,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    justifyContent: 'space-between',
   },
   modalHeaderContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   modalHeaderTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#ffffff',
   },
   modalCloseButton: {
     padding: 4,
   },
-  modalBody: {
-    flex: 1,
-    padding: 16,
+  modalBodyCard: {
+    paddingHorizontal: 18,
+    paddingVertical: 16,
   },
   formGroup: {
     marginBottom: 16,
@@ -638,6 +552,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     color: adminlteColors.dark,
   },
+  dateText: {
+    fontSize: 14,
+    color: adminlteColors.dark,
+  },
+  datePlaceholder: {
+    fontSize: 14,
+    color: '#6c757d',
+  },
   selectButton: {
     borderWidth: 1,
     borderColor: '#ced4da',
@@ -653,79 +575,64 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: adminlteColors.dark,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+  // Inline licencia selector styles
+  licenciaInlineContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+    gap: 8,
   },
-  modalLicenciaContainer: {
+  licenciaInlineOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+  },
+  licenciaInlineOptionSelected: {
+    backgroundColor: adminlteColors.primary,
+    borderColor: adminlteColors.primary,
+  },
+  licenciaInlineText: {
+    fontSize: 14,
+    color: adminlteColors.dark,
+    fontWeight: '500',
+  },
+  licenciaInlineTextSelected: {
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+  modalFooterCard: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     backgroundColor: '#ffffff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '70%',
-    paddingBottom: 20,
-  },
-  modalLicenciaHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  modalLicenciaTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: adminlteColors.dark,
-  },
-  licenciasList: {
-    maxHeight: 400,
-  },
-  licenciaOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  licenciaOptionSelected: {
-    backgroundColor: adminlteColors.lightBg,
-  },
-  licenciaOptionText: {
-    fontSize: 15,
-    color: adminlteColors.dark,
-  },
-  licenciaOptionTextSelected: {
-    fontWeight: '600',
-    color: adminlteColors.primary,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    backgroundColor: '#ffffff',
+    borderTopColor: adminlteColors.border,
   },
   modalFooterButtonSecondary: {
-    backgroundColor: adminlteColors.secondary,
-    borderRadius: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginRight: 8,
-  },
-  modalFooterButtonSuccess: {
-    backgroundColor: adminlteColors.success,
-    borderRadius: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: adminlteColors.secondary,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  modalFooterButtonSuccess: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: adminlteColors.success,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 6,
   },
   modalFooterButtonDisabled: {
-    backgroundColor: '#cccccc',
+    opacity: 0.5,
   },
   modalFooterButtonText: {
     color: '#ffffff',

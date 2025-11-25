@@ -978,13 +978,13 @@ const styles = StyleSheet.create({
   // Modal styles
   overlayBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
   },
   modalCard: {
-    backgroundColor: adminlteColors.bodyBg,
+    backgroundColor: '#ffffff',
     borderRadius: 8,
     width: '92%',
     maxHeight: '85%',

@@ -24,8 +24,6 @@ export default function VehiculosScreen() {
   const [marcas, setMarcas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalCrearVisible, setModalCrearVisible] = useState(false);
-  const [modalTipoVisible, setModalTipoVisible] = useState(false);
-  const [modalMarcaVisible, setModalMarcaVisible] = useState(false);
   const [formData, setFormData] = useState({
     placa: '',
     capacidad_aproximada: '',
@@ -281,33 +279,34 @@ export default function VehiculosScreen() {
         )}
       </ScrollView>
 
-      {/* Modal Crear Vehículo */}
+      {/* Modal Crear Vehículo (overlay centrado) */}
       <Modal
         visible={modalCrearVisible}
-        animationType="slide"
-        transparent={false}
+        animationType="fade"
+        transparent={true}
         onRequestClose={() => setModalCrearVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalHeaderContent}>
-              <FontAwesome5
-                name="plus-circle"
-                size={18}
-                color="#ffffff"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.modalHeaderTitle}>Crear Nuevo Vehículo</Text>
+        <View style={styles.overlayBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderCard}>
+              <View style={styles.modalHeaderContent}>
+                <FontAwesome5
+                  name="plus-circle"
+                  size={18}
+                  color="#ffffff"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.modalHeaderTitle}>Crear Nuevo Vehículo</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setModalCrearVisible(false)}
+                style={styles.modalCloseButton}
+              >
+                <MaterialIcons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={() => setModalCrearVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <MaterialIcons name="close" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
 
-          <ScrollView style={styles.modalBody}>
+            <ScrollView style={styles.modalBodyCard}>
             <View style={styles.formGroup}>
               <Text style={styles.label}>
                 Placa <Text style={styles.required}>*</Text>
@@ -338,17 +337,23 @@ export default function VehiculosScreen() {
               <Text style={styles.label}>
                 Tipo de Vehículo <Text style={styles.required}>*</Text>
               </Text>
-              <TouchableOpacity
-                style={styles.selectButton}
-                onPress={() => setModalTipoVisible(true)}
-              >
-                <Text style={styles.selectButtonText}>
-                  {formData.id_tipovehiculo 
-                    ? tiposVehiculo.find(t => t.id_tipovehiculo === formData.id_tipovehiculo)?.nombre_tipo_vehiculo || 'Seleccionar tipo'
-                    : 'Seleccionar tipo de vehículo'}
-                </Text>
-                <FontAwesome5 name="chevron-down" size={14} color={adminlteColors.muted} />
-              </TouchableOpacity>
+              <View style={styles.inlineSelectorContainer}>
+                {tiposVehiculo.map((item, index) => {
+                  const isSelected = formData.id_tipovehiculo === item.id_tipovehiculo;
+                  return (
+                    <TouchableOpacity
+                      key={item?.id_tipovehiculo ? item.id_tipovehiculo.toString() : `tipo-${index}`}
+                      style={[styles.inlineOption, isSelected && styles.inlineOptionSelected]}
+                      onPress={() => handleChange('id_tipovehiculo', item.id_tipovehiculo)}
+                    >
+                      <Text style={[styles.inlineOptionText, isSelected && styles.inlineOptionTextSelected]}>
+                        {item.nombre_tipo_vehiculo}
+                      </Text>
+                      {isSelected && (<FontAwesome5 name="check" size={14} color="#ffffff" style={{ marginLeft: 6 }} />)}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </View>
 
             <View style={styles.formGroup}>
@@ -380,21 +385,27 @@ export default function VehiculosScreen() {
               <Text style={styles.label}>
                 Marca <Text style={styles.required}>*</Text>
               </Text>
-              <TouchableOpacity
-                style={styles.selectButton}
-                onPress={() => setModalMarcaVisible(true)}
-              >
-                <Text style={styles.selectButtonText}>
-                  {formData.id_marca 
-                    ? marcas.find(m => m.id_marca === formData.id_marca)?.nombre_marca || 'Seleccionar marca'
-                    : 'Seleccionar marca'}
-                </Text>
-                <FontAwesome5 name="chevron-down" size={14} color={adminlteColors.muted} />
-              </TouchableOpacity>
+              <View style={styles.inlineSelectorContainer}>
+                {marcas.map((item, index) => {
+                  const isSelected = formData.id_marca === item.id_marca;
+                  return (
+                    <TouchableOpacity
+                      key={item?.id_marca ? item.id_marca.toString() : `marca-${index}`}
+                      style={[styles.inlineOption, isSelected && styles.inlineOptionSelected]}
+                      onPress={() => handleChange('id_marca', item.id_marca)}
+                    >
+                      <Text style={[styles.inlineOptionText, isSelected && styles.inlineOptionTextSelected]}>
+                        {item.nombre_marca}
+                      </Text>
+                      {isSelected && (<FontAwesome5 name="check" size={14} color="#ffffff" style={{ marginLeft: 6 }} />)}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </View>
-          </ScrollView>
+            </ScrollView>
 
-          <View style={styles.modalFooter}>
+            <View style={styles.modalFooterCard}>
             <TouchableOpacity
               style={styles.modalFooterButtonSecondary}
               onPress={() => setModalCrearVisible(false)}
@@ -428,121 +439,12 @@ export default function VehiculosScreen() {
                 color="#ffffff"
                 style={{ marginRight: 6 }}
               />
-              <Text style={styles.modalFooterButtonText}>Crear Vehículo</Text>
+              <Text style={styles.modalFooterButtonText}>Crear</Text>
             </TouchableOpacity>
+            </View>
+
+          {/* Selectores inline, sin modales externos */}
           </View>
-
-          {/* Modal Seleccionar Tipo Vehículo */}
-          <Modal
-            visible={modalTipoVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setModalTipoVisible(false)}
-          >
-            <TouchableOpacity 
-              style={styles.modalOverlay}
-              activeOpacity={1}
-              onPress={() => setModalTipoVisible(false)}
-            >
-              <TouchableOpacity 
-                style={styles.modalSelectContainer}
-                activeOpacity={1}
-                onPress={(e) => e.stopPropagation()}
-              >
-                <View style={styles.modalSelectHeader}>
-                  <Text style={styles.modalSelectTitle}>Seleccionar Tipo de Vehículo</Text>
-                  <TouchableOpacity onPress={() => setModalTipoVisible(false)}>
-                    <MaterialIcons name="close" size={24} color={adminlteColors.dark} />
-                  </TouchableOpacity>
-                </View>
-                
-                <ScrollView style={styles.selectList}>
-                  {tiposVehiculo.map((item, index) => {
-                    const isSelected = formData.id_tipovehiculo === item.id_tipovehiculo;
-                    return (
-                      <TouchableOpacity
-                        key={item?.id_tipovehiculo ? item.id_tipovehiculo.toString() : `tipo-${index}`}
-                        style={[
-                          styles.selectOption,
-                          isSelected && styles.selectOptionSelected
-                        ]}
-                        onPress={() => {
-                          handleChange('id_tipovehiculo', item.id_tipovehiculo);
-                          setModalTipoVisible(false);
-                        }}
-                      >
-                        <Text style={[
-                          styles.selectOptionText,
-                          isSelected && styles.selectOptionTextSelected
-                        ]}>
-                          {item.nombre_tipo_vehiculo}
-                        </Text>
-                        {isSelected && (
-                          <FontAwesome5 name="check" size={16} color={adminlteColors.primary} />
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          </Modal>
-
-          {/* Modal Seleccionar Marca */}
-          <Modal
-            visible={modalMarcaVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setModalMarcaVisible(false)}
-          >
-            <TouchableOpacity 
-              style={styles.modalOverlay}
-              activeOpacity={1}
-              onPress={() => setModalMarcaVisible(false)}
-            >
-              <TouchableOpacity 
-                style={styles.modalSelectContainer}
-                activeOpacity={1}
-                onPress={(e) => e.stopPropagation()}
-              >
-                <View style={styles.modalSelectHeader}>
-                  <Text style={styles.modalSelectTitle}>Seleccionar Marca</Text>
-                  <TouchableOpacity onPress={() => setModalMarcaVisible(false)}>
-                    <MaterialIcons name="close" size={24} color={adminlteColors.dark} />
-                  </TouchableOpacity>
-                </View>
-                
-                <ScrollView style={styles.selectList}>
-                  {marcas.map((item, index) => {
-                    const isSelected = formData.id_marca === item.id_marca;
-                    return (
-                      <TouchableOpacity
-                        key={item?.id_marca ? item.id_marca.toString() : `marca-${index}`}
-                        style={[
-                          styles.selectOption,
-                          isSelected && styles.selectOptionSelected
-                        ]}
-                        onPress={() => {
-                          handleChange('id_marca', item.id_marca);
-                          setModalMarcaVisible(false);
-                        }}
-                      >
-                        <Text style={[
-                          styles.selectOptionText,
-                          isSelected && styles.selectOptionTextSelected
-                        ]}>
-                          {item.nombre_marca}
-                        </Text>
-                        {isSelected && (
-                          <FontAwesome5 name="check" size={16} color={adminlteColors.primary} />
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          </Modal>
         </View>
       </Modal>
     </AdminLayout>
@@ -670,9 +572,9 @@ const styles = StyleSheet.create({
   modalCloseButton: {
     padding: 4,
   },
-  modalBody: {
-    flex: 1,
-    padding: 16,
+  modalBodyCard: {
+    paddingHorizontal: 18,
+    paddingVertical: 16,
   },
   formGroup: {
     marginBottom: 16,
@@ -710,6 +612,35 @@ const styles = StyleSheet.create({
   selectButtonText: {
     fontSize: 14,
     color: adminlteColors.dark,
+  },
+  inlineSelectorContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+    gap: 8,
+  },
+  inlineOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+  },
+  inlineOptionSelected: {
+    backgroundColor: adminlteColors.primary,
+    borderColor: adminlteColors.primary,
+  },
+  inlineOptionText: {
+    fontSize: 14,
+    color: adminlteColors.dark,
+    fontWeight: '500',
+  },
+  inlineOptionTextSelected: {
+    color: '#ffffff',
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
@@ -758,14 +689,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: adminlteColors.primary,
   },
-  modalFooter: {
+  modalFooterCard: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: adminlteColors.border,
   },
   modalFooterButtonSecondary: {
     backgroundColor: adminlteColors.secondary,
@@ -783,11 +714,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalFooterButtonDisabled: {
-    backgroundColor: '#cccccc',
+    opacity: 0.5,
   },
   modalFooterButtonText: {
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  overlayBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '92%',
+    maxHeight: '90%',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 6,
+  },
+  modalHeaderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: adminlteColors.primary,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    justifyContent: 'space-between',
   },
 });

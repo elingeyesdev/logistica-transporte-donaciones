@@ -163,70 +163,72 @@ export default function LicenciasScreen() {
         )}
       </ScrollView>
 
-      {/* Modal Crear Licencia */}
+      {/* Modal Crear Licencia (overlay centrado) */}
       <Modal
         visible={modalCrearVisible}
-        animationType="slide"
-        transparent={false}
+        animationType="fade"
+        transparent={true}
         onRequestClose={() => setModalCrearVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalHeaderContent}>
-              <FontAwesome5
-                name="plus-circle"
-                size={18}
-                color="#ffffff"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.modalHeaderTitle}>Crear Nueva Licencia</Text>
+        <View style={styles.overlayBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderCard}>
+              <View style={styles.modalHeaderContent}>
+                <FontAwesome5
+                  name="plus-circle"
+                  size={18}
+                  color="#ffffff"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.modalHeaderTitle}>Crear Nueva Licencia</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setModalCrearVisible(false)}
+                style={styles.modalCloseButton}
+              >
+                <MaterialIcons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={() => setModalCrearVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <MaterialIcons name="close" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
 
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Tipo Licencia <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. Licencia de Conducir Categoría A"
-                value={formData.licencia}
-                onChangeText={text => handleChange('licencia', text)}
-              />
+            <ScrollView style={styles.modalBodyCard}>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>
+                  Tipo Licencia <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ej. Licencia de Conducir Categoría A"
+                  value={formData.licencia}
+                  onChangeText={text => handleChange('licencia', text)}
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooterCard}>
+              <TouchableOpacity
+                style={styles.modalFooterButtonSecondary}
+                onPress={() => setModalCrearVisible(false)}
+              >
+                <Text style={styles.modalFooterButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.modalFooterButtonSuccess,
+                  !formData.licencia.trim() &&
+                    styles.modalFooterButtonDisabled,
+                ]}
+                onPress={handleCrearLicencia}
+                disabled={!formData.licencia.trim()}
+              >
+                <FontAwesome5
+                  name="check"
+                  size={14}
+                  color="#ffffff"
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={styles.modalFooterButtonText}>Crear Licencia</Text>
+              </TouchableOpacity>
             </View>
-          </ScrollView>
-
-          <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={styles.modalFooterButtonSecondary}
-              onPress={() => setModalCrearVisible(false)}
-            >
-              <Text style={styles.modalFooterButtonText}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.modalFooterButtonSuccess,
-                !formData.licencia.trim() &&
-                  styles.modalFooterButtonDisabled,
-              ]}
-              onPress={handleCrearLicencia}
-              disabled={!formData.licencia.trim()}
-            >
-              <FontAwesome5
-                name="check"
-                size={14}
-                color="#ffffff"
-                style={{ marginRight: 6 }}
-              />
-              <Text style={styles.modalFooterButtonText}>Crear Licencia</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -323,11 +325,22 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     marginLeft: 18,
   },
-  modalContainer: {
+  overlayBackdrop: {
     flex: 1,
-    backgroundColor: adminlteColors.lightBg,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
   },
-  modalHeader: {
+  modalCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    width: '92%',
+    maxHeight: '85%',
+    overflow: 'hidden',
+    elevation: 5,
+  },
+  modalHeaderCard: {
     backgroundColor: adminlteColors.primary,
     paddingVertical: 16,
     paddingHorizontal: 16,
@@ -348,8 +361,7 @@ const styles = StyleSheet.create({
   modalCloseButton: {
     padding: 4,
   },
-  modalBody: {
-    flex: 1,
+  modalBodyCard: {
     padding: 16,
   },
   formGroup: {
@@ -374,7 +386,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     color: adminlteColors.dark,
   },
-  modalFooter: {
+  modalFooterCard: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     paddingVertical: 12,

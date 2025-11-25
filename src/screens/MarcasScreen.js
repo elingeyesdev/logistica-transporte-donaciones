@@ -170,73 +170,75 @@ export default function MarcasScreen() {
       {/* Modal Crear Marca */}
       <Modal
         visible={modalCrearVisible}
-        animationType="slide"
-        transparent={false}
+        animationType="fade"
+        transparent={true}
         onRequestClose={() => setModalCrearVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalHeaderContent}>
-              <FontAwesome5
-                name="plus-circle"
-                size={18}
-                color="#ffffff"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.modalHeaderTitle}>Crear Nueva Marca</Text>
-            </View>
-            <TouchableOpacity
-              onPress={() => setModalCrearVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <MaterialIcons name="close" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Nombre Marca <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. Toyota"
-                value={formData.nombreMarca}
-                onChangeText={text => handleChange('nombreMarca', text)}
-              />
-            </View>
-          </ScrollView>
-
-          <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={styles.modalFooterButtonSecondary}
-              onPress={() => setModalCrearVisible(false)}
-            >
-              <Text style={styles.modalFooterButtonText}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.modalFooterButtonSuccess,
-                (!formData.nombreMarca.trim() || loading) &&
-                  styles.modalFooterButtonDisabled,
-              ]}
-              onPress={handleCrearMarca}
-              disabled={!formData.nombreMarca.trim() || loading}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 6 }} />
-              ) : (
+        <View style={styles.overlayBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderCard}>
+              <View style={styles.modalHeaderContent}>
                 <FontAwesome5
-                  name="check"
-                  size={14}
+                  name="plus-circle"
+                  size={18}
                   color="#ffffff"
-                  style={{ marginRight: 6 }}
+                  style={{ marginRight: 8 }}
                 />
-              )}
-              <Text style={styles.modalFooterButtonText}>
-                {loading ? 'Creando...' : 'Crear Marca'}
-              </Text>
-            </TouchableOpacity>
+                <Text style={styles.modalHeaderTitle}>Crear Nueva Marca</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setModalCrearVisible(false)}
+                style={styles.modalCloseButton}
+              >
+                <MaterialIcons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBodyCard}>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>
+                  Nombre Marca <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ej. Toyota"
+                  value={formData.nombreMarca}
+                  onChangeText={text => handleChange('nombreMarca', text)}
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooterCard}>
+              <TouchableOpacity
+                style={styles.modalFooterButtonSecondary}
+                onPress={() => setModalCrearVisible(false)}
+              >
+                <Text style={styles.modalFooterButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.modalFooterButtonSuccess,
+                  (!formData.nombreMarca.trim() || loading) &&
+                    styles.modalFooterButtonDisabled,
+                ]}
+                onPress={handleCrearMarca}
+                disabled={!formData.nombreMarca.trim() || loading}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 6 }} />
+                ) : (
+                  <FontAwesome5
+                    name="check"
+                    size={14}
+                    color="#ffffff"
+                    style={{ marginRight: 6 }}
+                  />
+                )}
+                <Text style={styles.modalFooterButtonText}>
+                  {loading ? 'Creando...' : 'Crear'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -333,34 +335,44 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     marginLeft: 18,
   },
-  modalContainer: {
+  overlayBackdrop: {
     flex: 1,
-    backgroundColor: adminlteColors.lightBg,
-  },
-  modalHeader: {
-    backgroundColor: adminlteColors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4,
+    padding: 20,
+  },
+  modalCard: {
+    width: '92%',
+    maxHeight: '90%',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 6,
+  },
+  modalHeaderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: adminlteColors.primary,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    justifyContent: 'space-between',
   },
   modalHeaderContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   modalHeaderTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#ffffff',
   },
   modalCloseButton: {
     padding: 4,
   },
-  modalBody: {
-    flex: 1,
-    padding: 16,
+  modalBodyCard: {
+    paddingHorizontal: 18,
+    paddingVertical: 16,
   },
   formGroup: {
     marginBottom: 16,
@@ -384,32 +396,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     color: adminlteColors.dark,
   },
-  modalFooter: {
+  modalFooterCard: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: adminlteColors.border,
   },
   modalFooterButtonSecondary: {
-    backgroundColor: adminlteColors.secondary,
-    borderRadius: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginRight: 8,
-  },
-  modalFooterButtonSuccess: {
-    backgroundColor: adminlteColors.success,
-    borderRadius: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: adminlteColors.secondary,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  modalFooterButtonSuccess: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: adminlteColors.success,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 6,
   },
   modalFooterButtonDisabled: {
-    backgroundColor: '#cccccc',
+    opacity: 0.5,
   },
   modalFooterButtonText: {
     color: '#ffffff',
