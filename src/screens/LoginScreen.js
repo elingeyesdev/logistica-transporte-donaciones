@@ -33,7 +33,7 @@ export default function LoginScreen() {
       await login(correo.trim(), password);
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Solicitudes' }],
+        routes: [{ name: 'ListadoSolicitud' }],
       });
     } catch (e) {
       Alert.alert('Error de inicio de sesión', e.message);

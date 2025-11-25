@@ -19,9 +19,10 @@ import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import * as ImagePicker from 'expo-image-picker';
 
-import { Picker } from '@react-native-picker/picker';
 import { conductorService } from '../services/conductorService';
 import { getVehiculos } from '../services/vehiculoService';
+import { getEstados } from '../services/estadoService';
+import { getSolicitudes } from '../services/solicitudService';
 
 const paquetesIniciales = [];
 
@@ -41,13 +42,15 @@ export default function PaqueteScreen() {
   const [imagenUri, setImagenUri] = useState(null);
 
   const [paquetes, setPaquetes] = useState(paquetesIniciales);
+  const [solicitudesMap, setSolicitudesMap] = useState({});
 
   const [conductores, setConductores] = useState([]);
   const [vehiculos, setVehiculosState] = useState([]);
+  const [estados, setEstados] = useState([]);
 
-  
-const [showConductorPicker, setShowConductorPicker] = useState(false);
-const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
+  const [showConductorPicker, setShowConductorPicker] = useState(false);
+  const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
+  const [showEstadoPicker, setShowEstadoPicker] = useState(false);
 
   const resetForm = () => {
     setEstadoEntrega('');
@@ -75,22 +78,51 @@ const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
     }
   };
 
-  const normalizarPaquetes = (listaBack) =>
-    listaBack.map((p) => ({
+const normalizarPaquetes = (listaBack, solicitudesIndex = {}) =>
+  (listaBack || []).map((p) => {
+    const solicitudKey =
+      p.id_solicitud != null ? String(p.id_solicitud) : null;
+
+    const solicitud =
+      solicitudKey && solicitudesIndex[solicitudKey]
+        ? solicitudesIndex[solicitudKey]
+        : null;
+
+    const codigoSolicitud =
+      solicitud?.codigo ??
+      solicitud?.codigo_seguimiento ??
+      null;
+    const comunidadSolicitud =
+      solicitud?.comunidad ??
+      solicitud?.comunidad_solicitante ??
+      solicitud?.comunidad_nombre ??
+      null;
+
+    return {
       id: p.id_paquete,
-      codigo: p.codigo,
+      codigo:
+        p.codigo ??
+        codigoSolicitud ??
+        (solicitudKey ? `SOL-${solicitudKey}` : null),
+
       id_solicitud: p.id_solicitud,
+      codigoSolicitud,
+      comunidadSolicitud,
+
       estado_id: p.estado_id,
       estadoNombre: p.estado?.nombre_estado ?? '—',
       ubicacionActual: p.ubicacion_actual ?? '—',
-      fechaAprobacion: p.fecha_aprobacion ?? '—',
+
+      fechaAprobacion: p.fecha_aprobacion ?? p.created_at ?? '—',
+
       fechaEntrega: p.fecha_entrega ?? null,
       latitud: p.latitud,
       longitud: p.longitud,
       zona: p.zona ?? '',
       id_conductor: p.id_conductor,
       id_vehiculo: p.id_vehiculo,
-    }));
+    };
+  });
 
   const getConductorLabelById = (id) => {
     if (!id) return 'Sin asignar';
@@ -107,11 +139,27 @@ const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
     return found.placa || `Vehículo ID ${id}`;
   };
 
-  useEffect(() => {
+  const getEstadoLabelById = (id) => {
+    if (!id) return 'Sin estado';
+    const found = estados.find((e) => String(e.id_estado) === String(id));
+    return found ? found.nombre_estado : `ID ${id}`;
+  };
+
+
+useEffect(() => {
     const fetchAll = async () => {
       try {
+          const solicitudes = await getSolicitudes();
+          const solicitudesIndex = {};
+
+          (solicitudes || []).forEach((s) => {
+            if (s.id_solicitud != null) {
+              solicitudesIndex[String(s.id_solicitud)] = s;
+            }
+          });
+
         const lista = await getPaquetes();
-        const normalizados = normalizarPaquetes(lista);
+        const normalizados = normalizarPaquetes(lista, solicitudesIndex);
         setPaquetes(normalizados);
 
         const respCond = await conductorService.getConductores();
@@ -123,6 +171,9 @@ const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
 
         const vehs = await getVehiculos();
         setVehiculosState(vehs || []);
+
+        const estadosApi = await getEstados();
+        setEstados(estadosApi || []);
       } catch (err) {
         console.error('Error cargando datos:', err);
       }
@@ -237,11 +288,12 @@ const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.itemTitle}>
-                    Paquete {p.codigo ? `#${p.codigo}` : `ID ${String(p.id).slice(-4)}`}
+                    Paquete {p.codigo ? `#${p.codigoSolicitud}` : `ID ${String(p.id).slice(-4)}`}
                   </Text>
                 </View>
               </View>
-
+              
+              
               <View style={styles.itemBody}>
                 {/* Estado */}
                 <View style={styles.row}>
@@ -392,7 +444,7 @@ const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
                 <Text style={styles.label}>Código</Text>
                 <TextInput
                   style={styles.input}
-                  value={paqueteActual.codigo || '—'}
+                  value={paqueteActual.codigoSolicitud || '—'}
                   editable={false}
                 />
               </View>
@@ -411,20 +463,26 @@ const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
             )}
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Estado (ID numérico) *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej: 1 (Pendiente), 2, 3..."
-                value={estadoEntrega}
-                onChangeText={setEstadoEntrega}
-                keyboardType="numeric"
-                placeholderTextColor={adminlteColors.muted}
-              />
-              {paqueteActual && (
-                <Text style={styles.smallTextMuted}>
-                  Estado actual: {paqueteActual.estadoNombre || '—'}
+              <Text style={styles.label}>Estado *</Text>
+
+              <TouchableOpacity
+                style={styles.dropdownBox}
+                onPress={() => setShowEstadoPicker(true)}
+              >
+                <Text style={styles.dropdownText}>
+                  {estadoEntrega
+                    ? getEstadoLabelById(estadoEntrega)
+                    : 'Tocar para seleccionar estado'}
                 </Text>
-              )}
+              </TouchableOpacity>
+
+              <Text style={styles.smallTextMuted}>
+                {estadoEntrega
+                  ? `Seleccionado: ${getEstadoLabelById(estadoEntrega)}`
+                  : paqueteActual
+                    ? `Estado actual: ${paqueteActual.estadoNombre || '—'}`
+                    : 'Ningún estado seleccionado.'}
+              </Text>
             </View>
 
             {/* CONDUCTOR (dropdown simple) */}
@@ -594,7 +652,6 @@ const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
               <Text style={styles.modalFooterButtonText}>Guardar Cambios</Text>
             </TouchableOpacity>
           </View>
-{/* Picker de CONDUCTOR */}
 <Modal
   visible={showConductorPicker}
   transparent
@@ -639,7 +696,6 @@ const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
   </TouchableOpacity>
 </Modal>
 
-{/* Picker de VEHÍCULO */}
 <Modal
   visible={showVehiculoPicker}
   transparent
@@ -676,6 +732,46 @@ const [showVehiculoPicker, setShowVehiculoPicker] = useState(false);
             <Text style={styles.pickerItemText}>
               {getVehiculoLabelById(v.id_vehiculo)}
             </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  </TouchableOpacity>
+</Modal>
+<Modal
+  visible={showEstadoPicker}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setShowEstadoPicker(false)}
+>
+  <TouchableOpacity
+    style={styles.pickerOverlay}
+    activeOpacity={1}
+    onPressOut={() => setShowEstadoPicker(false)}
+  >
+    <View style={styles.pickerModal}>
+      <Text style={styles.pickerTitle}>Seleccionar estado</Text>
+      <ScrollView style={{ maxHeight: 300 }}>
+        <TouchableOpacity
+          style={styles.pickerItem}
+          onPress={() => {
+            setEstadoEntrega('');
+            setShowEstadoPicker(false);
+          }}
+        >
+          <Text style={styles.pickerItemText}>— Sin seleccionar —</Text>
+        </TouchableOpacity>
+
+        {estados.map((e) => (
+          <TouchableOpacity
+            key={e.id_estado}
+            style={styles.pickerItem}
+            onPress={() => {
+              setEstadoEntrega(String(e.id_estado));
+              setShowEstadoPicker(false);
+            }}
+          >
+            <Text style={styles.pickerItemText}>{e.nombre_estado}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

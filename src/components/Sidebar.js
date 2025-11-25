@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Modal } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { adminlteColors } from '../theme/adminlte';
-
+import { logout } from '../services/authService';
 const menuItems = [
   {
     id: 'dashboard',
@@ -61,6 +61,7 @@ export default function Sidebar({ isVisible, onClose, navigation }) {
   const slideAnim = useRef(new Animated.Value(-250)).current;
   const overlayAnim = useRef(new Animated.Value(0)).current;
   const [shouldRender, setShouldRender] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     if (isVisible) {
@@ -104,6 +105,25 @@ export default function Sidebar({ isVisible, onClose, navigation }) {
       navigation.navigate(route);
     }
     onClose();
+  };
+
+   const handleConfirmLogout = async () => {
+    try {
+      setShowLogoutConfirm(false);
+      if (onClose) {
+        onClose();
+      }
+
+      await logout();
+      if (navigation) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+      }
+    } catch (err) {
+      console.log('Error en logout:', err);
+    }
   };
 
   return (
@@ -160,9 +180,55 @@ export default function Sidebar({ isVisible, onClose, navigation }) {
         </ScrollView>
 
         <View style={styles.sidebarFooter}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={() => setShowLogoutConfirm(true)}
+          >
+            <FontAwesome5
+              name="sign-out-alt"
+              size={16}
+              color="#dc3545"
+              padding="20px"
+              style={styles.logoutIcon}
+            />
+            <Text style={styles.logoutText}>Cerrar sesión</Text>
+          </TouchableOpacity>
+
           <Text style={styles.sidebarFooterText}>Versión 1.0</Text>
+          
         </View>
       </Animated.View>
+      <Modal
+        visible={showLogoutConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLogoutConfirm(false)}
+      >
+        <View style={styles.logoutOverlay}>
+          <View style={styles.logoutModal}>
+            <Text style={styles.logoutTitle}>Cerrar sesión</Text>
+            <Text style={styles.logoutMessage}>
+              ¿Seguro que deseas cerrar sesión?
+            </Text>
+
+            <View style={styles.logoutButtonsRow}>
+              <TouchableOpacity
+                style={styles.logoutCancelButton}
+                onPress={() => setShowLogoutConfirm(false)}
+              >
+                <Text style={styles.logoutCancelText}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.logoutConfirmButton}
+                onPress={handleConfirmLogout}
+              >
+                <Text style={styles.logoutConfirmText}>Cerrar sesión</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -239,8 +305,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   sidebarFooter: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
     borderTopWidth: 1,
     borderTopColor: '#495057',
     backgroundColor: '#212529',
@@ -250,5 +316,71 @@ const styles = StyleSheet.create({
     color: '#6c757d',
     textAlign: 'center',
   },
+ logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  logoutIcon: {
+    marginRight: 8,
+  },
+  logoutText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#dc3545',
+  },
+  logoutOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoutModal: {
+    width: '80%',
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    padding: 20,
+  },
+  logoutTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 8,
+    color: adminlteColors.dark,
+    textAlign: 'center',
+  },
+   logoutMessage: {
+    fontSize: 14,
+    color: adminlteColors.muted,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  logoutButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  logoutCancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 8,
+    borderRadius: 4,
+    backgroundColor: '#e9ecef',
+  },
+  logoutCancelText: {
+    fontSize: 14,
+    color: adminlteColors.dark,
+  },
+  logoutConfirmButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 4,
+    backgroundColor: adminlteColors.danger || '#dc3545',
+  },
+  logoutConfirmText: {
+    fontSize: 14,
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+
 });
 

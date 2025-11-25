@@ -79,7 +79,6 @@ export default function App() {
           component={DashboardScreen}
           options={{ title: 'Dashboard' }}
         />
-
         <Stack.Screen
           name="Solicitud"
           component={SolicitudScreen}
