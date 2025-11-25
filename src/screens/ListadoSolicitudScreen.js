@@ -102,10 +102,15 @@ export default function ListadoSolicitudScreen() {
         if (!solicitanteValor || typeof solicitanteValor !== 'string') {
           solicitanteValor = 'N/D';
         }
-        // Productos puede ser array de objetos o strings
+        // Productos/insumos puede venir como texto (insumos_necesarios) o como array
         let productosArray = [];
-        const productosRaw = item.productos || item.detalle_productos || item.items || [];
-        if (Array.isArray(productosRaw)) {
+        const productosRaw = item.productos || item.detalle_productos || item.items || item.insumos_necesarios || [];
+        if (typeof productosRaw === 'string') {
+          productosArray = productosRaw
+            .split(/[\n,;]+/)
+            .map(s => s.trim())
+            .filter(Boolean);
+        } else if (Array.isArray(productosRaw)) {
           productosArray = productosRaw.map(p => {
             if (typeof p === 'string') return p;
             if (p && typeof p === 'object') return p.nombre || p.descripcion || p.titulo || 'Producto';
@@ -562,179 +567,179 @@ export default function ListadoSolicitudScreen() {
       </ScrollView>
       )}
 
-      {/* Modal Detalle de Solicitud */}
+      {/* Modal Detalle de Solicitud (overlay centrado) */}
       <Modal
         visible={modalDetalleVisible}
-        animationType="slide"
-        transparent={false}
+        animationType="fade"
+        transparent={true}
         onRequestClose={() => setModalDetalleVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalHeaderContent}>
-              <FontAwesome5
-                name="file-alt"
-                size={18}
-                color="#ffffff"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.modalHeaderTitle}>Detalle de Solicitud</Text>
+        <View style={styles.overlayBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderCard}>
+              <View style={styles.modalHeaderContent}>
+                <FontAwesome5
+                  name="file-alt"
+                  size={18}
+                  color="#ffffff"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.modalHeaderTitle}>Detalle de Solicitud</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setModalDetalleVisible(false)}
+                style={styles.modalCloseButton}
+              >
+                <MaterialIcons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={() => setModalDetalleVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <MaterialIcons name="close" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
 
-          <ScrollView style={styles.modalBody}>
-            {solicitudSeleccionada ? (
-              <View style={styles.detalleContent}>
-                <View style={styles.alertInfo}>
-                  <Text style={styles.alertInfoTitle}>
-                    Detalles de la Solicitud #{solicitudSeleccionada.numero}
-                  </Text>
-                  <Text style={styles.alertInfoText}>
-                    Aquí se mostrarían todos los detalles completos de la
-                    solicitud...
-                  </Text>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Solicitante:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.solicitante}
+            <ScrollView style={styles.modalBodyCard}>
+              {solicitudSeleccionada ? (
+                <View style={styles.detalleContent}>
+                  <View style={styles.alertInfo}>
+                    <Text style={styles.alertInfoTitle}>
+                      Detalles de la Solicitud #{solicitudSeleccionada.numero}
                     </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Email:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.email}
-                    </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>CI:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.ci}
-                    </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Dirección:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.direccion}
-                    </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Fecha:</Text>
-                    <Text style={styles.detalleValue}>
-                      {solicitudSeleccionada.fechaTexto}
-                    </Text>
-                  </View>
-                  <View style={styles.detalleSection}>
-                    <Text style={styles.detalleLabel}>Productos:</Text>
-                    <View style={styles.productosContainer}>
-                      {solicitudSeleccionada.productos.map((producto, index) => (
-                        <View key={index} style={styles.productoBadge}>
-                          <Text style={styles.productoBadgeText}>
-                            {producto}
-                          </Text>
-                        </View>
-                      ))}
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Solicitante:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.solicitante}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Email:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.email}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>CI:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.ci}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Dirección:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.direccion}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Fecha:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.fechaTexto}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Productos:</Text>
+                      <View style={styles.productosContainer}>
+                        {solicitudSeleccionada.productos.map((producto, index) => (
+                          <View key={index} style={styles.productoBadge}>
+                            <Text style={styles.productoBadgeText}>
+                              {producto}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            ) : (
-              <Text>Cargando detalles...</Text>
-            )}
-          </ScrollView>
+              ) : (
+                <Text>Cargando detalles...</Text>
+              )}
+            </ScrollView>
 
-          <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={styles.modalFooterButtonSecondary}
-              onPress={() => setModalDetalleVisible(false)}
-            >
-              <Text style={styles.modalFooterButtonText}>Cerrar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalFooterButtonPrimary}
-              onPress={() => {
-                Alert.alert('Imprimir', 'Funcionalidad de impresión');
-              }}
-            >
-              <Text style={styles.modalFooterButtonText}>Imprimir</Text>
-            </TouchableOpacity>
+            <View style={styles.modalFooterCard}>
+              <TouchableOpacity
+                style={styles.modalFooterButtonSecondary}
+                onPress={() => setModalDetalleVisible(false)}
+              >
+                <Text style={styles.modalFooterButtonText}>Cerrar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalFooterButtonPrimary}
+                onPress={() => {
+                  Alert.alert('Imprimir', 'Funcionalidad de impresión');
+                }}
+              >
+                <Text style={styles.modalFooterButtonText}>Imprimir</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
 
-      {/* Modal Confirmar Rechazo */}
+      {/* Modal Confirmar Rechazo (overlay centrado) */}
       <Modal
         visible={modalRechazoVisible}
-        animationType="slide"
-        transparent={false}
+        animationType="fade"
+        transparent={true}
         onRequestClose={() => setModalRechazoVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalHeaderTitle}>Confirmar Rechazo</Text>
-            <TouchableOpacity
-              onPress={() => setModalRechazoVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <MaterialIcons name="close" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView style={styles.modalBody}>
-            <Text style={styles.modalBodyText}>
-              ¿Estás seguro que deseas rechazar la solicitud?
-            </Text>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>Motivo del rechazo:</Text>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  selectedValue={motivoRechazo}
-                  onValueChange={actualizarMotivoSeleccionado}
-                  style={styles.picker}
-                >
-                  {motivosRechazo.map((motivo, index) => (
-                    <Picker.Item
-                      key={index}
-                      label={motivo.label}
-                      value={motivo.value}
-                    />
-                  ))}
-                </Picker>
-              </View>
+        <View style={styles.overlayBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderCard}>
+              <Text style={styles.modalHeaderTitle}>Confirmar Rechazo</Text>
+              <TouchableOpacity
+                onPress={() => setModalRechazoVisible(false)}
+                style={styles.modalCloseButton}
+              >
+                <MaterialIcons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
             </View>
 
-            {motivoSeleccionado ? (
-              <View style={styles.motivoSeleccionadoContainer}>
-                <Text style={styles.motivoSeleccionadoText}>
-                  Motivo seleccionado: {motivoSeleccionado}
-                </Text>
-              </View>
-            ) : null}
-          </ScrollView>
+            <ScrollView style={styles.modalBodyCard}>
+              <Text style={styles.modalBodyText}>
+                ¿Estás seguro que deseas rechazar la solicitud?
+              </Text>
 
-          <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={styles.modalFooterButtonSecondary}
-              onPress={() => setModalRechazoVisible(false)}
-            >
-              <Text style={styles.modalFooterButtonText}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.modalFooterButtonDanger,
-                !motivoRechazo && styles.modalFooterButtonDisabled,
-              ]}
-              onPress={confirmarRechazo}
-              disabled={!motivoRechazo}
-            >
-              <Text style={styles.modalFooterButtonText}>Confirmar</Text>
-            </TouchableOpacity>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Motivo del rechazo:</Text>
+                <View style={styles.pickerWrapper}>
+                  <Picker
+                    selectedValue={motivoRechazo}
+                    onValueChange={actualizarMotivoSeleccionado}
+                    style={styles.picker}
+                  >
+                    {motivosRechazo.map((motivo, index) => (
+                      <Picker.Item
+                        key={index}
+                        label={motivo.label}
+                        value={motivo.value}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
+
+              {motivoSeleccionado ? (
+                <View style={styles.motivoSeleccionadoContainer}>
+                  <Text style={styles.motivoSeleccionadoText}>
+                    Motivo seleccionado: {motivoSeleccionado}
+                  </Text>
+                </View>
+              ) : null}
+            </ScrollView>
+
+            <View style={styles.modalFooterCard}>
+              <TouchableOpacity
+                style={styles.modalFooterButtonSecondary}
+                onPress={() => setModalRechazoVisible(false)}
+              >
+                <Text style={styles.modalFooterButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.modalFooterButtonDanger,
+                  !motivoRechazo && styles.modalFooterButtonDisabled,
+                ]}
+                onPress={confirmarRechazo}
+                disabled={!motivoRechazo}
+              >
+                <Text style={styles.modalFooterButtonText}>Confirmar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -971,9 +976,28 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   // Modal styles
-  modalContainer: {
+  overlayBackdrop: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  modalCard: {
     backgroundColor: adminlteColors.bodyBg,
+    borderRadius: 8,
+    width: '92%',
+    maxHeight: '85%',
+    overflow: 'hidden',
+    elevation: 5,
+  },
+  modalHeaderCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: adminlteColors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -996,8 +1020,7 @@ const styles = StyleSheet.create({
   modalCloseButton: {
     padding: 4,
   },
-  modalBody: {
-    flex: 1,
+  modalBodyCard: {
     padding: 16,
   },
   modalBodyText: {
@@ -1067,7 +1090,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: adminlteColors.dark,
   },
-  modalFooter: {
+  modalFooterCard: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     paddingHorizontal: 16,
