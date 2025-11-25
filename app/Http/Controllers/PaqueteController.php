@@ -212,6 +212,8 @@ class PaqueteController extends Controller
 
         if ($request->hasFile('imagen')) {
             $payload['imagen'] = $request->file('imagen')->store('paquetes', 'public');
+        }else {
+            unset($payload['imagen']);
         }
 
         $paquete->update($payload);

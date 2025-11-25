@@ -25,7 +25,7 @@ class paqueteRequest extends FormRequest
             'id_solicitud'   => ['required','integer','exists:solicitud,id_solicitud'],
             'estado_id'      => ['required','integer','exists:estado,id_estado'],
             'imagen'         => ['nullable', 'image', 'max:4096'],
-            'codigo'         => ['required', 'string'],
+            'codigo'         => ['nullable', 'string'],
             'ubicacion_actual' => ['nullable','string'],    
             'latitud'        => ['nullable','numeric'],
             'longitud'       => ['nullable','numeric'],
@@ -59,7 +59,6 @@ class paqueteRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'imagen'      => $this->filled('imagen')      ? trim($this->imagen)      : null,
             'zona'        => $this->filled('zona')        ? trim($this->zona)        : null,
         ]);
     }
