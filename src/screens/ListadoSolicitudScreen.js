@@ -89,9 +89,10 @@ export default function ListadoSolicitudScreen() {
         // Numero
         const numero = item.numero || item.numero_solicitud || (id ? String(id).padStart(3, '0') : '---');
         // Estado (uniformar a valores usados en UI)
-        let estado = item.estado || item.estado_solicitud || item.estadoSolicitud || 'sin_contestar';
+        let estado = item.estado || item.estado_solicitud || item.estadoSolicitud || 'pendiente';
         if (estado === 'aprobada') estado = 'aprobadas';
-        if (estado === 'rechazada') estado = 'rechazadas';
+        if (estado === 'rechazada' || estado === 'negada') estado = 'rechazadas';
+        if (!estado || estado === 'sin_contestar') estado = 'pendiente';
         // Solicitante puede ser objeto
         let solicitanteValor = item.solicitante || item.solicitante_data || item.solicitanteInfo || item.nombre_solicitante;
         if (solicitanteValor && typeof solicitanteValor === 'object') {
@@ -259,11 +260,15 @@ export default function ListadoSolicitudScreen() {
   const obtenerColorBorde = estado => {
     switch (estado) {
       case 'aprobadas':
+      case 'aprobada':
         return adminlteColors.success;
       case 'rechazadas':
+      case 'rechazada':
+      case 'negada':
         return adminlteColors.danger;
       case 'sin_contestar':
-        return adminlteColors.secondary;
+      case 'pendiente':
+        return '#ffc107'; // warning amarillo
       default:
         return '#dee2e6';
     }
@@ -272,11 +277,15 @@ export default function ListadoSolicitudScreen() {
   const obtenerBadgeColor = estado => {
     switch (estado) {
       case 'aprobadas':
+      case 'aprobada':
         return adminlteColors.success;
       case 'rechazadas':
+      case 'rechazada':
+      case 'negada':
         return adminlteColors.danger;
       case 'sin_contestar':
-        return adminlteColors.secondary;
+      case 'pendiente':
+        return '#ffc107'; // warning amarillo
       default:
         return adminlteColors.secondary;
     }
@@ -285,13 +294,17 @@ export default function ListadoSolicitudScreen() {
   const obtenerBadgeTexto = estado => {
     switch (estado) {
       case 'aprobadas':
+      case 'aprobada':
         return 'Aprobada';
       case 'rechazadas':
-        return 'Rechazada';
+      case 'rechazada':
+      case 'negada':
+        return 'Negada';
       case 'sin_contestar':
-        return 'Sin Contestar';
+      case 'pendiente':
+        return 'Pendiente';
       default:
-        return 'Sin Contestar';
+        return 'Pendiente';
     }
   };
 
@@ -503,7 +516,7 @@ export default function ListadoSolicitudScreen() {
                   <Text style={styles.btnVerDetalleText}>Ver Detalle</Text>
                 </TouchableOpacity>
 
-                {solicitud.estado === 'sin_contestar' && (
+                {(solicitud.estado === 'sin_contestar' || solicitud.estado === 'pendiente' || !solicitud.estado) && (
                   <>
                     <TouchableOpacity
                       style={[styles.btnAprobar, processingIds.includes(solicitud.id) && styles.btnDisabled]}
@@ -530,7 +543,7 @@ export default function ListadoSolicitudScreen() {
                         color="#ffffff"
                         style={{ marginRight: 4 }}
                       />
-                      <Text style={styles.btnRechazarText}>{processingIds.includes(solicitud.id) ? 'Procesando...' : 'Rechazar'}</Text>
+                      <Text style={styles.btnRechazarText}>{processingIds.includes(solicitud.id) ? 'Procesando...' : 'Negar'}</Text>
                     </TouchableOpacity>
                   </>
                 )}
