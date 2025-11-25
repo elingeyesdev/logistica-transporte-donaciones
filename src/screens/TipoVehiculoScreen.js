@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,58 +8,60 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
-
-const tiposVehiculoIniciales = [
-  {
-    id: 1,
-    nombreTipoVehiculo: 'Camioneta',
-  },
-  {
-    id: 2,
-    nombreTipoVehiculo: 'Camión',
-  },
-  {
-    id: 3,
-    nombreTipoVehiculo: 'Van',
-  },
-  {
-    id: 4,
-    nombreTipoVehiculo: 'Automóvil',
-  },
-];
+import * as tipoVehiculoService from '../services/tipoVehiculoService';
 
 export default function TipoVehiculoScreen() {
-  const [tiposVehiculo, setTiposVehiculo] = useState(tiposVehiculoIniciales);
+  const [tiposVehiculo, setTiposVehiculo] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [modalCrearVisible, setModalCrearVisible] = useState(false);
   const [formData, setFormData] = useState({
-    nombreTipoVehiculo: '',
+    nombre_tipo_vehiculo: '',
   });
+
+  useEffect(() => {
+    cargarTiposVehiculo();
+  }, []);
+
+  const cargarTiposVehiculo = async () => {
+    setLoading(true);
+    try {
+      const data = await tipoVehiculoService.getTiposVehiculo();
+      setTiposVehiculo(data);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudieron cargar los tipos de vehículo');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCrearTipoVehiculo = () => {
-    if (!formData.nombreTipoVehiculo.trim()) {
+  const handleCrearTipoVehiculo = async () => {
+    if (!formData.nombre_tipo_vehiculo.trim()) {
       Alert.alert('Error', 'Por favor completa el campo');
       return;
     }
 
-    const nuevoTipoVehiculo = {
-      id: Date.now(),
-      ...formData,
-    };
-
-    setTiposVehiculo(prev => [nuevoTipoVehiculo, ...prev]);
-    setFormData({
-      nombreTipoVehiculo: '',
-    });
-    setModalCrearVisible(false);
-    Alert.alert('Éxito', 'Tipo de Vehículo creado exitosamente');
+    setLoading(true);
+    try {
+      await tipoVehiculoService.createTipoVehiculo(formData);
+      Alert.alert('Éxito', 'Tipo de Vehículo creado exitosamente');
+      setFormData({ nombre_tipo_vehiculo: '' });
+      setModalCrearVisible(false);
+      await cargarTiposVehiculo();
+    } catch (error) {
+      Alert.alert('Error', 'Error de conexión con el servidor');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const obtenerColorBorde = index => {
@@ -101,11 +103,25 @@ export default function TipoVehiculoScreen() {
 
       {/* Lista de Tipos de Vehículo */}
       <ScrollView style={styles.tiposVehiculoContainer}>
-        <View style={styles.tiposVehiculoGrid}>
-          {tiposVehiculo.map((tipoVehiculo, index) => (
-            <View
-              key={tipoVehiculo.id}
-              style={[
+        {loading ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={adminlteColors.primary} />
+            <Text style={{ marginTop: 10, color: adminlteColors.muted }}>
+              Cargando tipos de vehículo...
+            </Text>
+          </View>
+        ) : tiposVehiculo.length === 0 ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <Text style={{ color: adminlteColors.muted }}>
+              No hay tipos de vehículo registrados
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.tiposVehiculoGrid}>
+            {tiposVehiculo.map((tipoVehiculo, index) => (
+              <View
+                key={tipoVehiculo.id ? `tipo-vehiculo-${tipoVehiculo.id}` : `tipo-vehiculo-index-${index}`}
+                style={[
                 styles.tipoVehiculoCard,
                 {
                   borderTopWidth: 3,
@@ -138,12 +154,13 @@ export default function TipoVehiculoScreen() {
                   <Text style={styles.tipoVehiculoInfoLabel}>Nombre Tipo Vehículo:</Text>
                 </View>
                 <Text style={styles.tipoVehiculoInfoValue}>
-                  {tipoVehiculo.nombreTipoVehiculo}
+                  {tipoVehiculo.nombre_tipo_vehiculo}
                 </Text>
               </View>
             </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       {/* Modal Crear Tipo de Vehículo */}
@@ -179,9 +196,9 @@ export default function TipoVehiculoScreen() {
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ej. Camioneta"
-                value={formData.nombreTipoVehiculo}
-                onChangeText={text => handleChange('nombreTipoVehiculo', text)}
+                placeholder="Ej. Camioneta doble cabina"
+                value={formData.nombre_tipo_vehiculo}
+                onChangeText={text => handleChange('nombre_tipo_vehiculo', text)}
               />
             </View>
           </ScrollView>
@@ -196,11 +213,11 @@ export default function TipoVehiculoScreen() {
             <TouchableOpacity
               style={[
                 styles.modalFooterButtonSuccess,
-                !formData.nombreTipoVehiculo.trim() &&
+                !formData.nombre_tipo_vehiculo.trim() &&
                   styles.modalFooterButtonDisabled,
               ]}
               onPress={handleCrearTipoVehiculo}
-              disabled={!formData.nombreTipoVehiculo.trim()}
+              disabled={!formData.nombre_tipo_vehiculo.trim()}
             >
               <FontAwesome5
                 name="check"
