@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,58 +8,60 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
-
-const licenciasIniciales = [
-  {
-    id: 1,
-    tipoLicencia: 'Licencia de Conducir Categoría A',
-  },
-  {
-    id: 2,
-    tipoLicencia: 'Licencia de Conducir Categoría B',
-  },
-  {
-    id: 3,
-    tipoLicencia: 'Licencia de Construcción',
-  },
-  {
-    id: 4,
-    tipoLicencia: 'Licencia de Funcionamiento',
-  },
-];
+import * as licenciaService from '../services/licenciaService';
 
 export default function LicenciasScreen() {
-  const [licencias, setLicencias] = useState(licenciasIniciales);
+  const [licencias, setLicencias] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [modalCrearVisible, setModalCrearVisible] = useState(false);
   const [formData, setFormData] = useState({
-    tipoLicencia: '',
+    licencia: '',
   });
+
+  useEffect(() => {
+    cargarLicencias();
+  }, []);
+
+  const cargarLicencias = async () => {
+    setLoading(true);
+    try {
+      const data = await licenciaService.getLicencias();
+      setLicencias(data);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudieron cargar las licencias');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCrearLicencia = () => {
-    if (!formData.tipoLicencia.trim()) {
+  const handleCrearLicencia = async () => {
+    if (!formData.licencia.trim()) {
       Alert.alert('Error', 'Por favor completa el campo');
       return;
     }
 
-    const nuevaLicencia = {
-      id: Date.now(),
-      ...formData,
-    };
-
-    setLicencias(prev => [nuevaLicencia, ...prev]);
-    setFormData({
-      tipoLicencia: '',
-    });
-    setModalCrearVisible(false);
-    Alert.alert('Éxito', 'Licencia creada exitosamente');
+    setLoading(true);
+    try {
+      await licenciaService.createLicencia(formData);
+      Alert.alert('Éxito', 'Licencia creada exitosamente');
+      setFormData({ licencia: '' });
+      setModalCrearVisible(false);
+      await cargarLicencias();
+    } catch (error) {
+      Alert.alert('Error', 'Error de conexión con el servidor');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const obtenerColorBorde = index => {
@@ -101,11 +103,25 @@ export default function LicenciasScreen() {
 
       {/* Lista de Licencias */}
       <ScrollView style={styles.licenciasContainer}>
-        <View style={styles.licenciasGrid}>
-          {licencias.map((licencia, index) => (
-            <View
-              key={licencia.id}
-              style={[
+        {loading ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={adminlteColors.primary} />
+            <Text style={{ marginTop: 10, color: adminlteColors.muted }}>
+              Cargando licencias...
+            </Text>
+          </View>
+        ) : licencias.length === 0 ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <Text style={{ color: adminlteColors.muted }}>
+              No hay licencias registradas
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.licenciasGrid}>
+            {licencias.map((licencia, index) => (
+              <View
+                key={licencia.id ? `licencia-${licencia.id}` : `licencia-index-${index}`}
+                style={[
                 styles.licenciaCard,
                 {
                   borderTopWidth: 3,
@@ -138,12 +154,13 @@ export default function LicenciasScreen() {
                   <Text style={styles.licenciaInfoLabel}>Tipo Licencia:</Text>
                 </View>
                 <Text style={styles.licenciaInfoValue}>
-                  {licencia.tipoLicencia}
+                  {licencia.licencia}
                 </Text>
               </View>
             </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       {/* Modal Crear Licencia */}
@@ -180,8 +197,8 @@ export default function LicenciasScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Ej. Licencia de Conducir Categoría A"
-                value={formData.tipoLicencia}
-                onChangeText={text => handleChange('tipoLicencia', text)}
+                value={formData.licencia}
+                onChangeText={text => handleChange('licencia', text)}
               />
             </View>
           </ScrollView>
@@ -196,11 +213,11 @@ export default function LicenciasScreen() {
             <TouchableOpacity
               style={[
                 styles.modalFooterButtonSuccess,
-                !formData.tipoLicencia.trim() &&
+                !formData.licencia.trim() &&
                   styles.modalFooterButtonDisabled,
               ]}
               onPress={handleCrearLicencia}
-              disabled={!formData.tipoLicencia.trim()}
+              disabled={!formData.licencia.trim()}
             >
               <FontAwesome5
                 name="check"
