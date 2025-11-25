@@ -11,14 +11,20 @@ use Illuminate\View\View;
 
 class EstadoController extends Controller
 {
-    public function index(Request $request): View
+  public function index(Request $request)
     {
-        $estado = Estado::paginate();
+        $estados = Estado::paginate();
 
-        return view('estado.index', compact('estado'))
-            ->with('i', ($request->input('page', 1) - 1) * $estado->perPage());
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data'    => $estados
+            ]);
+        }
+
+        return view('estado.index', compact('estados'))
+            ->with('i', ($request->input('page', 1) - 1) * $estados->perPage());
     }
-
     public function create(): View
     {
         $estado = new Estado();
@@ -26,41 +32,98 @@ class EstadoController extends Controller
         return view('estado.create', compact('estado'));
     }
 
-    public function store(EstadoRequest $request): RedirectResponse
+    public function store(EstadoRequest $request)
     {
-        Estado::create($request->validated());
+        $estado = Estado::create($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado creado exitosamente.',
+                'data'    => $estado
+            ], 201);
+        }
 
         return Redirect::route('estado.index')
             ->with('success', 'Estado creado exitosamente.');
     }
 
-    public function show($id): View
+    public function show(Request $request, $id)
     {
         $estado = Estado::find($id);
+
+        if (!$estado) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => 'Estado no encontrado'
+                ], 404);
+            }
+
+            return Redirect::route('estado.index')
+                ->with('error', 'Estado no encontrado.');
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data'    => $estado
+            ]);
+        }
 
         return view('estado.show', compact('estado'));
     }
 
+
     public function edit($id): View
     {
-        $estado = Estado::find($id);
-
+        $estado = Estado::findOrFail($id);
         return view('estado.edit', compact('estado'));
     }
 
-    public function update(EstadoRequest $request, Estado $estado): RedirectResponse
+    public function update(EstadoRequest $request, Estado $estado)
     {
         $estado->update($request->validated());
 
-        return Redirect::route('estado.index')
-            ->with('success', 'Estado actualizado correctamente');
-    }
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente.',
+                'data'    => $estado
+            ]);
+        }
 
-    public function destroy($id): RedirectResponse
+        return Redirect::route('estado.index')
+            ->with('success', 'Estado actualizado correctamente.');
+    }
+    
+    public function destroy(Request $request, $id)
     {
-        Estado::find($id)->delete();
+        $estado = Estado::find($id);
+
+        if (!$estado) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => 'Estado no encontrado'
+                ], 404);
+            }
+
+            return Redirect::route('estado.index')
+                ->with('error', 'Estado no encontrado.');
+        }
+
+        $estado->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado eliminado correctamente.'
+            ]);
+        }
 
         return Redirect::route('estado.index')
-            ->with('success', 'Estado eliminado');
+            ->with('success', 'Estado eliminado correctamente.');
     }
+
 }
