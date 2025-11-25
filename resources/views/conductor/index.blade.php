@@ -47,7 +47,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($conductor as $conductor)
+                                    @foreach ($conductores as $conductor)
                                         <tr>
                                             
 										<td >{{ $conductor->conductor_id }}</td>
