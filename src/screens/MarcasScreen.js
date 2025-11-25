@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,58 +8,71 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
-
-const marcasIniciales = [
-  {
-    id: 1,
-    nombreMarca: 'Toyota',
-  },
-  {
-    id: 2,
-    nombreMarca: 'Honda',
-  },
-  {
-    id: 3,
-    nombreMarca: 'Ford',
-  },
-  {
-    id: 4,
-    nombreMarca: 'Chevrolet',
-  },
-];
+import { marcaService } from '../services/marcaService';
 
 export default function MarcasScreen() {
-  const [marcas, setMarcas] = useState(marcasIniciales);
+  const [marcas, setMarcas] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [modalCrearVisible, setModalCrearVisible] = useState(false);
   const [formData, setFormData] = useState({
     nombreMarca: '',
   });
 
+  // Cargar marcas al montar el componente
+  useEffect(() => {
+    cargarMarcas();
+  }, []);
+
+  const cargarMarcas = async () => {
+    setLoading(true);
+    try {
+      const result = await marcaService.getMarcas();
+      if (result.success) {
+        setMarcas(result.data || []); // Si data es null/undefined, usa array vacío
+      } else {
+        Alert.alert('Error', 'No se pudieron cargar las marcas');
+        setMarcas([]); // Asegura que marcas sea un array
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Error de conexión con el servidor');
+      setMarcas([]); // Asegura que marcas sea un array
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCrearMarca = () => {
+  const handleCrearMarca = async () => {
     if (!formData.nombreMarca.trim()) {
       Alert.alert('Error', 'Por favor completa el campo');
       return;
     }
 
-    const nuevaMarca = {
-      id: Date.now(),
-      ...formData,
-    };
-
-    setMarcas(prev => [nuevaMarca, ...prev]);
-    setFormData({
-      nombreMarca: '',
-    });
-    setModalCrearVisible(false);
-    Alert.alert('Éxito', 'Marca creada exitosamente');
+    setLoading(true);
+    try {
+      const result = await marcaService.createMarca(formData.nombreMarca.trim());
+      
+      if (result.success) {
+        Alert.alert('Éxito', 'Marca creada exitosamente');
+        setFormData({ nombreMarca: '' });
+        setModalCrearVisible(false);
+        cargarMarcas(); // Recargar lista
+      } else {
+        Alert.alert('Error', result.error || 'No se pudo crear la marca');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Error de conexión con el servidor');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const obtenerColorBorde = index => {
@@ -87,6 +100,7 @@ export default function MarcasScreen() {
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}
+            disabled={loading}
           >
             <FontAwesome5
               name="plus"
@@ -99,52 +113,69 @@ export default function MarcasScreen() {
         </View>
       </View>
 
-      {/* Lista de Marcas */}
-      <ScrollView style={styles.marcasContainer}>
-        <View style={styles.marcasGrid}>
-          {marcas.map((marca, index) => (
-            <View
-              key={marca.id}
-              style={[
-                styles.marcaCard,
-                {
-                  borderTopWidth: 3,
-                  borderTopColor: obtenerColorBorde(index),
-                },
-              ]}
-            >
-              <View style={styles.marcaCardHeader}>
-                <View style={styles.marcaCardHeaderContent}>
-                  <FontAwesome5
-                    name="tag"
-                    size={14}
-                    color={adminlteColors.dark}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.marcaCardTitle}>
-                    Marca #{String(index + 1).padStart(3, '0')}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.marcaCardBody}>
-                <View style={styles.marcaInfoRow}>
-                  <FontAwesome5
-                    name="copyright"
-                    size={12}
-                    color={adminlteColors.primary}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.marcaInfoLabel}>Nombre Marca:</Text>
-                </View>
-                <Text style={styles.marcaInfoValue}>
-                  {marca.nombreMarca}
-                </Text>
-              </View>
-            </View>
-          ))}
+      {/* Loading Indicator */}
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={adminlteColors.primary} />
+          <Text style={styles.loadingText}>Cargando marcas...</Text>
         </View>
-      </ScrollView>
+      )}
+
+      {/* Lista de Marcas */}
+      {!loading && (
+        <ScrollView style={styles.marcasContainer}>
+          <View style={styles.marcasGrid}>
+            {marcas.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <FontAwesome5 name="inbox" size={48} color={adminlteColors.muted} />
+                <Text style={styles.emptyText}>No hay marcas registradas</Text>
+              </View>
+            ) : (
+              marcas.map((marca, index) => (
+                <View
+                  key={marca.id ? `marca-${marca.id}` : `marca-index-${index}`}
+                  style={[
+                    styles.marcaCard,
+                    {
+                      borderTopWidth: 3,
+                      borderTopColor: obtenerColorBorde(index),
+                    },
+                  ]}
+                >
+                  <View style={styles.marcaCardHeader}>
+                    <View style={styles.marcaCardHeaderContent}>
+                      <FontAwesome5
+                        name="tag"
+                        size={14}
+                        color={adminlteColors.dark}
+                        style={{ marginRight: 6 }}
+                      />
+                      <Text style={styles.marcaCardTitle}>
+                        Marca #{String(index + 1).padStart(3, '0')}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.marcaCardBody}>
+                    <View style={styles.marcaInfoRow}>
+                      <FontAwesome5
+                        name="copyright"
+                        size={12}
+                        color={adminlteColors.primary}
+                        style={{ marginRight: 6 }}
+                      />
+                      <Text style={styles.marcaInfoLabel}>Nombre Marca:</Text>
+                    </View>
+                    <Text style={styles.marcaInfoValue}>
+                      {marca.nombre_marca}
+                    </Text>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
+        </ScrollView>
+      )}
 
       {/* Modal Crear Marca */}
       <Modal
@@ -196,19 +227,25 @@ export default function MarcasScreen() {
             <TouchableOpacity
               style={[
                 styles.modalFooterButtonSuccess,
-                !formData.nombreMarca.trim() &&
+                (!formData.nombreMarca.trim() || loading) &&
                   styles.modalFooterButtonDisabled,
               ]}
               onPress={handleCrearMarca}
-              disabled={!formData.nombreMarca.trim()}
+              disabled={!formData.nombreMarca.trim() || loading}
             >
-              <FontAwesome5
-                name="check"
-                size={14}
-                color="#ffffff"
-                style={{ marginRight: 6 }}
-              />
-              <Text style={styles.modalFooterButtonText}>Crear Marca</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 6 }} />
+              ) : (
+                <FontAwesome5
+                  name="check"
+                  size={14}
+                  color="#ffffff"
+                  style={{ marginRight: 6 }}
+                />
+              )}
+              <Text style={styles.modalFooterButtonText}>
+                {loading ? 'Creando...' : 'Crear Marca'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -388,5 +425,28 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: adminlteColors.muted,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: adminlteColors.muted,
+    textAlign: 'center',
   },
 });
