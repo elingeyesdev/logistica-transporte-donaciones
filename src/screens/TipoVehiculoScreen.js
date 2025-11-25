@@ -163,33 +163,34 @@ export default function TipoVehiculoScreen() {
         )}
       </ScrollView>
 
-      {/* Modal Crear Tipo de Vehículo */}
+      {/* Modal Crear Tipo de Vehículo (overlay centrado) */}
       <Modal
         visible={modalCrearVisible}
-        animationType="slide"
-        transparent={false}
+        animationType="fade"
+        transparent={true}
         onRequestClose={() => setModalCrearVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalHeaderContent}>
-              <FontAwesome5
-                name="plus-circle"
-                size={18}
-                color="#ffffff"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.modalHeaderTitle}>Crear Nuevo Tipo de Vehículo</Text>
+        <View style={styles.overlayBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderCard}>
+              <View style={styles.modalHeaderContent}>
+                <FontAwesome5
+                  name="plus-circle"
+                  size={18}
+                  color="#ffffff"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.modalHeaderTitle}>Crear Nuevo Tipo de Vehículo</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setModalCrearVisible(false)}
+                style={styles.modalCloseButton}
+              >
+                <MaterialIcons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={() => setModalCrearVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <MaterialIcons name="close" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
 
-          <ScrollView style={styles.modalBody}>
+            <ScrollView style={styles.modalBodyCard}>
             <View style={styles.formGroup}>
               <Text style={styles.label}>
                 Nombre Tipo Vehículo <Text style={styles.required}>*</Text>
@@ -201,9 +202,9 @@ export default function TipoVehiculoScreen() {
                 onChangeText={text => handleChange('nombre_tipo_vehiculo', text)}
               />
             </View>
-          </ScrollView>
+            </ScrollView>
 
-          <View style={styles.modalFooter}>
+            <View style={styles.modalFooterCard}>
             <TouchableOpacity
               style={styles.modalFooterButtonSecondary}
               onPress={() => setModalCrearVisible(false)}
@@ -225,8 +226,9 @@ export default function TipoVehiculoScreen() {
                 color="#ffffff"
                 style={{ marginRight: 6 }}
               />
-              <Text style={styles.modalFooterButtonText}>Crear Tipo Vehículo</Text>
+                <Text style={styles.modalFooterButtonText}>Crear</Text>
             </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -374,14 +376,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     color: adminlteColors.dark,
   },
-  modalFooter: {
+  modalFooterCard: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: adminlteColors.border,
   },
   modalFooterButtonSecondary: {
     backgroundColor: adminlteColors.secondary,
@@ -399,11 +401,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalFooterButtonDisabled: {
-    backgroundColor: '#cccccc',
+    opacity: 0.5,
   },
   modalFooterButtonText: {
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  overlayBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '92%',
+    maxHeight: '90%',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 6,
+  },
+  modalHeaderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: adminlteColors.primary,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    justifyContent: 'space-between',
+  },
+  modalBodyCard: {
+    paddingHorizontal: 18,
+    paddingVertical: 16,
   },
 });
