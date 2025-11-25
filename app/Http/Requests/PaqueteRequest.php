@@ -24,7 +24,7 @@ class paqueteRequest extends FormRequest
         return [
             'id_solicitud'   => ['required','integer','exists:solicitud,id_solicitud'],
             'estado_id'      => ['required','integer','exists:estado,id_estado'],
-            'imagen'         => ['required','string','max:255'],
+            'imagen'         => ['required', 'image', 'max:4096'],
             'ubicacion_actual' => ['nullable','string'],    
             'latitud'        => ['nullable','numeric'],
             'longitud'       => ['nullable','numeric'],
@@ -38,10 +38,11 @@ class paqueteRequest extends FormRequest
         $validator->after(function ($v) {
             $hasLat = $this->filled('latitud');
             $hasLng = $this->filled('longitud');
+
             if ($hasLat xor $hasLng) {
-                $v->errors()->add('latitud',  'Si envías coordenadas, deben incluir latitud y longitud.');
-                $v->errors()->add('longitud', 'Si envías coordenadas, deben incluir latitud y longitud.');
+                $v->errors()->add('latitud', 'Debes enviar latitud y longitud juntas.');
             }
+
         });
     }
         public function messages(): array

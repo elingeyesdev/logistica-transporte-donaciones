@@ -56,7 +56,9 @@
 										<td >{{ $historialSeguimientoDonacione->ci_usuario }}</td>
 										<td >{{ $historialSeguimientoDonacione->estado }}</td>
 										<td >{{ $historialSeguimientoDonacione->fecha_actualizacion }}</td>
-										<td >{{ $historialSeguimientoDonacione->imagen_evidencia }}</td>
+                                        @if($historialSeguimientoDonacione->imagen_evidencia)
+                                            <img src="{{ asset('storage/' . $historialSeguimientoDonacione->imagen_evidencia) }}" class="img-fluid" />
+                                        @endif
 										<td >{{ $historialSeguimientoDonacione->id_paquete }}</td>
 										<td >{{ $historialSeguimientoDonacione->id_ubicacion }}</td>
 

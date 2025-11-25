@@ -73,4 +73,8 @@ Route::post('solicitud/{id}/aprobar', [SolicitudController::class, 'aprobar'])->
 
 Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar'])->name('solicitud.negar');
 
+Route::get('/seguimiento/tracking/{id_paquete}', 
+    [HistorialSeguimientoDonacioneController::class, 'tracking'])
+    ->name('seguimiento.tracking');
+
 

@@ -55,26 +55,40 @@ class HistorialSeguimientoDonacioneController extends Controller
         ];
     }
 
-    public function store(HistorialSeguimientoDonacioneRequest $request): RedirectResponse
+    public function store(HistorialSeguimientoDonacioneRequest $request)
     {
         $paq = Paquete::with('estado')->findOrFail($request->input('id_paquete'));
         $estadoNombre = optional($paq->estado)->nombre_estado ?? 'Pendiente';
 
         $snapshot = $this->buildSnapshotFromPaquete($paq);
 
-        HistorialSeguimientoDonacione::create(array_merge(
+        $path = null;
+        if ($request->hasFile('imagen_evidencia')) {
+            $path = $request->file('imagen_evidencia')->store('evidencias', 'public');
+        }
+
+        $historial = HistorialSeguimientoDonacione::create(array_merge(
             $request->validated(),
             [
                 'estado'              => $estadoNombre,
                 'ci_usuario'          => optional(Auth::user())->ci,
                 'fecha_actualizacion' => now(),
+                'imagen_evidencia'    => $path,
             ],
             $snapshot
         ));
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data'    => $historial
+            ]);
+        }
+
         return Redirect::route('seguimiento.index')
             ->with('success', 'Seguimiento registrado.');
     }
+
 
    public function show($id): View
     {
@@ -90,14 +104,19 @@ class HistorialSeguimientoDonacioneController extends Controller
         return view('seguimiento.edit', compact('historialSeguimientoDonacione'));
     }
 
-    public function update(HistorialSeguimientoDonacioneRequest $request, HistorialSeguimientoDonacione $historialSeguimientoDonacione): RedirectResponse
+    public function update(HistorialSeguimientoDonacioneRequest $request, HistorialSeguimientoDonacione $historialSeguimientoDonacione)
     {
         $paq = Paquete::with('estado')->findOrFail(
             $request->input('id_paquete', $historialSeguimientoDonacione->id_paquete)
         );
         $estadoNombre = optional($paq->estado)->nombre_estado ?? 'Pendiente';
-
         $snapshot = $this->buildSnapshotFromPaquete($paq);
+
+        $path = $historialSeguimientoDonacione->imagen_evidencia;
+
+        if ($request->hasFile('imagen_evidencia')) {
+            $path = $request->file('imagen_evidencia')->store('evidencias', 'public');
+        }
 
         $historialSeguimientoDonacione->update(array_merge(
             $request->validated(),
@@ -105,15 +124,21 @@ class HistorialSeguimientoDonacioneController extends Controller
                 'estado'              => $estadoNombre,
                 'ci_usuario'          => optional(Auth::user())->ci ?? $historialSeguimientoDonacione->ci_usuario,
                 'fecha_actualizacion' => now(),
+                'imagen_evidencia'    => $path,
             ],
             $snapshot
         ));
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data'    => $historialSeguimientoDonacione
+            ]);
+        }
+
         return Redirect::route('seguimiento.index')
             ->with('success', 'Seguimiento actualizado.');
     }
-
-
 
     public function destroy($id): RedirectResponse
     {
@@ -122,4 +147,61 @@ class HistorialSeguimientoDonacioneController extends Controller
         return Redirect::route('seguimiento.index')
             ->with('success', 'Seguimiento eliminado.');
     }
+
+    public function tracking($id_paquete)
+    {
+        $paquete = Paquete::with([
+            'solicitud.solicitante',
+            'solicitud.destino',
+            'conductor',
+            'vehiculo.marcaVehiculo',
+            'vehiculo.tipoVehiculo',
+        ])->findOrFail($id_paquete);
+
+        $historial = HistorialSeguimientoDonacione::with('ubicacion')
+            ->where('id_paquete', $id_paquete)
+            ->orderBy('fecha_actualizacion', 'asc')
+            ->get();
+
+        $points = [];
+
+        if ($historial->count() > 0) {
+            foreach ($historial as $h) {
+                if ($h->ubicacion) {
+                    $points[] = [
+                        'lat' => (float)$h->ubicacion->latitud,
+                        'lng' => (float)$h->ubicacion->longitud,
+                        'zona' => $h->ubicacion->zona,
+                        'fecha' => $h->fecha_actualizacion,
+                    ];
+                }
+            }
+        } else {
+            if ($paquete->ubicacion_actual && strpos($paquete->ubicacion_actual, '(') !== false) {
+                preg_match('/\(([-0-9.]+),\s*([-0-9.]+)\)/', $paquete->ubicacion_actual, $m);
+                if (count($m) == 3) {
+                    $points[] = [
+                        'lat' => (float)$m[1],
+                        'lng' => (float)$m[2],
+                        'zona' => $paquete->zona ?? '',
+                        'fecha' => $paquete->fecha_aprobacion ?? '',
+                    ];
+                }
+            }
+        }
+
+        $imagenes = $historial
+            ->whereNotNull('imagen_evidencia')
+            ->sortByDesc('fecha_actualizacion')
+            ->pluck('imagen_evidencia')
+            ->map(fn($path) => asset('storage/' . $path));
+
+        return view('seguimiento.tracking', compact(
+            'paquete',
+            'historial',
+            'points',
+            'imagenes'
+        ));
+    }
+
 }

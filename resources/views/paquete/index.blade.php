@@ -36,6 +36,8 @@
                                     <th>Ubicación Actual</th>
                                     <th>Fecha Creación</th>
                                     <th>Fecha Entrega</th>
+                                     <th class="text-center"></th>
+
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
@@ -70,6 +72,11 @@
                                         <td>{{ $paquete->ubicacion_actual }}</td>
                                         <td>{{ $paquete->fecha_creacion }}</td>
                                         <td>{{ $paquete->fecha_entrega }}</td>
+                                        <td class="text-center">
+                                                <a class="btn btn-sm btn-primary" href="{{ route('seguimiento.tracking', $paquete->id_paquete) }}">
+                                                    Seguimiento
+                                                </a>
+                                        </td>
                                         <td class="text-center">
                                             <form action="{{ route('paquete.destroy', $paquete->id_paquete) }}" method="POST">
                                                 <a class="btn btn-sm btn-primary" href="{{ route('paquete.show', $paquete->id_paquete) }}">

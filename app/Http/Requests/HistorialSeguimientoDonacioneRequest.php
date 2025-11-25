@@ -24,7 +24,7 @@ class HistorialSeguimientoDonacioneRequest extends FormRequest
         return [
 		'ci_usuario'        => ['nullable','string','max:255'],
         'estado'            => ['nullable','string','max:255'],
-        'imagen_evidencia'  => ['nullable','string'],
+        'imagen_evidencia'  => ['nullable','file','image','max:5120'],
         'fecha_actualizacion'=> ['nullable','date'],
         'id_paquete'        => ['nullable','integer','exists:paquete,id_paquete'],
         'id_ubicacion'      => ['nullable','integer','exists:ubicacion,id_ubicacion'],

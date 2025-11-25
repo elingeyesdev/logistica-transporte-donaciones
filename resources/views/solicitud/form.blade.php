@@ -250,77 +250,26 @@
 
     const mapContainer = document.getElementById('mapa-ubicacion');
     if (!mapContainer) return;
-    
-    const defaultLat = parseFloat(mapContainer.dataset.lat || "-17.8146");
-    const defaultLng = parseFloat(mapContainer.dataset.lng || "-63.1561");
-    const defaultZoom = parseInt(mapContainer.dataset.zoom || "6", 10);
-    const map = L.map('mapa-ubicacion').setView([defaultLat, defaultLng], defaultZoom);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
-    }).addTo(map);
+    let defaultLat = parseFloat(mapContainer.dataset.lat || "-17.8146");
+    let defaultLng = parseFloat(mapContainer.dataset.lng || "-63.1561");
+    let defaultZoom = parseInt(mapContainer.dataset.zoom || "6", 10);
 
-    let marker = null;
     const latInput = document.getElementById('latitud');
     const lngInput = document.getElementById('longitud');
     const ubicacionInput = document.getElementById('ubicacion');
     const provinciaInput = document.getElementById('provincia');
 
-    if (latInput.value && lngInput.value) {
-      marker = L.marker([parseFloat(latInput.value), parseFloat(lngInput.value)]).addTo(map);
-      map.setView([parseFloat(latInput.value), parseFloat(lngInput.value)], 13);
-      reverseGeocode(parseFloat(latInput.value), parseFloat(lngInput.value));
-    }
+    const map = L.map('mapa-ubicacion').setView([defaultLat, defaultLng], defaultZoom);
 
-    function reverseGeocode(lat, lng) {
-      ubicacionInput.value = 'Cargando...';
-      provinciaInput.value = 'Cargando...';
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap',
+      maxZoom: 19
+    }).addTo(map);
 
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
-        headers: {
-          'User-Agent': 'DAS-Sistema/1.0'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data && data.address) {
-          const address = data.address;
-          
-          let direccion = '';
-          if (address.road) direccion += address.road;
-          if (address.house_number) direccion += ' ' + address.house_number;
-          if (address.neighbourhood || address.suburb) {
-            direccion += (direccion ? ', ' : '') + (address.neighbourhood || address.suburb);
-          }
-          if (address.city || address.town || address.village) {
-            direccion += (direccion ? ', ' : '') + (address.city || address.town || address.village);
-          }
-          
-          ubicacionInput.value = direccion || address.display_name || '';
+    let marker = null;
 
-          if (address.state) {
-            provinciaInput.value = address.state;
-          } else if (address.region) {
-            provinciaInput.value = address.region;
-          } else if (address.county) {
-            provinciaInput.value = address.county;
-          }
-        } else {
-          ubicacionInput.value = `${lat}, ${lng}`;
-        }
-      })
-      .catch(error => {
-        console.error('Error en geocodificación inversa:', error);
-        ubicacionInput.value = `${lat}, ${lng}`;
-        provinciaInput.value = '';
-      });
-    }
-
-    map.on('click', function(e) {
-      const lat = e.latlng.lat;
-      const lng = e.latlng.lng;
-
+    function setMarkerAndReverseGeocode(lat, lng) {
       latInput.value = lat.toFixed(6);
       lngInput.value = lng.toFixed(6);
 
@@ -331,8 +280,68 @@
       }
 
       reverseGeocode(lat, lng);
+    }
+
+    function reverseGeocode(lat, lng) {
+      ubicacionInput.value = 'Cargando...';
+      provinciaInput.value = 'Cargando...';
+
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+        .then(r => r.json())
+        .then(data => {
+          if (data?.address) {
+            const a = data.address;
+
+            let dir = a.road ?? '';
+            if (a.house_number) dir += ' ' + a.house_number;
+            if (a.neighbourhood) dir += ', ' + a.neighbourhood;
+            if (a.suburb) dir += ', ' + a.suburb;
+            if (a.city || a.town) dir += ', ' + (a.city || a.town);
+
+            ubicacionInput.value = dir || data.display_name || `${lat}, ${lng}`;
+
+            provinciaInput.value =
+              a.state ??
+              a.region ??
+              a.county ??
+              '';
+          } else {
+            ubicacionInput.value = `${lat}, ${lng}`;
+          }
+        })
+        .catch(() => {
+          ubicacionInput.value = `${lat}, ${lng}`;
+          provinciaInput.value = '';
+        });
+    }
+
+    map.on('click', function(e) {
+      setMarkerAndReverseGeocode(e.latlng.lat, e.latlng.lng);
     });
 
+    if (latInput.value && lngInput.value) {
+      const lat = parseFloat(latInput.value);
+      const lng = parseFloat(lngInput.value);
+      map.setView([lat, lng], 13);
+      setMarkerAndReverseGeocode(lat, lng);
+      return; 
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          map.setView([lat, lng], 18);
+          setMarkerAndReverseGeocode(lat, lng);
+        },
+        function(err) {
+          console.warn("Geolocalización rechazada o falló:", err);
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
   }
 
   if (document.readyState === 'loading') {
@@ -342,4 +351,3 @@
   }
 })();
 </script>
-

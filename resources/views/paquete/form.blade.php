@@ -1,7 +1,16 @@
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="row padding-1 p-1">
   <div class="col-md-12">
 
-    {{-- SOLICITUD--}}
     <div class="form-group mb-2 mb20">
       <label for="id_solicitud" class="form-label">Solicitud</label>
       <select name="id_solicitud" id="id_solicitud"
@@ -95,19 +104,24 @@
 
 
     <div class="form-group mb-2 mb20">
-      <label for="imagen" class="form-label">Imagen (URL)</label>
-      <input type="url" name="imagen" id="imagen"
-             class="form-control @error('imagen') is-invalid @enderror"
-             value="{{ old('imagen', $paquete->imagen) }}" placeholder="https://...">
-      {!! $errors->first('imagen', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
-      @if(old('imagen', $paquete->imagen))
-        <div class="mt-2">
-          <img src="{{ old('imagen', $paquete->imagen) }}" alt="Imagen paquete" style="max-height:120px">
-        </div>
-      @endif
+        <label for="imagen" class="form-label">Imagen del paquete</label>
+        <input type="file" name="imagen" id="imagen"
+              accept="image/*"
+              class="form-control @error('imagen') is-invalid @enderror">
+
+        {!! $errors->first('imagen', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
+
+        @if($paquete->imagen)
+            <div class="mt-2">
+                <img src="{{ asset('storage/' . $paquete->imagen) }}"
+                    alt="Imagen paquete"
+                    style="max-height:120px">
+            </div>
+        @endif
     </div>
 
-    {{-- UBICACIÓN ACTUAL --}}
+
+    <div id="geo-alert" class="alert alert-warning d-none" role="alert"></div>
     <div class="card mt-3 mb-3">
       <div class="card-header">
         <strong>Ubicación Actual</strong>
@@ -213,9 +227,10 @@
 
 <script>
 (function() {
+
   function initMap() {
     if (typeof L === 'undefined') {
-      console.warn('Leaflet no está cargado. Reintentando...');
+      console.warn("Leaflet no está cargado. Reintentando...");
       setTimeout(initMap, 100);
       return;
     }
@@ -227,45 +242,85 @@
     const defaultLng  = Number("{{ $defaultLng }}");
     const defaultZoom = Number("{{ $defaultZoom }}");
 
-    const map = L.map('mapa-ubicacion-paquete').setView([defaultLat, defaultLng], defaultZoom);
+    const map = L.map('mapa-ubicacion-paquete', {
+      zoomControl: true,
+      dragging: false, 
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      touchZoom: false,
+    }).setView([defaultLat, defaultLng], defaultZoom);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
     }).addTo(map);
 
     let marker = null;
+
     const latInput = document.getElementById('latitud');
     const lngInput = document.getElementById('longitud');
 
-    if (latInput && lngInput && latInput.value && lngInput.value) {
+    function setMarker(lat, lng) {
+      latInput.value = lat.toFixed(6);
+      lngInput.value = lng.toFixed(6);
+
+      if (!marker) {
+        marker = L.marker([lat, lng], {
+          draggable: false
+        }).addTo(map);
+      } else {
+        marker.setLatLng([lat, lng]);
+      }
+
+      map.setView([lat, lng], 15);
+    }
+
+    if (latInput.value && lngInput.value) {
       const lat = parseFloat(latInput.value);
       const lng = parseFloat(lngInput.value);
       if (!isNaN(lat) && !isNaN(lng)) {
-        marker = L.marker([lat, lng]).addTo(map);
-        map.setView([lat, lng], 13);
+        setMarker(lat, lng);
+        return;
       }
     }
 
-    map.on('click', function(e) {
-      const lat = e.latlng.lat;
-      const lng = e.latlng.lng;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
 
-      if (latInput) latInput.value = lat.toFixed(6);
-      if (lngInput) lngInput.value = lng.toFixed(6);
+          setMarker(lat, lng);
+        },
+        function(error) {
+          console.warn("Error o permiso denegado en geolocalización:", error);
 
-      if (marker) {
-        marker.setLatLng([lat, lng]);
-      } else {
-        marker = L.marker([lat, lng]).addTo(map);
-      }
+          latInput.value = "";
+          lngInput.value = "";
+
+          const geoAlert = document.getElementById("geo-alert");
+          geoAlert.classList.remove("d-none");
+          geoAlert.innerHTML = `
+              <strong>Permiso de ubicación requerido:</strong><br>
+              Debe habilitar la ubicación en su dispositivo para actualizar la posición del paquete.
+          `;
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+
+    map.on("click", function() {
+      alert("No puedes modificar la ubicación manualmente. Se usa tu ubicación real por seguridad.");
     });
+
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMap);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMap);
   } else {
     initMap();
   }
+
 })();
 </script>

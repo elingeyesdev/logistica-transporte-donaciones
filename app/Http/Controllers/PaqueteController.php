@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
 
 use App\Http\Requests\PaqueteRequest;
 use App\Models\Paquete;
@@ -69,6 +70,10 @@ class PaqueteController extends Controller
             $data['fecha_aprobacion'] = now()->toDateString();
             $data['id_encargado']     = optional(Auth::user())->ci;
             $data['codigo']           = $this->makeCodigoPaquete();
+
+            if ($request->hasFile('imagen')) {
+                $data['imagen'] = $request->file('imagen')->store('paquetes', 'public');
+            }
 
             /** @var \App\Models\Paquete $paq */
             $paq = Paquete::create($data);
@@ -197,85 +202,89 @@ class PaqueteController extends Controller
     }
 
     public function update(PaqueteRequest $request, Paquete $paquete)
-    {
-        $paq = DB::transaction(function () use ($request, $paquete) {
+{
+    $paq = DB::transaction(function () use ($request, $paquete) {
 
-            $oldEstadoId = $paquete->estado_id;
+        $oldEstadoId = $paquete->estado_id;
 
-            $payload = $request->validated();
-            $payload['id_encargado'] = optional(Auth::user())->ci;
+        $payload = $request->validated();
+        $payload['id_encargado'] = optional(Auth::user())->ci;
 
-            $paquete->update($payload);
-
-            $newNombre = optional($paquete->estado)->nombre_estado ?? 'Pendiente';
-
-            if ($paquete->estado_id != $oldEstadoId) {
-
-                if (strcasecmp($newNombre, 'Entregada') === 0) {
-                    $paquete->update(['fecha_entrega' => now()->toDateString()]);
-                }
-
-                $lat  = $request->input('latitud');
-                $lng  = $request->input('longitud');
-                $zona = $request->input('zona');
-
-                $ubicacionId = null;
-                if ($lat !== null && $lng !== null) {
-                    $ubic = Ubicacion::create([
-                        'latitud'  => $lat,
-                        'longitud' => $lng,
-                        'zona'     => $zona,
-                    ]);
-                    $ubicacionId = $ubic->id_ubicacion;
-                }
-
-                $ubicacionString = $this->buildUbicacionString($zona, $lat, $lng);
-                $paquete->update(['ubicacion_actual' => $ubicacionString]);
-
-                $conductorNombre = null;
-                $conductorCi     = null;
-                $vehiculoPlaca   = null;
-
-                if ($paquete->id_conductor) {
-                    $conductor = Conductor::find($paquete->id_conductor);
-                    if ($conductor) {
-                        $conductorNombre = trim(($conductor->nombre ?? '') . ' ' . ($conductor->apellido ?? ''));
-                        $conductorCi     = $conductor->ci;
-                    }
-                }
-
-                if ($paquete->id_vehiculo) {
-                    $vehiculo = Vehiculo::find($paquete->id_vehiculo);
-                    if ($vehiculo) {
-                        $vehiculoPlaca = $vehiculo->placa;
-                    }
-                }
-
-                HistorialSeguimientoDonacione::create([
-                    'ci_usuario'          => optional(Auth::user())->ci,
-                    'estado'              => $newNombre,
-                    'imagen_evidencia'    => $request->input('imagen_evidencia'),
-                    'id_paquete'          => $paquete->id_paquete,
-                    'id_ubicacion'        => $ubicacionId,
-                    'fecha_actualizacion' => now(),
-                    'conductor_nombre'    => $conductorNombre,
-                    'conductor_ci'        => $conductorCi,
-                    'vehiculo_placa'      => $vehiculoPlaca,
-                ]);
-
-            }
-        });
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data'    => $paq
-            ]);
+        if ($request->hasFile('imagen')) {
+            $payload['imagen'] = $request->file('imagen')->store('paquetes', 'public');
         }
 
-        return Redirect::route('paquete.index')
-            ->with('success', 'Paquete actualizado correctamente');
+        $paquete->update($payload);
+
+        $estadoNombre = optional($paquete->estado)->nombre_estado ?? 'Pendiente';
+
+        if (strcasecmp($estadoNombre, 'Entregada') === 0) {
+            $paquete->update(['fecha_entrega' => now()->toDateString()]);
+        }
+
+        $lat  = $request->input('latitud');
+        $lng  = $request->input('longitud');
+        $zona = $request->input('zona');
+
+        $ubicacionId = null;
+
+        if ($lat !== null && $lng !== null) {
+            $ubic = Ubicacion::create([
+                'latitud'  => $lat,
+                'longitud' => $lng,
+                'zona'     => $zona,
+            ]);
+            $ubicacionId = $ubic->id_ubicacion;
+        }
+
+        $ubicacionString = $this->buildUbicacionString($zona, $lat, $lng);
+        $paquete->update(['ubicacion_actual' => $ubicacionString]);
+
+        $conductorNombre = null;
+        $conductorCi     = null;
+        $vehiculoPlaca   = null;
+
+        if ($paquete->id_conductor) {
+            $conductor = Conductor::find($paquete->id_conductor);
+            if ($conductor) {
+                $conductorNombre = trim(($conductor->nombre ?? '') . ' ' . ($conductor->apellido ?? ''));
+                $conductorCi     = $conductor->ci;
+            }
+        }
+
+        if ($paquete->id_vehiculo) {
+            $vehiculo = Vehiculo::find($paquete->id_vehiculo);
+            if ($vehiculo) {
+                $vehiculoPlaca = $vehiculo->placa;
+            }
+        }
+
+        $pathEvidencia = null;
+        if ($request->hasFile('imagen_evidencia')) {
+            $pathEvidencia = $request->file('imagen_evidencia')->store('evidencias', 'public');
+        }
+
+        HistorialSeguimientoDonacione::create([
+            'ci_usuario'          => optional(Auth::user())->ci,
+            'estado'              => $estadoNombre,
+            'imagen_evidencia'    => $pathEvidencia,
+            'id_paquete'          => $paquete->id_paquete,
+            'id_ubicacion'        => $ubicacionId,
+            'fecha_actualizacion' => now(),
+            'conductor_nombre'    => $conductorNombre,
+            'conductor_ci'        => $conductorCi,
+            'vehiculo_placa'      => $vehiculoPlaca,
+        ]);
+
+    });
+
+    if ($request->wantsJson()) {
+        return response()->json(['success' => true]);
     }
+
+    return Redirect::route('paquete.index')->with('success', 'Paquete actualizado y registrado en historial.');
+}
+
 
     public function destroy(Request $request, $id)
     {
@@ -291,6 +300,10 @@ class PaqueteController extends Controller
 
             return Redirect::route('paquete.index')
                 ->with('error', 'Paquete no encontrado');
+        }
+
+        if ($paquete->imagen && Storage::disk('public')->exists($paquete->imagen)) {
+            Storage::disk('public')->delete($paquete->imagen);
         }
 
         $paquete->delete();
