@@ -76,7 +76,9 @@
           {!! $errors->first('id_conductor', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
           <small class="form-text text-muted">
             ¿No existe el conductor? 
-            <a href="{{ route('conductor.create') }}" target="_blank">Crear nuevo conductor</a>
+            <a href="#" data-toggle="modal" data-target="#modalConductor">
+                Crear nuevo conductor
+            </a>
           </small>
         </div>
 
@@ -95,7 +97,9 @@
           {!! $errors->first('id_vehiculo', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
           <small class="form-text text-muted">
             ¿No existe el vehículo? 
-            <a href="{{ route('vehiculo.create') }}" target="_blank">Crear nuevo vehículo</a>
+            <a href="#" data-toggle="modal" data-target="#modalVehiculo">
+                Crear nuevo vehículo
+            </a>
           </small>
         </div>
 
@@ -207,6 +211,9 @@
     </div>
   </div>
 </div>
+
+
+
 @php
     $latValue = old('latitud');
     $lngValue = old('longitud');
