@@ -252,6 +252,39 @@ useEffect(() => {
     }
   };
 
+  const formatFechaAprobacion = (isoString) => {
+  if (!isoString) return '—';
+  const clean = isoString.replace(/\.\d+Z$/, 'Z');
+
+  const date = new Date(clean);
+  if (isNaN(date.getTime())) {
+    return isoString; // fallback bruto
+  }
+
+  try {
+    const deviceTz =
+      Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/La_Paz';
+
+    return new Intl.DateTimeFormat('es-BO', {
+      timeZone: deviceTz,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date); 
+  } catch (e) {
+    const pad = (n) => String(n).padStart(2, '0');
+    const d = date.getDate();
+    const m = date.getMonth() + 1;
+    const y = date.getFullYear();
+    const h = date.getHours();
+    const min = date.getMinutes();
+    return `${pad(d)}/${pad(m)}/${y} ${pad(h)}:${pad(min)}`;
+  }
+};
+
+
   const obtenerColorBorde = (index) => {
     const colors = [
       adminlteColors.primary,
@@ -357,7 +390,7 @@ useEffect(() => {
                   />
                   <Text style={styles.label}>Fecha Aprobación:</Text>
                 </View>
-                <Text style={styles.valueMuted}>{p.fechaAprobacion || '—'}</Text>
+                <Text style={styles.valueMuted}>{formatFechaAprobacion(p.fechaAprobacion) || '—'}</Text>
 
                 {/* Fecha entrega */}
                 <View style={styles.row}>
@@ -456,7 +489,7 @@ useEffect(() => {
                 <Text style={styles.label}>Fecha Aprobación</Text>
                 <TextInput
                   style={styles.input}
-                  value={paqueteActual.fechaAprobacion || '—'}
+                  value={formatFechaAprobacion(paqueteActual.fechaAprobacion) || '—'}
                   editable={false}
                 />
               </View>
