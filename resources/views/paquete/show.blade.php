@@ -33,10 +33,22 @@
                                                         #reporte-pdf, #reporte-pdf * { visibility: visible; }
                                                         #reporte-pdf { position: absolute; left: 0; top: 0; width: 100%; }
                                                     }
+                                                    /* Estilo profesional del reporte */
+                                                    #reporte-pdf { font-family: Arial, Helvetica, sans-serif; color: #222; }
+                                                    #reporte-pdf .header {
+                                                        display: flex; justify-content: space-between; align-items: center;
+                                                        border-bottom: 2px solid #444; padding-bottom: 8px; margin-bottom: 12px;
+                                                    }
+                                                    #reporte-pdf .brand { font-size: 18px; font-weight: 700; letter-spacing: .5px; }
+                                                    #reporte-pdf .title { font-size: 16px; font-weight: 600; }
+                                                    #reporte-pdf .subtle { color: #555; font-size: 12px; }
+                                                    #reporte-pdf .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin: 10px 0 14px; }
+                                                    #reporte-pdf .grid .item { padding: 6px 8px; background: #f7f7f7; border: 1px solid #e3e3e3; border-radius: 4px; }
+                                                    #reporte-pdf .section-title { font-size: 14px; font-weight: 600; margin: 10px 0 6px; }
                                                     #reporte-pdf table { width: 100%; border-collapse: collapse; }
-                                                    #reporte-pdf th, #reporte-pdf td { border: 1px solid #ddd; padding: 6px; font-size: 12px; }
-                                                    #reporte-pdf h2 { margin-bottom: 8px; }
-                                                    #reporte-pdf .meta { margin: 6px 0 12px; font-size: 13px; }
+                                                    #reporte-pdf thead th { background: #efefef; border: 1px solid #ddd; padding: 6px; font-size: 12px; text-align: left; }
+                                                    #reporte-pdf tbody td { border: 1px solid #ddd; padding: 6px; font-size: 12px; }
+                                                    #reporte-pdf .footer { margin-top: 12px; border-top: 1px dashed #bbb; padding-top: 6px; font-size: 11px; color: #666; }
                                                 </style>
                                                 <script>
                                                     document.addEventListener('DOMContentLoaded', function() {
@@ -50,7 +62,11 @@
                                                 </script>
 
                                                 <div id="reporte-pdf">
-                                                    <h2>Reporte de Paquete #{{ $paquete->id_paquete }}</h2>
+                                                    <div class="header">
+                                                        <div class="brand">DAS - Alas Chiquitanas</div>
+                                                        <div class="subtle">Generado: {{ now()->format('Y-m-d H:i') }}</div>
+                                                    </div>
+                                                    <div class="title">Reporte de Paquete #{{ $paquete->id_paquete }}</div>
 
                                                     @php
                                                         $solicitud = optional($paquete->solicitud);
@@ -58,70 +74,75 @@
                                                         $destino = optional($solicitud->destino);
                                                     @endphp
 
-                                                    <h3>Solicitud</h3>
+                                                    <div class="section-title">Solicitud</div>
                                                     <table style="margin-bottom:14px;">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:180px;">Campo</th>
+                                                                <th>Valor</th>
+                                                            </tr>
+                                                        </thead>
                                                         <tbody>
                                                             <tr>
-                                                                <th style="width:180px;">ID Solicitud</th>
+                                                                <td>ID Solicitud</td>
                                                                 <td>{{ $solicitud->id_solicitud ?? '—' }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <th>Tipo Emergencia</th>
+                                                                <td>Tipo Emergencia</td>
                                                                 <td>{{ $solicitud->tipo_emergencia ?? '—' }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <th>Solicitante CI</th>
+                                                                <td>Solicitante CI</td>
                                                                 <td>{{ $solicitante->ci ?? '—' }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <th>Solicitante Nombre</th>
+                                                                <td>Solicitante Nombre</td>
                                                                 <td>{{ trim(($solicitante->nombre ?? '').' '.($solicitante->apellido ?? '')) ?: '—' }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <th>Comunidad Destino</th>
+                                                                <td>Comunidad Destino</td>
                                                                 <td>{{ $destino->comunidad ?? '—' }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <th>Fecha Creación Solicitud</th>
+                                                                <td>Fecha Creación Solicitud</td>
                                                                 <td>{{ $solicitud->fecha_creacion ?? ($solicitud->created_at ?? '—') }}</td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
 
-                                                    <h3>Seguimiento</h3>
-                                                    <div class="meta" style="margin-bottom:10px;">
-                                                        <div><strong>Estado:</strong> {{ $paquete->estado->nombre_estado ?? '—' }}</div>
-                                                        <div><strong>Vehículo:</strong> {{ $paquete->vehiculo->placa ?? '—' }}@if(optional($paquete->vehiculo->marcaVehiculo)->nombre_marca) - {{ optional($paquete->vehiculo->marcaVehiculo)->nombre_marca }}@endif</div>
-                                                        <div><strong>Conductor:</strong> {{ trim(($paquete->conductor->nombre ?? '').' '.($paquete->conductor->apellido ?? '')) ?: '—' }}@if($paquete->conductor->ci ?? false) (CI {{ $paquete->conductor->ci }})@endif</div>
-                                                        <div><strong>Fecha de reporte:</strong> {{ now()->format('Y-m-d H:i') }}</div>
-                                                    </div>
-                                                    <table>
+                                                    <div class="section-title">Seguimiento</div>
+                                                    <table style="margin-bottom:12px;">
                                                         <thead>
                                                             <tr>
-                                                                <th>Fecha/Hora</th>
-                                                                <th>Ubicación</th>
-                                                                <th>Latitud</th>
-                                                                <th>Longitud</th>
+                                                                <th style="width:180px;">Campo</th>
+                                                                <th>Valor</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            @php
-                                                                $seguimientos = method_exists($paquete, 'historialSeguimientoDonaciones')
-                                                                    ? ($paquete->historialSeguimientoDonaciones ?? collect())
-                                                                    : (property_exists($paquete, 'seguimientos') ? ($paquete->seguimientos ?? collect()) : collect());
-                                                            @endphp
-                                                            @forelse($seguimientos as $s)
-                                                                <tr>
-                                                                    <td>{{ $s->fecha_seguimiento ?? $s->created_at }}</td>
-                                                                    <td>{{ $s->ubicacion ?? $s->ubicacion_actual ?? '—' }}</td>
-                                                                    <td>{{ $s->latitud ?? '—' }}</td>
-                                                                    <td>{{ $s->longitud ?? '—' }}</td>
-                                                                </tr>
-                                                            @empty
-                                                                <tr><td colspan="4">Sin registros de seguimiento.</td></tr>
-                                                            @endforelse
+                                                            <tr>
+                                                                <td>Estado</td>
+                                                                <td>{{ $paquete->estado->nombre_estado ?? '—' }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Vehículo</td>
+                                                                <td>{{ $paquete->vehiculo->placa ?? '—' }}@if(optional($paquete->vehiculo->marcaVehiculo)->nombre_marca) - {{ optional($paquete->vehiculo->marcaVehiculo)->nombre_marca }}@endif</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Conductor</td>
+                                                                <td>{{ trim(($paquete->conductor->nombre ?? '').' '.($paquete->conductor->apellido ?? '')) ?: '—' }}@if($paquete->conductor->ci ?? false) (CI {{ $paquete->conductor->ci }})@endif</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Ubicación Actual</td>
+                                                                <td>{{ $paquete->ubicacion_actual ?? '—' }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Fecha de reporte</td>
+                                                                <td>{{ now()->format('Y-m-d H:i') }}</td>
+                                                            </tr>
                                                         </tbody>
                                                     </table>
+                                                    <!-- Tabla detallada de puntos de seguimiento eliminada a solicitud del usuario -->
+                                                    <div class="footer">Documento generado automáticamente desde el sistema DAS.</div>
                                                 </div>
                         
                         <div class="form-group mb-2 mb20">
