@@ -63,7 +63,8 @@ class PaqueteController extends Controller
 
     public function store(PaqueteRequest $request)  
     {
-        $paq = DB::transaction(function () use ($request) {
+        DB::transaction(); 
+        try{
 
             $data = $request->validated();
 
@@ -132,8 +133,12 @@ class PaqueteController extends Controller
                 'vehiculo_placa'      => $vehiculoPlaca,
             ]);
 
-            return $paq->getKey();
-        });
+             DB::commit();
+            $paqId = $paq->id_paquete;
+        }catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -202,8 +207,10 @@ class PaqueteController extends Controller
     }
 
     public function update(PaqueteRequest $request, Paquete $paquete)
-{
-    $paq = DB::transaction(function () use ($request, $paquete) {
+    {
+      DB::beginTransaction();
+
+        try {
 
         $oldEstadoId = $paquete->estado_id;
 
@@ -277,8 +284,12 @@ class PaqueteController extends Controller
             'conductor_ci'        => $conductorCi,
             'vehiculo_placa'      => $vehiculoPlaca,
         ]);
+    DB::commit();
 
-    });
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        throw $e;
+    }
 
     if ($request->wantsJson()) {
         return response()->json(['success' => true]);

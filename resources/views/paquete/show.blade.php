@@ -82,14 +82,14 @@
                                 <tbody>
                                     <tr>
                                         <td>ID Solicitud</td>
-                                        <td>{{ $solicitud->id_solicitud ?? '—' }}</td>
+                                        <td>{{ $solicitud->codigo_seguimiento ?? '—' }}</td>
                                     </tr>
                                     <tr>
                                         <td>Tipo Emergencia</td>
                                         <td>{{ $solicitud->tipo_emergencia ?? '—' }}</td>
                                     </tr>
                                     <tr>
-                                        <td>Solicitante CI</td>
+                                        <td>CI del Solicitante</td>
                                         <td>{{ $solicitante->ci ?? '—' }}</td>
                                     </tr>
                                     <tr>
@@ -143,6 +143,14 @@
                                         <td>Fecha de reporte</td>
                                         <td>{{ now()->format('Y-m-d H:i') }}</td>
                                     </tr>
+                                    <tr>
+                                    <td>Voluntario Encargado</td>
+                                        <td>
+                                            @php $encargado = $paquete->encargado; @endphp
+                                            {{ $encargado ? $encargado->nombre . ' ' . $encargado->apellido : '—' }}
+                                            @if($paquete->id_encargado) - CI {{ $paquete->id_encargado }}@endif
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                             <div class="footer">Documento generado automáticamente desde el sistema DAS.</div>
@@ -159,7 +167,7 @@
 
                         <div class="form-group mb-2 mb20">
                             <strong>Ubicacion Actual:</strong>
-                            {{ $paquete->ubicacion_actual }}
+                            {{ $paquete->ubicacion_actual ?? '—'}}
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha de Creacion:</strong>
@@ -167,7 +175,7 @@
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha Entrega:</strong>
-                            {{ $paquete->fecha_entrega }}
+                            {{ $paquete->fecha_entrega ?? '—'}}
                         </div>
 
                         @php
@@ -199,6 +207,12 @@
                             @else
                                 —
                             @endif
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Voluntario Encargado: </strong>
+                            @php $encargado = $paquete->encargado; @endphp
+                            {{ $encargado ? $encargado->nombre . ' ' . $encargado->apellido : '—' }}
+                            @if($paquete->id_encargado) - CI {{ $paquete->id_encargado }}@endif
                         </div>
                     </div>
                 </div>

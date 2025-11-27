@@ -1,107 +1,127 @@
 @extends('adminlte::page')
 
-@section('title', 'Paquetes')
-
-@section('content_header')
-    <h1>Gestión de Paquetes</h1>
-@stop
+@section('template_title')
+    Paquetes
+@endsection
 
 @section('content')
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title mb-0">Listado de Paquetes</h3>
-                </div>
-
-                @if ($message = Session::get('success'))
-                    <div class="alert alert-success m-3">
-                        {{ $message }}
-                    </div>
-                @endif
-
-                <div class="card-body bg-white">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>#</th>
-                                    <th>ID Paquete</th>
-                                    <th>Solicitud</th>
-                                    <th>Estado de Entrega</th>
-                                    <th>Ubicación Actual</th>
-                                    <th>Fecha Creación</th>
-                                    <th>Fecha Entrega</th>
-                                     <th class="text-center"></th>
-
-                                    <th class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($paquetes as $paquete)
-                                    <tr>
-                                        <td>{{ ++$i }}</td>
-                                        <td>{{ $paquete->id_paquete }}</td>
-                                        @php
-                                            $sol  = optional($paquete->solicitud);
-                                            $pers = optional($sol->solicitante);
-                                            $dest = optional($sol->destino);
-                                        @endphp
-                                        <td>
-                                            <div><strong>CI Sol.:</strong> {{ $pers->ci ?? '—' }}</div>
-                                            <div><strong>Solicitante:</strong> {{ $pers->nombre ?? '—' }} {{ $pers->apellido ?? '—' }}</div>
-                                            <div><strong>Comunidad:</strong> {{ $dest->comunidad ?? '—' }}</div>
-                                            <div><strong>Emergencia:</strong> {{ $sol->tipo_emergencia ?? '—' }}</div>
-                                        </td>
-    
-                                       @php $nombre = optional($paquete->estado)->nombre_estado; @endphp
-                                        <td>
-                                        <span class="badge
-                                            @if($nombre === 'Pendiente') bg-warning
-                                            @elseif($nombre === 'En camino') bg-info
-                                            @elseif($nombre === 'Entregada') bg-success
-                                            @elseif($nombre === 'Esperando Aprobacion') bg-secondary
-                                            @else bg-secondary @endif">
-                                            {{ $nombre ?? '—' }}
-                                        </span>
-                                        </td>
-                                       <td>{{ trim(\Illuminate\Support\Str::before($paquete->ubicacion_actual, '-')) }}</td>
-                                        <td> {{ \Carbon\Carbon::parse( $paquete->created_at)->format('d/m/Y') }}</td>
-                                        <td>{{ $paquete->fecha_entrega }}</td>
-                                        <td class="text-center">
-                                                <a class="btn btn-sm btn-primary" href="{{ route('seguimiento.tracking', $paquete->id_paquete) }}">
-                                                    Seguimiento
-                                                </a>
-                                        </td>
-                                        <td class="text-center">
-                                            <form action="{{ route('paquete.destroy', $paquete->id_paquete) }}" method="POST">
-                                                <a class="btn btn-sm btn-primary" href="{{ route('paquete.show', $paquete->id_paquete) }}">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a class="btn btn-sm btn-success" href="{{ route('paquete.edit', $paquete->id_paquete) }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" 
-                                                    onclick="return confirm('¿Estás segura/o de eliminar este paquete?')">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card-footer">
-                    {!! $paquetes->withQueryString()->links() !!}
-                </div>
-            </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="card_title" style="font-size: larger; font-weight: bolder;">{{ __('Paquetes') }}</span>
+          </div>
         </div>
+        @if ($message = Session::get('success'))
+          <div class="alert alert-success m-4"><p>{{ $message }}</p></div>
+        @endif
+
+        <div class="card-body bg-white">
+          <div class="row">
+
+            @foreach ($paquetes as $paquete)
+
+              @php
+                $sol  = optional($paquete->solicitud);
+                $pers = optional($sol->solicitante);
+                $dest = optional($sol->destino);
+
+                $estado = optional($paquete->estado)->nombre_estado;
+
+                $badgeClass = match($estado) {
+                    'Pendiente' => 'badge-warning',
+                    'En Camino', 'En camino' => 'badge-info',
+                    'Entregado' => 'badge-success',
+                    'Esperando Aprobacion' => 'badge-secondary',
+                    default => 'badge-secondary'
+                };
+              @endphp
+
+              <div class="col-md-3">
+                <div class="card mb-3 shadow-sm bg-light">
+
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <div style="font-size: large;">
+                      <strong>Paquete {{ $paquete->codigo ?? $sol->codigo_seguimiento }}</strong><br>
+                    </div>
+
+                    <span class="badge {{ $badgeClass }} text-uppercase"
+                          style="font-weight:600; font-size: small;">
+                        {{ $estado ?? '—' }}
+                    </span>
+                  </div>
+
+                  <div class="card-body">
+
+                    <p class="mb-1"><strong>Solicitante:</strong> 
+                      {{ $pers->nombre ?? '—' }} {{ $pers->apellido ?? '' }}
+                    </p>
+
+                    <p class="mb-1"><strong>CI:</strong> {{ $pers->ci ?? '—' }}</p>
+
+                    <p class="mb-1"><strong>Comunidad:</strong> {{ $dest->comunidad ?? '—' }}</p>
+
+                    <p class="mb-1"><strong>Emergencia:</strong> {{ $sol->tipo_emergencia ?? '—' }}</p>
+
+                    <hr>
+
+                    <p class="mb-1"><strong>Ubicación:</strong>
+                      {{ trim(\Illuminate\Support\Str::before($paquete->ubicacion_actual, '-')) ?: '—' }}
+                    </p>
+
+                    <p class="mb-1"><strong>Fecha Creación:</strong> 
+                      {{ \Carbon\Carbon::parse($paquete->created_at)->format('d/m/Y') }}
+                    </p>
+
+                    <p class="mb-1"><strong>Fecha Entrega:</strong> 
+                      {{ $paquete->fecha_entrega ?? '—' }}
+                    </p>
+
+                  </div>
+
+                  <div class="card-footer d-flex justify-content-between">
+
+                    <div>
+                      <a class="btn btn-sm btn-dark mr-2" href="{{ route('paquete.show', $paquete->id_paquete) }}">
+                        <i class="fa fa-eye"></i>
+                      </a>
+                      <a class="btn btn-sm btn-info mr-2" href="{{ route('paquete.edit', $paquete->id_paquete) }}">
+                        <i class="fa fa-edit"></i>
+                      </a>
+                      <form action="{{ route('paquete.destroy', $paquete->id_paquete) }}"
+                            method="POST" class="d-inline">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger"
+                                onclick="return confirm('¿Estás seguro de eliminar este paquete?')">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </form>
+                    </div>
+
+                    <div>
+                      @if($estado === 'En Camino' || $estado === 'En camino')
+                        <a class="btn btn-sm btn-primary" 
+                           href="{{ route('seguimiento.tracking', $paquete->id_paquete) }}">
+                          Seguimiento
+                        </a>
+                      @endif
+
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+
+            @endforeach
+
+          </div>
+        </div>
+
+      </div>
     </div>
+  </div>
 </div>
-@stop
+@endsection

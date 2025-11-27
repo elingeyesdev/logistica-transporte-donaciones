@@ -11,7 +11,7 @@
       <div class="card">
        <div class="card-header">
          <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span id="card_title">{{ __('Solicitudes') }}</span>
+          <span id="card_title" style="font-size: larger; font-weight: bolder;">{{ __('Solicitudes') }}</span>
           <a href="{{ route('solicitud.create') }}" class="btn btn-primary btn-sm">
             <i class="fa fa-plus"></i> {{ __('Crear nueva') }}
           </a>
