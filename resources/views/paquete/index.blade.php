@@ -69,8 +69,8 @@
                                             {{ $nombre ?? '—' }}
                                         </span>
                                         </td>
-                                        <td>{{ $paquete->ubicacion_actual }}</td>
-                                        <td>{{ $paquete->fecha_creacion }}</td>
+                                       <td>{{ trim(\Illuminate\Support\Str::before($paquete->ubicacion_actual, '-')) }}</td>
+                                        <td> {{ \Carbon\Carbon::parse( $paquete->fecha_creacion)->format('d/m/Y') }}</td>
                                         <td>{{ $paquete->fecha_entrega }}</td>
                                         <td class="text-center">
                                                 <a class="btn btn-sm btn-primary" href="{{ route('seguimiento.tracking', $paquete->id_paquete) }}">

@@ -162,7 +162,7 @@
 
     <div class="col-md-4">
         <div class="form-group mb-3">
-            <label for="id_tipoemergencia">Tipo de Emergencia</label>
+            <label for="id_tipoemergencia">Tipo de Emergencia</label><br>
             <select required name="id_tipoemergencia" id="id_tipoemergencia"
                     class="form-select @error('id_tipoemergencia') is-invalid @enderror">
                 <option value="">Seleccione un tipo</option>

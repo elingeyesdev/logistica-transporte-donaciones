@@ -47,14 +47,13 @@
                       }
                   @endphp
 
-                  <div class="col-md-4">
-                      <div class="card mb-3 shadow-sm">
+                  <div class="col-md-3">
+                      <div class="card mb-3 shadow-sm bg-light">
                           <div class="card-header d-flex justify-content-between align-items-center">
-                              <div>
-                                  <strong>Solicitud #{{ $key }}</strong><br>
-                                  <small>Código: {{ $solicitud->codigo_seguimiento ?? '—' }}</small>
+                              <div style="font-size: large;">
+                                  <strong>Solicitud {{ $solicitud->codigo_seguimiento }}</strong><br>
                               </div>
-                              <span class="badge {{ $badgeClass }} text-uppercase">
+                              <span class="badge {{ $badgeClass }} text-uppercase" style="font-weight:600; font-size: small;">
                                   {{ $estadoTexto }}
                               </span>
                           </div>
@@ -64,51 +63,43 @@
                               <p class="mb-1"><strong>CI:</strong> {{ $pers->ci ?? '—' }}</p>
                               <p class="mb-1"><strong>Correo:</strong> {{ $pers->email ?? '—' }}</p>
                               <p class="mb-1"><strong>Celular:</strong> {{ $pers->telefono ?? '—' }}</p>
-
-                              <hr class="my-2">
+                            <br>
 
                               <p class="mb-1"><strong>Comunidad:</strong> {{ $dest->comunidad ?? '—' }}</p>
                               <p class="mb-1"><strong>Provincia:</strong> {{ $dest->provincia ?? '—' }}</p>
                               <p class="mb-1"><strong>Ubicación:</strong> {{ $dest->direccion ?? '—' }}</p>
-
-                              <hr class="my-2">
+                            <br>
 
                               <p class="mb-1"><strong>Tipo de Emergencia:</strong> {{ $solicitud->tipo_emergencia ?? '—' }}</p>
                               <p class="mb-1"><strong>Personas afectadas:</strong> {{ $solicitud->cantidad_personas }}</p>
-                              <p class="mb-1"><strong>Fecha inicio:</strong> {{ $solicitud->fecha_inicio }}</p>
+                              <p class="mb-1"><strong>Fecha inicio:</strong> {{ \Carbon\Carbon::parse($solicitud->fecha_inicio)->format('d/m/Y') }}</p>
                           </div>
 
                           <div class="card-footer d-flex justify-content-between">
-                              <div>
-                                  <a class="btn btn-sm btn-primary" href="{{ route('solicitud.show', $key) }}">
+                              <div >
+                                  <a class="btn btn-sm btn-dark mr-2" href="{{ route('solicitud.show', $key) }}">
                                       <i class="fa fa-eye"></i>
                                   </a>
-                                  <a class="btn btn-sm btn-success" href="{{ route('solicitud.edit', $key) }}">
+                                  <a class="btn btn-sm btn-info mr-2" href="{{ route('solicitud.edit', $key) }}">
                                       <i class="fa fa-edit"></i>
                                   </a>
+                                
                               </div>
 
                               <div>
                                   @if($esPendienteYNoRespondida)
                                       <form action="{{ route('solicitud.aprobar', $key) }}" method="POST" class="d-inline">
                                           @csrf
-                                          <button type="submit" class="btn btn-sm btn-outline-success"
-                                              onclick="return confirm('¿Aprobar esta solicitud y crear un paquete?')">
-                                              Aprobar
-                                          </button>
+                                            <button 
+                                                type="button" class="btn btn-sm btn-dark btn-open-aprobar" data-id="{{ $key }}">
+                                                Aprobar
+                                            </button>
                                       </form>
-                                     <button type="button" class="btn btn-sm btn-outline-danger btn-open-negar" data-id="{{ $key }}">
+                                     <button type="button" class="btn btn-sm btn-outline-dark btn-open-negar" data-id="{{ $key }}">
                                         Negar
                                     </button>
                                   @endif
-                                  <form action="{{ route('solicitud.destroy', $key) }}" method="POST" class="d-inline">
-                                      @csrf
-                                      @method('DELETE')
-                                      <button type="submit" class="btn btn-sm btn-danger"
-                                              onclick="return confirm('¿Seguro que deseas eliminar esta solicitud?')">
-                                          <i class="fa fa-trash"></i>
-                                      </button>
-                                  </form>
+
                               </div>
                           </div>
 
@@ -134,13 +125,39 @@
                   </div>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
                   <button type="submit" class="btn btn-danger">Confirmar negación</button>
                 </div>
               </div>
           </form>
         </div>
       </div>
+
+<div class="modal fade" id="aprobarConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header py-2">
+        <h6 class="modal-title">Confirmar Aprobación</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body py-3">
+        <p class="mb-0">¿Aprobar esta solicitud y crear un paquete?</p>
+      </div>
+
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
+        <form id="aprobarForm" method="POST">
+          @csrf
+          <button type="submit" class="btn btn-success btn-sm">Aprobar</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 
      @push('js')
     <script>
@@ -161,6 +178,20 @@
             });
         });
     </script>
+    @endpush
+    @push('js')
+    <script>
+        document.querySelectorAll('.btn-open-aprobar').forEach(btn => {
+            btn.addEventListener('click', function () {
+                let id = this.getAttribute('data-id');
+                const form = document.getElementById('aprobarForm');
+                form.action = `/solicitud/aprobar/${id}`;
+                 let modal = new bootstrap.Modal(document.getElementById('aprobarConfirmModal'));
+                modal.show();
+            });
+        });
+    </script>
+
     @endpush
 
       </div>

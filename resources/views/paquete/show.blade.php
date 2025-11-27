@@ -66,7 +66,7 @@
                                                         <div class="brand">DAS - Alas Chiquitanas</div>
                                                         <div class="subtle">Generado: {{ now()->format('Y-m-d H:i') }}</div>
                                                     </div>
-                                                    <div class="title">Reporte de Paquete #{{ $paquete->id_paquete }}</div>
+                                                    <div class="title">Reporte de Paquete N°{{ $paquete->id_paquete }}</div>
 
                                                     @php
                                                         $solicitud = optional($paquete->solicitud);
@@ -165,7 +165,7 @@
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha Creacion:</strong>
-                            {{ $paquete->fecha_creacion }}
+                            {{ \Carbon\Carbon::parse($paquete->fecha_creacion)->format('d/m/Y') }}
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha Entrega:</strong>
@@ -180,7 +180,7 @@
                             @if($conductor->conductor_id)
                                 {{ trim(($conductor->nombre ?? '').' '.($conductor->apellido ?? '')) ?: 'Sin nombre' }}
                                 @if($conductor->ci)
-                                    (CI {{ $conductor->ci }})
+                                  - CI {{ $conductor->ci }}
                                 @endif
                             @else
                                 —

@@ -3,7 +3,7 @@
 @section('title', 'Detalle de Solicitud')
 
 @section('content_header')
-  <h1 class="mb-0">Solicitud #{{ $solicitud->id_solicitud }}</h1>
+  <h1 class="mb-0">Solicitud N°{{ $solicitud->id_solicitud }}</h1>
 @endsection
 
 @section('content')
