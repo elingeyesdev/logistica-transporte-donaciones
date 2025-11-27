@@ -13,9 +13,6 @@
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title mb-0">Listado de Paquetes</h3>
-                    <a href="{{ route('paquete.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Nuevo Paquete
-                    </a>
                 </div>
 
                 @if ($message = Session::get('success'))
@@ -70,7 +67,7 @@
                                         </span>
                                         </td>
                                        <td>{{ trim(\Illuminate\Support\Str::before($paquete->ubicacion_actual, '-')) }}</td>
-                                        <td> {{ \Carbon\Carbon::parse( $paquete->fecha_creacion)->format('d/m/Y') }}</td>
+                                        <td> {{ \Carbon\Carbon::parse( $paquete->created_at)->format('d/m/Y') }}</td>
                                         <td>{{ $paquete->fecha_entrega }}</td>
                                         <td class="text-center">
                                                 <a class="btn btn-sm btn-primary" href="{{ route('seguimiento.tracking', $paquete->id_paquete) }}">

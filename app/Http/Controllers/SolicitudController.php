@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Solicitud;
 use App\Models\Solicitante;
 use App\Models\Destino;
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Paquete;
 use App\Models\Estado;
+use Illuminate\Support\Facades\Auth;
 
 class SolicitudController extends Controller
 {
@@ -38,66 +38,72 @@ class SolicitudController extends Controller
     }
 
    public function store(SolicitudRequest $request)
-{
-    $data = $request->validated();
-    $solicitud = DB::transaction(function () use ($data) {
+    {
+        $data = $request->validated();
 
-        $solicitante = Solicitante::firstOrCreate(
-            ['ci' => $data['carnet_identidad']],
-            [
-                'nombre'   => $data['nombre'],
-                'apellido' => $data['apellido'],
-                'email'    => $data['correo_electronico'] ?? null,
-                'telefono' => $data['nro_celular'] ?? null,
-            ]
-        );
+        DB::beginTransaction();
 
-        $destino = Destino::create([
-            'comunidad' => $data['comunidad_solicitante'] ?? null,
-            'provincia' => $data['provincia'] ?? null,
-            'direccion' => $data['ubicacion'] ?? null,
-            'latitud'   => $data['latitud'] ?? null,
-            'longitud'  => $data['longitud'] ?? null,
-        ]);
+        try {
 
-        $tipoEmergencia = \App\Models\TipoEmergencia::find($data['id_tipoemergencia']);
-        
-        $solicitud = Solicitud::create([
-            'id_solicitante'     => $solicitante->id_solicitante,
-            'id_destino'         => $destino->id_destino,
-            'cantidad_personas'  => $data['cantidad_personas'],
-            'fecha_inicio'       => $data['fecha_inicio'],
-            'id_tipoemergencia'  => $data['id_tipoemergencia'],
-            'tipo_emergencia'    => $tipoEmergencia->emergencia ?? null,
-            'insumos_necesarios' => $data['insumos_necesarios'],
-            'codigo_seguimiento' => $data['codigo_seguimiento'] ?? null,
-            'estado'             => 'pendiente',
-            'fecha_solicitud'    => $data['fecha_solicitud'] ?? now()->toDateString(),
-            'aprobada'           => (bool)($data['aprobada'] ?? false),
-            'apoyoaceptado'      => (bool)($data['apoyoaceptado'] ?? false),
-            'justificacion'      => $data['justificacion'] ?? null,
-        ]);
+            $solicitante = Solicitante::firstOrCreate(
+                ['ci' => $data['carnet_identidad']],
+                [
+                    'nombre'   => $data['nombre'],
+                    'apellido' => $data['apellido'],
+                    'email'    => $data['correo_electronico'] ?? null,
+                    'telefono' => $data['nro_celular'] ?? null,
+                ]
+            );
 
-        return $solicitud;
-    });
+            $destino = Destino::create([
+                'comunidad' => $data['comunidad_solicitante'] ?? null,
+                'provincia' => $data['provincia'] ?? null,
+                'direccion' => $data['ubicacion'] ?? null,
+                'latitud'   => $data['latitud'] ?? null,
+                'longitud'  => $data['longitud'] ?? null,
+            ]);
 
-    // JSON TEST PARA EL GATEWAY
-    if ($request->is('api/*')) {
-        return response()->json([
-            'success' => true,
-            'data'    => $solicitud,
-            'message' => 'Solicitud creada correctamente.',
-        ], 201);
+            $tipoEmergencia = \App\Models\TipoEmergencia::find($data['id_tipoemergencia']);
+
+            $solicitud = Solicitud::create([
+                'id_solicitante'     => $solicitante->id_solicitante,
+                'id_destino'         => $destino->id_destino,
+                'cantidad_personas'  => $data['cantidad_personas'],
+                'fecha_inicio'       => $data['fecha_inicio'],
+                'id_tipoemergencia'  => $data['id_tipoemergencia'],
+                'tipo_emergencia'    => $tipoEmergencia->emergencia ?? null,
+                'insumos_necesarios' => $data['insumos_necesarios'],
+                'codigo_seguimiento' => $data['codigo_seguimiento'] ?? null,
+                'estado'             => 'pendiente',
+                'fecha_solicitud'    => $data['fecha_solicitud'] ?? now()->toDateString(),
+                'aprobada'           => (bool)($data['aprobada'] ?? false),
+                'apoyoaceptado'      => (bool)($data['apoyoaceptado'] ?? false),
+                'justificacion'      => $data['justificacion'] ?? null,
+            ]);
+
+            DB::commit();
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        if ($request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data'    => $solicitud,
+                'message' => 'Solicitud creada correctamente.',
+            ], 201);
+        }
+        return redirect()
+            ->route('solicitud.show', $solicitud->id_solicitud)
+            ->with('success', 'Solicitud creada correctamente.');
     }
 
-     return redirect()
-        ->route('solicitud.show', $solicitud->id_solicitud)
-        ->with('success', 'Solicitud creada correctamente.');
-}
     public function show($id): View
     {
         $solicitud = Solicitud::with(['solicitante','destino'])->findOrFail($id);
-    return view('solicitud.show', compact('solicitud'));
+        return view('solicitud.show', compact('solicitud'));
     }
 
     public function edit($id): View
@@ -111,7 +117,9 @@ class SolicitudController extends Controller
     {
         $data = $request->validated();
 
-        $solicitud = DB::transaction(function () use ($data, $solicitud) {
+        DB::beginTransaction();
+
+        try {
 
             $solicitud->solicitante?->update([
                 'nombre'  => $data['nombre'],
@@ -132,7 +140,7 @@ class SolicitudController extends Controller
             $solicitud->update([
                 'cantidad_personas'  => $data['cantidad_personas'],
                 'fecha_inicio'       => $data['fecha_inicio'],
-                'id_tipoemergencia'    => $data['id_tipoemergencia'],
+                'id_tipoemergencia'  => $data['id_tipoemergencia'],
                 'insumos_necesarios' => $data['insumos_necesarios'],
                 'codigo_seguimiento' => $data['codigo_seguimiento'] ?? $solicitud->codigo_seguimiento,
                 'fecha_solicitud'    => $data['fecha_solicitud'] ?? $solicitud->fecha_solicitud,
@@ -141,9 +149,13 @@ class SolicitudController extends Controller
                 'justificacion'      => $data['justificacion'] ?? $solicitud->justificacion,
             ]);
 
-            return $solicitud;
+            DB::commit();
 
-        });
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -185,33 +197,28 @@ class SolicitudController extends Controller
     }
     public function aprobar(Request $request, int $id)
     {
-        $solicitud = Solicitud::with(['solicitante', 'destino'])->findOrFail($id);
+        $solicitud = Solicitud::with(['solicitante','destino'])->findOrFail($id);
 
-        if ($solicitud->estado !== 'pendiente') {            
-             return redirect()->back()->with('error', 'Esta solicitud ya fue respondida.');
+        if ($solicitud->estado !== 'pendiente') {
+            return redirect()->back()->with('error', 'Esta solicitud ya fue respondida.');
         }
 
         $estadoPendiente = Estado::where('nombre_estado', 'Pendiente')->first();
 
         if (!$estadoPendiente) {
-            return redirect()->back()->with('error', 'No se encontró el estado Pendiente para el paquete.');
+            return redirect()->back()->with('error', 'No se encontró el estado Pendiente.');
         }
 
-        $paquete = null;
+        DB::beginTransaction();
 
-       $paquete = DB::transaction(function () use ($solicitud, $estadoPendiente) {
-            $paq = Paquete::create([
+        try {
+
+            $paquete = Paquete::create([
                 'id_solicitud'      => $solicitud->id_solicitud,
                 'estado_id'         => $estadoPendiente->id_estado,
                 'codigo'            => $solicitud->codigo_seguimiento,
+                'id_encargado'      => Auth::user()->ci,
                 'fecha_aprobacion'  => now()->toDateString(),
-                'imagen'            => null,
-                'ubicacion_actual'  => null,
-                'latitud'           => null,
-                'longitud'          => null,
-                'zona'              => null,
-                'id_conductor'      => null,
-                'id_vehiculo'       => null,
             ]);
 
             $solicitud->update([
@@ -219,8 +226,11 @@ class SolicitudController extends Controller
                 'estado'   => 'aprobada',
             ]);
 
-            return $paq;
-        });
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -230,7 +240,7 @@ class SolicitudController extends Controller
             ]);
         }
 
-         return redirect()
+        return redirect()
             ->route('paquete.show', $paquete->id_paquete)
             ->with('success', 'Solicitud aprobada y paquete creado correctamente.');
     }

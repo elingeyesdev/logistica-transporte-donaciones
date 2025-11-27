@@ -68,7 +68,7 @@ class PaqueteController extends Controller
             $data = $request->validated();
 
             $data['fecha_aprobacion'] = now()->toDateString();
-            $data['id_encargado']     = optional(Auth::user())->ci;
+            $data['id_encargado']     = Auth::user()->ci;
             $data['codigo']           = $this->makeCodigoPaquete();
 
             if ($request->hasFile('imagen')) {
@@ -208,7 +208,7 @@ class PaqueteController extends Controller
         $oldEstadoId = $paquete->estado_id;
 
         $payload = $request->validated();
-        $payload['id_encargado'] = optional(Auth::user())->ci;
+        $payload['id_encargado'] = Auth::user()->ci;
 
         if ($request->hasFile('imagen')) {
             $payload['imagen'] = $request->file('imagen')->store('paquetes', 'public');

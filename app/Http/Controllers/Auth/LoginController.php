@@ -44,7 +44,6 @@ class LoginController extends Controller
     {
         return 'correo_electronico';
     }
-
     protected function credentials(Request $request)
     {
         return $request->only('correo_electronico', 'password');

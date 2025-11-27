@@ -185,7 +185,7 @@
             btn.addEventListener('click', function () {
                 let id = this.getAttribute('data-id');
                 const form = document.getElementById('aprobarForm');
-                form.action = `/solicitud/aprobar/${id}`;
+                form.action = `/solicitud/${id}/aprobar`;
                  let modal = new bootstrap.Modal(document.getElementById('aprobarConfirmModal'));
                 modal.show();
             });

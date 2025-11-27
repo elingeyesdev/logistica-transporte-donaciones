@@ -39,7 +39,6 @@ class RegisterController extends Controller
             'correo_electronico' => ['required','string','email','max:255','unique:users,correo_electronico'],
             'password'           => ['required','string','min:8','confirmed'],
 
-            // Se mantiene la validación de rol NO administrador
             'id_rol' => [
                 'required',
                 'integer',
@@ -52,7 +51,6 @@ class RegisterController extends Controller
 
     public function showRegistrationForm()
     {
-        // Solo roles que no sean Administrador
         $roles = Rol::where('titulo_rol', '!=', 'Administrador')
             ->orderBy('titulo_rol')
             ->get();

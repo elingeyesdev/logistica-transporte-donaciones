@@ -16,11 +16,7 @@
                                 {{ __('Solicitantes') }}
                             </span>
 
-                             <div class="float-right">
-                                <a href="{{ route('solicitante.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Crear Nuevo') }}
-                                </a>
-                              </div>
+                             
                         </div>
                     </div>
                     @if ($message = Session::get('success'))
@@ -33,10 +29,7 @@
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
                                 <thead class="thead">
-                                    <tr>
-                                        <th>No</th>
-                                        
-									<th >Id Solicitante</th>
+                                    <tr>                                        
 									<th >Nombre</th>
 									<th >Apellido</th>
 									<th >Ci</th>
@@ -49,9 +42,7 @@
                                 <tbody>
                                     @foreach ($solicitante as $solicitante)
                                         <tr>
-                                            <td>{{ ++$i }}</td>
-                                            
-										<td >{{ $solicitante->id_solicitante }}</td>
+
                                         <td >{{ $solicitante->nombre }}</td>
 										<td >{{ $solicitante->apellido }}</td>
 										<td >{{ $solicitante->ci }}</td>
