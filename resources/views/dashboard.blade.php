@@ -161,6 +161,31 @@
                         <span class="info-box-number" id="paquetes-entregados">{{ $paquetesEntregados }}</span>
                     </div>
                 </div>
+                <div class="card card-outline card-info mb-0">
+                    <div class="card-header py-2">
+                        <h3 class="card-title" style="font-size: 1rem;">Top Voluntarios (Paquetes)</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Voluntario</th>
+                                    <th class="text-right">Paquetes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="voluntarios-paquetes-tbody">
+                                @forelse($topVoluntariosPaquetes as $v)
+                                    <tr>
+                                        <td>{{ $v['nombre'] }}<br><small class="text-muted">CI: {{ $v['ci'] }}</small></td>
+                                        <td class="text-right"><span class="badge badge-primary">{{ $v['total'] }}</span></td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="2" class="text-center text-muted">Sin datos</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -308,6 +333,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).join('')
                 : '<tr><td colspan="4" class="text-center text-muted">No hay paquetes con fechas de entrega.</td></tr>';
             document.getElementById('paquetes-tbody').innerHTML = paquetesHtml;
+
+            
+            if (data.topVoluntariosPaquetes) {
+                const voluntariosHtml = data.topVoluntariosPaquetes.length > 0
+                    ? data.topVoluntariosPaquetes.map(v => `
+                        <tr>
+                            <td>${v.nombre}<br><small class="text-muted">CI: ${v.ci}</small></td>
+                            <td class="text-right"><span class="badge badge-primary">${v.total}</span></td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="2" class="text-center text-muted">Sin datos</td></tr>';
+                const voluntariosTbody = document.getElementById('voluntarios-paquetes-tbody');
+                if (voluntariosTbody) voluntariosTbody.innerHTML = voluntariosHtml;
+            }
 
           
             icon.classList.remove('fa-spin');

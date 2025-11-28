@@ -6,6 +6,7 @@ use App\Models\Solicitud;
 use App\Models\Paquete;
 use App\Models\User;
 use App\Models\Conductor;
+use App\Models\Estado;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -45,35 +46,55 @@ class DashboardController extends Controller
             ->take(5); 
 
         
-        $paquetes = Paquete::whereNotNull('fecha_creacion')
-            ->whereNotNull('fecha_entrega')
+        
+        $idsEntregado = Estado::whereIn('nombre_estado', ['Entregado', 'entregado'])
+            ->pluck('id_estado');
+
+        
+        $paquetes = Paquete::whereIn('estado_id', $idsEntregado)
             ->selectRaw('
                 id_paquete,
-                fecha_creacion,
-                fecha_entrega,
-                (fecha_entrega::date - fecha_creacion::date) as dias_entrega
+                COALESCE(fecha_creacion::date, created_at::date) as fecha_creacion,
+                COALESCE(fecha_entrega::date, updated_at::date) as fecha_entrega,
+                (COALESCE(fecha_entrega::date, updated_at::date) - COALESCE(fecha_creacion::date, created_at::date)) as dias_entrega
             ')
-            ->orderByDesc(DB::raw('(fecha_entrega::date - fecha_creacion::date)'))
+            ->orderByDesc(DB::raw('(COALESCE(fecha_entrega::date, updated_at::date) - COALESCE(fecha_creacion::date, created_at::date))'))
             ->limit(10)
             ->get();
 
         
-        $promedioEntrega = Paquete::whereNotNull('fecha_creacion')
-            ->whereNotNull('fecha_entrega')
-            ->selectRaw('AVG(fecha_entrega::date - fecha_creacion::date) as promedio')
+        $promedioEntrega = Paquete::whereIn('estado_id', $idsEntregado)
+            ->selectRaw('AVG(COALESCE(fecha_entrega::date, updated_at::date) - COALESCE(fecha_creacion::date, created_at::date)) as promedio')
             ->value('promedio');
         
         $promedioEntrega = $promedioEntrega ? round($promedioEntrega, 1) : 0;
 
         
         $totalPaquetes = Paquete::count();
-        $paquetesEntregados = Paquete::whereNotNull('fecha_entrega')->count();
+        $paquetesEntregados = Paquete::whereIn('estado_id', $idsEntregado)->count();
 
         
         $totalVoluntarios = User::where('activo', true)->count();
         
         
         $voluntariosConductores = Conductor::count();
+
+        
+       
+        $topVoluntariosPaquetes = Paquete::selectRaw('id_encargado, COUNT(*) as total')
+            ->whereNotNull('id_encargado')
+            ->groupBy('id_encargado')
+            ->orderByDesc('total')
+            ->limit(3)
+            ->get()
+            ->map(function($row){
+                $user = User::where('ci', $row->id_encargado)->first();
+                return [
+                    'ci' => $row->id_encargado,
+                    'nombre' => $user ? trim($user->nombre.' '.$user->apellido) : 'Desconocido',
+                    'total' => $row->total,
+                ];
+            });
 
         $data = compact(
             'total',
@@ -86,7 +107,8 @@ class DashboardController extends Controller
             'totalPaquetes',
             'paquetesEntregados',
             'totalVoluntarios',
-            'voluntariosConductores'
+            'voluntariosConductores',
+            'topVoluntariosPaquetes'
         );
 
         if (request()->ajax()) {
