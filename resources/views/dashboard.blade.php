@@ -96,73 +96,23 @@
 </div>
 
 <div class="row">
-    <div class="col-md-8">
-        <div class="card">
+    <div class="col-12">
+        <div class="card mb-3">
             <div class="card-header border-0">
-                <div class="d-flex justify-content-between">
-                    <h3 class="card-title">Solicitudes</h3>
-                </div>
+                <h3 class="card-title mb-0">Solicitudes (Distribución)</h3>
             </div>
-            <div class="card-body">
-                <canvas id="solicitudesChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="info-box">
-            <span class="info-box-icon bg-info"><i class="fas fa-file-alt"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Total Solicitudes</span>
-                <span class="info-box-number">{{ $total }}</span>
-            </div>
-        </div>
-
-        <div class="info-box">
-            <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Aceptadas</span>
-                <span class="info-box-number">{{ $aceptadas }}</span>
-            </div>
-        </div>
-
-        <div class="info-box">
-            <span class="info-box-icon bg-danger"><i class="fas fa-times"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Rechazadas</span>
-                <span class="info-box-number">{{ $rechazadas }}</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Progreso General</h3>
-            </div>
-            <div class="card-body">
-                <div class="progress-group">
-                    Aceptadas
-                    <span class="float-right"><b>{{ $aceptadas }}</b>/{{ $total }}</span>
-                    <div class="progress progress-sm">
-                        <div class="progress-bar bg-success" style="width: {{ $total > 0 ? ($aceptadas / $total) * 100 : 0 }}%"></div>
-                    </div>
-                </div>
-                <div class="progress-group">
-                    Rechazadas
-                    <span class="float-right"><b>{{ $rechazadas }}</b>/{{ $total }}</span>
-                    <div class="progress progress-sm">
-                        <div class="progress-bar bg-danger" style="width: {{ $total > 0 ? ($rechazadas / $total) * 100 : 0 }}%"></div>
-                    </div>
-                </div>
+            <div class="card-body pt-2">
+                <canvas id="solicitudesChart" style="min-height: 250px; height: 250px; max-height: 250px; width:100%;"></canvas>
             </div>
         </div>
     </div>
 </div>
 
 {{-- NUEVAS SECCIONES --}}
-<div class="row mt-3">
+<div class="row mt-3 align-items-stretch">
     {{-- Productos más pedidos --}}
-    <div class="col-md-6">
-        <div class="card">
+    <div class="col-md-6 mb-4 d-flex">
+        <div class="card w-100 h-100">
             <div class="card-header bg-primary">
                 <h3 class="card-title text-white">Productos Más Pedidos (Top 5)</h3>
             </div>
@@ -190,8 +140,8 @@
     </div>
 
     {{-- Info Paquetes --}}
-    <div class="col-md-6">
-        <div class="card">
+    <div class="col-md-6 mb-4 d-flex">
+        <div class="card w-100 h-100">
             <div class="card-header bg-warning">
                 <h3 class="card-title">Estadísticas de Paquetes</h3>
             </div>
