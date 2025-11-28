@@ -23,7 +23,14 @@
         @endif
 
         <div class="card-body bg-white">
-          <div class="row">
+          <style>
+            .solicitud-uniform-row .col-md-3 {display:flex;}
+            .solicitud-uniform-row .card {display:flex; flex-direction:column; width:100%;}
+            .solicitud-uniform-row .card-body {flex:1; min-height:340px; display:flex; flex-direction:column;}
+            .solicitud-uniform-row .card-footer {margin-top:auto;}
+            .solicitud-uniform-row .card-body .mt-auto p {margin-bottom:4px;}
+          </style>
+          <div class="row solicitud-uniform-row">
               @foreach ($solicituds as $solicitud)
                   @php
                       $pers = optional($solicitud->solicitante);
@@ -63,16 +70,16 @@
                               <p class="mb-1"><strong>CI:</strong> {{ $pers->ci ?? '—' }}</p>
                               <p class="mb-1"><strong>Correo:</strong> {{ $pers->email ?? '—' }}</p>
                               <p class="mb-1"><strong>Celular:</strong> {{ $pers->telefono ?? '—' }}</p>
-                            <br>
 
                               <p class="mb-1"><strong>Comunidad:</strong> {{ $dest->comunidad ?? '—' }}</p>
                               <p class="mb-1"><strong>Provincia:</strong> {{ $dest->provincia ?? '—' }}</p>
-                              <p class="mb-1"><strong>Ubicación:</strong> {{ $dest->direccion ?? '—' }}</p>
-                            <br>
+                              <p class="mb-1"><strong>Ubicación:</strong> <span title="{{ $dest->direccion }}">{{ $dest->direccion ? \Illuminate\Support\Str::limit($dest->direccion, 60) : '—' }}</span></p>
 
-                              <p class="mb-1"><strong>Tipo de Emergencia:</strong> {{ $solicitud->tipo_emergencia ?? '—' }}</p>
-                              <p class="mb-1"><strong>Personas afectadas:</strong> {{ $solicitud->cantidad_personas }}</p>
-                              <p class="mb-1"><strong>Fecha inicio:</strong> {{ \Carbon\Carbon::parse($solicitud->fecha_inicio)->format('d/m/Y') }}</p>
+                              <div class="mt-auto">
+                                  <p class="mb-1"><strong>Tipo de Emergencia:</strong> {{ $solicitud->tipo_emergencia ?? '—' }}</p>
+                                  <p class="mb-1"><strong>Personas afectadas:</strong> {{ $solicitud->cantidad_personas }}</p>
+                                  <p class="mb-1"><strong>Fecha inicio:</strong> {{ \Carbon\Carbon::parse($solicitud->fecha_inicio)->format('d/m/Y') }}</p>
+                              </div>
                           </div>
 
                           <div class="card-footer d-flex justify-content-between">
