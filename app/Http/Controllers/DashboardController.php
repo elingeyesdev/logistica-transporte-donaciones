@@ -75,7 +75,7 @@ class DashboardController extends Controller
         
         $voluntariosConductores = Conductor::count();
 
-        return view('dashboard', compact(
+        $data = compact(
             'total',
             'aceptadas',
             'rechazadas',
@@ -87,6 +87,12 @@ class DashboardController extends Controller
             'paquetesEntregados',
             'totalVoluntarios',
             'voluntariosConductores'
-        ));
+        );
+
+        if (request()->ajax()) {
+            return response()->json($data);
+        }
+
+        return view('dashboard', $data);
     }
 }

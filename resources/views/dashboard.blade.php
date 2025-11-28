@@ -5,18 +5,19 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1>Dashboard <small>Control panel</small></h1>
-        <button class="btn btn-primary" onclick="location.reload()">
+        <button class="btn btn-primary" id="btn-refresh-dashboard">
             <i class="fas fa-sync-alt"></i> Recargar
         </button>
     </div>
 @stop
 
 @section('content')
+<div id="dashboard-content">
 <div class="row">
     <div class="col-lg-3 col-6">
         <div class="small-box bg-info">
             <div class="inner">
-                <h3>{{ $total }}</h3>
+                <h3 id="total-solicitudes">{{ $total }}</h3>
                 <p>Solicitudes Totales</p>
             </div>
             <div class="icon">
@@ -29,7 +30,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-success">
             <div class="inner">
-                <h3>{{ $aceptadas }}</h3>
+                <h3 id="total-aceptadas">{{ $aceptadas }}</h3>
                 <p>Aceptadas</p>
             </div>
             <div class="icon">
@@ -42,7 +43,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-danger">
             <div class="inner">
-                <h3>{{ $rechazadas }}</h3>
+                <h3 id="total-rechazadas">{{ $rechazadas }}</h3>
                 <p>Rechazadas</p>
             </div>
             <div class="icon">
@@ -55,7 +56,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3>{{ $total > 0 ? round(($aceptadas / $total) * 100) : 0 }}%</h3>
+                <h3 id="tasa-aprobacion">{{ $total > 0 ? round(($aceptadas / $total) * 100) : 0 }}%</h3>
                 <p>Tasa de Aprobación</p>
             </div>
             <div class="icon">
@@ -71,7 +72,7 @@
     <div class="col-lg-6 col-6">
         <div class="small-box bg-purple">
             <div class="inner">
-                <h3>{{ $totalVoluntarios }}</h3>
+                <h3 id="total-voluntarios">{{ $totalVoluntarios }}</h3>
                 <p>Total Voluntarios</p>
             </div>
             <div class="icon">
@@ -84,7 +85,7 @@
     <div class="col-lg-6 col-6">
         <div class="small-box bg-teal">
             <div class="inner">
-                <h3>{{ $voluntariosConductores }}</h3>
+                <h3 id="voluntarios-conductores">{{ $voluntariosConductores }}</h3>
                 <p>Voluntarios Conductores</p>
             </div>
             <div class="icon">
@@ -124,7 +125,7 @@
                             <th class="text-right">Veces pedido</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="productos-tbody">
                         @forelse($productosMasPedidos as $producto => $cantidad)
                             <tr>
                                 <td>{{ ucfirst($producto) }}</td>
@@ -150,14 +151,14 @@
                     <span class="info-box-icon bg-info"><i class="fas fa-box"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Total Paquetes</span>
-                        <span class="info-box-number">{{ $totalPaquetes }}</span>
+                        <span class="info-box-number" id="total-paquetes">{{ $totalPaquetes }}</span>
                     </div>
                 </div>
                 <div class="info-box mb-3">
                     <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Paquetes Entregados</span>
-                        <span class="info-box-number">{{ $paquetesEntregados }}</span>
+                        <span class="info-box-number" id="paquetes-entregados">{{ $paquetesEntregados }}</span>
                     </div>
                 </div>
             </div>
@@ -181,7 +182,7 @@
                             <th class="text-right">Días de Entrega</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="paquetes-tbody">
                         @forelse($paquetes as $paq)
                             <tr>
                                 <td><a href="{{ route('paquete.show', $paq->id_paquete) }}">#{{ $paq->id_paquete }}</a></td>
@@ -205,10 +206,13 @@
         </div>
     </div>
 </div>
+</div>
 @stop
 
 @section('js')
 <script>
+let solicitudesChart = null;
+
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof Chart === 'undefined') {
         console.warn('Chart.js no está cargado. Activa el plugin Chartjs en config/adminlte.php');
@@ -218,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('solicitudesChart');
     if (!ctx) return;
     
-    new Chart(ctx, {
+    solicitudesChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: ['Aceptadas', 'Rechazadas', 'Pendientes'],
@@ -235,6 +239,86 @@ document.addEventListener('DOMContentLoaded', function() {
                 position: 'bottom'
             }
         }
+    });
+
+   
+    document.getElementById('btn-refresh-dashboard').addEventListener('click', function() {
+        const btn = this;
+        const icon = btn.querySelector('i');
+        
+       
+        icon.classList.add('fa-spin');
+        btn.disabled = true;
+
+        fetch('{{ route("dashboard") }}', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            
+            document.getElementById('total-solicitudes').textContent = data.total;
+            document.getElementById('total-aceptadas').textContent = data.aceptadas;
+            document.getElementById('total-rechazadas').textContent = data.rechazadas;
+            const tasaAprobacion = data.total > 0 ? Math.round((data.aceptadas / data.total) * 100) : 0;
+            document.getElementById('tasa-aprobacion').textContent = tasaAprobacion + '%';
+            document.getElementById('total-voluntarios').textContent = data.totalVoluntarios;
+            document.getElementById('voluntarios-conductores').textContent = data.voluntariosConductores;
+            document.getElementById('total-paquetes').textContent = data.totalPaquetes;
+            document.getElementById('paquetes-entregados').textContent = data.paquetesEntregados;
+
+          
+            if (solicitudesChart) {
+                solicitudesChart.data.datasets[0].data = [
+                    data.aceptadas,
+                    data.rechazadas,
+                    data.total - data.aceptadas - data.rechazadas
+                ];
+                solicitudesChart.update();
+            }
+
+           
+            const productosHtml = Object.entries(data.productosMasPedidos).length > 0
+                ? Object.entries(data.productosMasPedidos).map(([producto, cantidad]) => `
+                    <tr>
+                        <td>${producto.charAt(0).toUpperCase() + producto.slice(1)}</td>
+                        <td class="text-right"><span class="badge badge-info">${cantidad}</span></td>
+                    </tr>
+                `).join('')
+                : '<tr><td colspan="2" class="text-center text-muted">No hay datos de productos.</td></tr>';
+            document.getElementById('productos-tbody').innerHTML = productosHtml;
+
+            
+            const paquetesHtml = data.paquetes.length > 0
+                ? data.paquetes.map(paq => {
+                    const badgeClass = paq.dias_entrega > 7 ? 'danger' : (paq.dias_entrega > 3 ? 'warning' : 'success');
+                    return `
+                        <tr>
+                            <td><a href="/paquete/${paq.id_paquete}">#${paq.id_paquete}</a></td>
+                            <td>${paq.fecha_creacion}</td>
+                            <td>${paq.fecha_entrega}</td>
+                            <td class="text-right">
+                                <span class="badge badge-${badgeClass}">
+                                    ${Math.round(paq.dias_entrega * 10) / 10} días
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('')
+                : '<tr><td colspan="4" class="text-center text-muted">No hay paquetes con fechas de entrega.</td></tr>';
+            document.getElementById('paquetes-tbody').innerHTML = paquetesHtml;
+
+          
+            icon.classList.remove('fa-spin');
+            btn.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error refreshing dashboard:', error);
+            alert('Error al actualizar el dashboard');
+            icon.classList.remove('fa-spin');
+            btn.disabled = false;
+        });
     });
 });
 </script>
