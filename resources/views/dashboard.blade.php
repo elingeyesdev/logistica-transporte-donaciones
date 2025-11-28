@@ -3,7 +3,12 @@
 @section('title', 'Dashboard')
 
 @section('content_header')
-    <h1>Dashboard <small>Control panel</small></h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Dashboard <small>Control panel</small></h1>
+        <button class="btn btn-primary" onclick="location.reload()">
+            <i class="fas fa-sync-alt"></i> Recargar
+        </button>
+    </div>
 @stop
 
 @section('content')
@@ -57,6 +62,35 @@
                 <i class="fas fa-chart-pie"></i>
             </div>
             <a href="#" class="small-box-footer">Info <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+</div>
+
+{{-- VOLUNTARIOS --}}
+<div class="row">
+    <div class="col-lg-6 col-6">
+        <div class="small-box bg-purple">
+            <div class="inner">
+                <h3>{{ $totalVoluntarios }}</h3>
+                <p>Total Voluntarios</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <a href="{{ url('usuario') }}" class="small-box-footer">Ver voluntarios <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+
+    <div class="col-lg-6 col-6">
+        <div class="small-box bg-teal">
+            <div class="inner">
+                <h3>{{ $voluntariosConductores }}</h3>
+                <p>Voluntarios Conductores</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <a href="{{ url('conductor') }}" class="small-box-footer">Ver conductores <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
 </div>
@@ -174,13 +208,6 @@
                     <div class="info-box-content">
                         <span class="info-box-text">Paquetes Entregados</span>
                         <span class="info-box-number">{{ $paquetesEntregados }}</span>
-                    </div>
-                </div>
-                <div class="info-box">
-                    <span class="info-box-icon bg-warning"><i class="fas fa-clock"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Promedio Entrega (días)</span>
-                        <span class="info-box-number">{{ $promedioEntrega }}</span>
                     </div>
                 </div>
             </div>

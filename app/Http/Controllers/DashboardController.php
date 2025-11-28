@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Solicitud;
 use App\Models\Paquete;
+use App\Models\User;
+use App\Models\Conductor;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -68,6 +70,12 @@ class DashboardController extends Controller
         $totalPaquetes = Paquete::count();
         $paquetesEntregados = Paquete::whereNotNull('fecha_entrega')->count();
 
+        // === VOLUNTARIOS ===
+        $totalVoluntarios = User::where('activo', true)->count();
+        
+        // Total de conductores registrados
+        $voluntariosConductores = Conductor::count();
+
         return view('dashboard', compact(
             'total',
             'aceptadas',
@@ -77,7 +85,9 @@ class DashboardController extends Controller
             'paquetes',
             'promedioEntrega',
             'totalPaquetes',
-            'paquetesEntregados'
+            'paquetesEntregados',
+            'totalVoluntarios',
+            'voluntariosConductores'
         ));
     }
 }
