@@ -54,11 +54,11 @@
                                             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                                         };
                                         
-                                        // Mostrar temporalmente el elemento
+                                        
                                         element.style.display = 'block';
                                         
                                         html2pdf().set(opt).from(element).save().then(() => {
-                                            // Ocultar nuevamente después de generar
+                                            
                                             element.style.display = 'none';
                                         });
                                     });
@@ -69,7 +69,7 @@
                         <div id="reporte-pdf">
                             <div class="header">
                                 <div class="brand">DAS - Alas Chiquitanas</div>
-                                <div class="subtle">Generado: {{ now()->format('Y-m-d H:i') }}</div>
+                                <div class="subtle">Generado: {{ now()->format('d/m/Y H:i') }}</div>
                             </div>
                             <div class="title">Reporte de Paquete N°{{ $paquete->id_paquete }}</div>
 
@@ -110,7 +110,7 @@
                                     </tr>
                                     <tr>
                                         <td>Fecha Creación Solicitud</td>
-                                        <td>{{ $solicitud->fecha_creacion ?? ($solicitud->created_at ?? '—') }}</td>
+                                        <td>{{ ($solicitud->fecha_creacion ?? $solicitud->created_at) ? \Carbon\Carbon::parse($solicitud->fecha_creacion ?? $solicitud->created_at)->format('d/m/Y') : '—' }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -149,7 +149,7 @@
                                     </tr>
                                     <tr>
                                         <td>Fecha de reporte</td>
-                                        <td>{{ now()->format('Y-m-d H:i') }}</td>
+                                        <td>{{ now()->format('d/m/Y H:i') }}</td>
                                     </tr>
                                     <tr>
                                     <td>Voluntario Encargado</td>
