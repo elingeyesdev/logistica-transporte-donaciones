@@ -66,10 +66,16 @@ class LoginController extends Controller
 
         $token = $user->createToken('mobile_token')->plainTextToken;
 
-        return response()->json([
+       return response()->json([
             'success' => true,
             'message' => 'Inicio de sesión exitoso.',
-            'user' => $user,
+            'user' => [
+                'ci'            => $user->ci,
+                'nombre'        => $user->nombre,
+                'apellido'      => $user->apellido,
+                'correo'        => $user->correo_electronico,
+                'administrador' => (bool)$user->administrador,
+            ],
             'token' => $token
         ]);
     }
