@@ -36,7 +36,6 @@
 
                         
                     </form>
-                    {{-- Modal Crear Conductor --}}
                     <div class="modal fade" id="modalConductor" tabindex="-1" aria-labelledby="modalConductorLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">

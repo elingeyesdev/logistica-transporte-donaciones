@@ -63,7 +63,7 @@ class PaqueteController extends Controller
 
     public function store(PaqueteRequest $request)  
     {
-        DB::transaction(); 
+        DB::beginTransaction();
         try{
 
             $data = $request->validated();
@@ -215,7 +215,7 @@ class PaqueteController extends Controller
         $oldEstadoId = $paquete->estado_id;
 
         $payload = $request->validated();
-        $payload['id_encargado'] = Auth::user()->ci;
+        $payload['id_encargado'] = optional(Auth::user())->ci ?? $paquete->id_encargado ?? null;
 
         if ($request->hasFile('imagen')) {
             $payload['imagen'] = $request->file('imagen')->store('paquetes', 'public');
