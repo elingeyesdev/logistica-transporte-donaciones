@@ -65,7 +65,10 @@
             <input required type="text" name="nro_celular" id="nro_celular"
                    class="form-control @error('nro_celular') is-invalid @enderror"
                    value="{{ old('nro_celular', $pers->telefono) }}"
-                   placeholder="Ej. 70000000">
+                   placeholder="Ej. 70000000"
+                   pattern="[0-9]+"
+                   title="Solo se permiten números"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             @error('nro_celular') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
     </div>
