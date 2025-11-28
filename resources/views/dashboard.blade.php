@@ -250,10 +250,10 @@ document.addEventListener('DOMContentLoaded', function() {
     solicitudesChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Aceptadas', 'Rechazadas', 'Pendientes'],
+            labels: ['Aceptadas', 'Rechazadas'],
             datasets: [{
-                data: [{{ $aceptadas }}, {{ $rechazadas }}, {{ $total - $aceptadas - $rechazadas }}],
-                backgroundColor: ['#28a745', '#dc3545', '#ffc107']
+                data: [{{ $aceptadas }}, {{ $rechazadas }}],
+                backgroundColor: ['#28a745', '#dc3545']
             }]
         },
         options: {
@@ -297,8 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (solicitudesChart) {
                 solicitudesChart.data.datasets[0].data = [
                     data.aceptadas,
-                    data.rechazadas,
-                    data.total - data.aceptadas - data.rechazadas
+                    data.rechazadas
                 ];
                 solicitudesChart.update();
             }
