@@ -22,7 +22,6 @@ class EstadoRequest extends FormRequest
     public function rules(): array
     {
         return [
-			'id_estado' => 'required',
 			'nombre_estado' => 'required|string',
         ];
     }

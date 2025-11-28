@@ -14,7 +14,7 @@
                         <span class="card-title">{{ __('Actualizar') }} Tipo de Licencia</span>
                     </div>
                     <div class="card-body bg-white">
-                        <form method="UPDATE" action="{{ route('tipo-licencia.update', $tipoLicencia->id_licencia) }}"  role="form" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('tipo-licencia.update', $tipoLicencia->id_licencia) }}"  role="form" enctype="multipart/form-data">
                             {{ method_field('PATCH') }}
                             @csrf
 
