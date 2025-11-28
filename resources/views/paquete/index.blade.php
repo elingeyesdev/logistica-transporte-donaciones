@@ -19,7 +19,13 @@
         @endif
 
         <div class="card-body bg-white">
-          <div class="row">
+          <style>
+            .paquete-uniform-row .col-md-3 {display:flex;}
+            .paquete-uniform-row .card {display:flex; flex-direction:column; width:100%;}
+            .paquete-uniform-row .card-body {flex:1; display:flex; flex-direction:column; min-height:320px;}
+            .paquete-uniform-row .card-footer {margin-top:auto;}
+          </style>
+          <div class="row paquete-uniform-row">
 
             @foreach ($paquetes as $paquete)
 
@@ -67,17 +73,19 @@
 
                     <hr>
 
-                    <p class="mb-1"><strong>Ubicación:</strong>
-                      {{ trim(\Illuminate\Support\Str::before($paquete->ubicacion_actual, '-')) ?: '—' }}
-                    </p>
+                    <div class="mt-auto">
+                      <p class="mb-1"><strong>Ubicación:</strong>
+                        <span title="{{ $paquete->ubicacion_actual }}">{{ ($paquete->ubicacion_actual ? \Illuminate\Support\Str::limit(trim(\Illuminate\Support\Str::before($paquete->ubicacion_actual, '-')), 55) : '—') }}</span>
+                      </p>
 
-                    <p class="mb-1"><strong>Fecha Creación:</strong> 
-                      {{ \Carbon\Carbon::parse($paquete->created_at)->format('d/m/Y') }}
-                    </p>
+                      <p class="mb-1"><strong>Fecha Creación:</strong> 
+                        {{ \Carbon\Carbon::parse($paquete->created_at)->format('d/m/Y') }}
+                      </p>
 
-                    <p class="mb-1"><strong>Fecha Entrega:</strong> 
-                      {{ $paquete->fecha_entrega ?? '—' }}
-                    </p>
+                      <p class="mb-1"><strong>Fecha Entrega:</strong> 
+                        {{ $paquete->fecha_entrega ?? '—' }}
+                      </p>
+                    </div>
 
                   </div>
 
