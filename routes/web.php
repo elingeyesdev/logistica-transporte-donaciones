@@ -17,6 +17,7 @@ use App\Http\Controllers\TipoEmergenciaController;
 use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserAdminController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -76,5 +77,8 @@ Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar'])->name
 Route::get('/seguimiento/tracking/{id_paquete}', 
     [HistorialSeguimientoDonacioneController::class, 'tracking'])
     ->name('seguimiento.tracking');
+
+// Dashboard
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 

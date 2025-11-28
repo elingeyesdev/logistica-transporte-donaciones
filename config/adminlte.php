@@ -318,6 +318,11 @@ return [
             'text' => 'Buscar',
         ],
         [
+            'text' => 'Dashboard',
+            'route' => 'dashboard',
+            'icon' => 'fas fa-tachometer-alt',
+        ],
+        [
             'text' => 'Solicitudes',
             'url'  => 'solicitud',
             'icon' => 'fas fa-fw fa-file',
@@ -479,7 +484,7 @@ return [
             ],
         ],
         'Chartjs' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',

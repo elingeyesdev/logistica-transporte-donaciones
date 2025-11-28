@@ -42,18 +42,18 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($estado as $estados)
+                                    @foreach ($estados as $estado)
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
-										<td >{{ $estados->id_estado }}</td>
-										<td >{{ $estados->nombre_estado }}</td>
+										<td >{{ $estado->id_estado }}</td>
+										<td >{{ $estado->nombre_estado }}</td>
 						
 
                                             <td>
-                                                <form action="{{ route('estado.destroy', $estados->id_estado) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('estado.show', $estados->id_estado) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('estado.edit', $estados->id_estado) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
+                                                <form action="{{ route('estado.destroy', $estado->id_estado) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('estado.show', $estado->id_estado) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('estado.edit', $estado->id_estado) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Seguro que quieres eliminiar este registro?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
@@ -66,7 +66,7 @@
                         </div>
                     </div>
                 </div>
-                {!! $estado->withQueryString()->links() !!}
+               
             </div>
         </div>
     </div>
