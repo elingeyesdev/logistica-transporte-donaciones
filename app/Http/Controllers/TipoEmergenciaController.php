@@ -47,8 +47,9 @@ class TipoEmergenciaController extends Controller
 
         return view('tipo-emergencia.edit', compact('tipoEmergencia'));
     }
-    public function update(TipoEmergenciaRequest $request, TipoEmergencia $tipoEmergencia): RedirectResponse
+    public function update(TipoEmergenciaRequest $request, $id): RedirectResponse
     {
+        $tipoEmergencia = TipoEmergencia::find($id);
         $tipoEmergencia->update($request->validated());
 
         return Redirect::route('tipo-emergencia.index')
