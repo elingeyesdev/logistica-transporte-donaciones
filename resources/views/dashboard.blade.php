@@ -66,7 +66,7 @@
     </div>
 </div>
 
-{{-- VOLUNTARIOS --}}
+
 <div class="row">
     <div class="col-lg-6 col-6">
         <div class="small-box bg-purple">
@@ -108,9 +108,9 @@
     </div>
 </div>
 
-{{-- NUEVAS SECCIONES --}}
+
 <div class="row mt-3 align-items-stretch">
-    {{-- Productos más pedidos --}}
+    
     <div class="col-md-6 mb-4 d-flex">
         <div class="card w-100 h-100">
             <div class="card-header bg-primary">
@@ -139,7 +139,7 @@
         </div>
     </div>
 
-    {{-- Info Paquetes --}}
+    
     <div class="col-md-6 mb-4 d-flex">
         <div class="card w-100 h-100">
             <div class="card-header bg-warning">
