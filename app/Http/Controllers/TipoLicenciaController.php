@@ -66,9 +66,9 @@ class TipoLicenciaController extends Controller
 
     public function edit($id_licencia): View
     {
-        $tipoLicencia = TipoLicencia::find($id_licencia);
+        $tipoLicencia = TipoLicencia::findOrFail($id_licencia);
 
-        return view('tipo-licencia.edit', compact('tipoLicencium'));
+        return view('tipo-licencia.edit', compact('tipoLicencia'));
     }
     public function update(TipoLicenciaRequest $request, TipoLicencia $tipoLicencia)
     {
