@@ -23,15 +23,7 @@
 
                 <div class="card-body bg-white">
                         <style>
-                            @media screen {
-                                #reporte-pdf { display: none; }
-                            }
-                            @media print {
-                                body * { visibility: hidden; }
-                                #reporte-pdf, #reporte-pdf * { visibility: visible; }
-                                #reporte-pdf { position: absolute; left: 0; top: 0; width: 100%; }
-                            }
-                            #reporte-pdf { font-family: Arial, Helvetica, sans-serif; color: #222; }
+                            #reporte-pdf { display: none; font-family: Arial, Helvetica, sans-serif; color: #222; }
                             #reporte-pdf .header {
                                 display: flex; justify-content: space-between; align-items: center;
                                 border-bottom: 2px solid #444; padding-bottom: 8px; margin-bottom: 12px;
@@ -47,12 +39,28 @@
                             #reporte-pdf tbody td { border: 1px solid #ddd; padding: 6px; font-size: 12px; }
                             #reporte-pdf .footer { margin-top: 12px; border-top: 1px dashed #bbb; padding-top: 6px; font-size: 11px; color: #666; }
                         </style>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 const btn = document.getElementById('btn-imprimir-reporte');
                                 if (btn) {
                                     btn.addEventListener('click', function() {
-                                        window.print();
+                                        const element = document.getElementById('reporte-pdf');
+                                        const opt = {
+                                            margin: 10,
+                                            filename: 'Reporte_Paquete_{{ $paquete->id_paquete }}.pdf',
+                                            image: { type: 'jpeg', quality: 0.98 },
+                                            html2canvas: { scale: 2 },
+                                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                                        };
+                                        
+                                        // Mostrar temporalmente el elemento
+                                        element.style.display = 'block';
+                                        
+                                        html2pdf().set(opt).from(element).save().then(() => {
+                                            // Ocultar nuevamente después de generar
+                                            element.style.display = 'none';
+                                        });
                                     });
                                 }
                             });
