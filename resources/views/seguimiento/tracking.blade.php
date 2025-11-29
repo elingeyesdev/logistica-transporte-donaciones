@@ -1,9 +1,15 @@
 @extends('adminlte::page')
 
 @section('title','Tracking del Paquete')
- @section('css')
-            <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-            @endsection
+@section('css')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <style>
+        .leaflet-routing-container {
+            display: none !important;
+        }
+    </style>
+@endsection
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1>Tracking del Paquete: {{ $paquete->codigo }}</h1>
@@ -93,12 +99,66 @@
 
 @section('js')
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    const parsedPoints = JSON.parse(String.raw`{!! json_encode($points) !!}`) || [];
+    const points = parsedPoints
+        .map(p => ({
+            ...p,
+            lat: p.lat !== undefined ? parseFloat(p.lat) : null,
+            lng: p.lng !== undefined ? parseFloat(p.lng) : null,
+        }))
+        .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng));
 
-    const points = JSON.parse(String.raw`{!! json_encode($points) !!}`);
+    let truckMarker = null;
+    let truckTimer = null;
 
-    if (!points.length) return;
+    const startTruckAnimation = (mapInstance, coords) => {
+        if (!coords.length) return;
+
+        const normalized = coords.map(coord => {
+            if (coord && coord.lat !== undefined && coord.lng !== undefined) {
+                return L.latLng(coord.lat, coord.lng);
+            }
+            if (coord && coord.latLng && coord.latLng.lat !== undefined && coord.latLng.lng !== undefined) {
+                return L.latLng(coord.latLng.lat, coord.latLng.lng);
+            }
+            if (Array.isArray(coord) && coord.length >= 2) {
+                return L.latLng(coord[0], coord[1]);
+            }
+            return null;
+        }).filter(Boolean);
+
+        if (!normalized.length) return;
+
+        if (truckMarker) {
+            mapInstance.removeLayer(truckMarker);
+            truckMarker = null;
+        }
+
+        if (truckTimer) {
+            clearTimeout(truckTimer);
+            truckTimer = null;
+        }
+
+        truckMarker = L.marker(normalized[0], { title: 'Camión en ruta' }).addTo(mapInstance);
+
+        let index = 0;
+        const delayMs = 2500;
+
+        const advance = () => {
+            index = (index + 1) % normalized.length;
+            truckMarker.setLatLng(normalized[index]);
+            truckTimer = setTimeout(advance, delayMs);
+        };
+
+        truckTimer = setTimeout(advance, delayMs);
+    };
+
+    if (!points.length) {
+        return;
+    }
 
     const map = L.map('tracking-map').setView([points[0].lat, points[0].lng], 12);
 
@@ -106,19 +166,55 @@ document.addEventListener("DOMContentLoaded", () => {
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    const coords = [];
-
-    points.forEach(p => {
-        coords.push([p.lat, p.lng]);
-        L.marker([p.lat, p.lng])
-            .bindPopup(`<strong>${p.fecha}</strong><br>${p.zona ?? ''}`)
+    if (points.length === 1) {
+        const point = points[0];
+        L.marker([point.lat, point.lng])
+            .bindPopup(`<strong>${point.fecha ?? 'Sin fecha'}</strong><br>${point.zona ?? ''}`)
             .addTo(map);
+        map.setView([point.lat, point.lng], 14);
+        startTruckAnimation(map, [point]);
+        return;
+    }
+
+    const fallbackPolyline = () => {
+        const latLngs = points.map(p => [p.lat, p.lng]);
+        L.polyline(latLngs, { color: 'blue', opacity: 0.6, weight: 4 }).addTo(map);
+        map.fitBounds(latLngs, { padding: [40, 40] });
+        startTruckAnimation(map, latLngs);
+    };
+
+    const routing = L.Routing.control({
+        waypoints: points.map(p => L.latLng(p.lat, p.lng)),
+        router: L.Routing.osrmv1({
+            serviceUrl: 'https://router.project-osrm.org/route/v1'
+        }),
+        lineOptions: {
+            styles: [{ color: 'blue', opacity: 0.7, weight: 5 }]
+        },
+        routeWhileDragging: false,
+        addWaypoints: false,
+        draggableWaypoints: false,
+        fitSelectedRoutes: true,
+        show: false,
+        createMarker: function(i, wp) {
+            const point = points[i];
+            return L.marker(wp.latLng).bindPopup(`<strong>${point.fecha ?? 'Sin fecha'}</strong><br>${point.zona ?? ''}`);
+        }
+    }).addTo(map);
+
+    routing.on('routesfound', function(e) {
+        const coordinates = e.routes[0]?.coordinates;
+        if (coordinates && coordinates.length) {
+            map.fitBounds(coordinates.map(c => [c.lat, c.lng]), { padding: [40, 40] });
+            startTruckAnimation(map, coordinates);
+        }
     });
 
-    L.polyline(coords, { color: 'blue' }).addTo(map);
-
-    map.fitBounds(coords, { padding: [40, 40] });
-
+    routing.on('routingerror', function(err) {
+        console.warn('OSRM routing failed, using straight polyline fallback.', err);
+        routing.remove();
+        fallbackPolyline();
+    });
 });
 </script>
 @endsection
