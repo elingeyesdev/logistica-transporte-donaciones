@@ -9,11 +9,19 @@ use App\Models\Rol;
 use App\Models\TipoLicencia;
 class UserAdminController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $users = User::all();
         $roles = Rol::orderBy('titulo_rol')->get();
         $licencias = TipoLicencia::orderBy('id_licencia')->get();
+         if ($request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success'   => true,
+                'users'     => $users,
+                'roles'     => $roles,
+                'licencias' => $licencias,
+            ]);
+        }
         return view('users.index', compact('users', 'roles', 'licencias'));
     }
 

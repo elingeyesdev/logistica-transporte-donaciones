@@ -51,7 +51,7 @@ Route::middleware(['auth:sanctum', 'activo'])->group(function () {
     Route::apiResource('tipo-emergencia', TipoEmergenciaController::class);
     Route::apiResource('marca', MarcaController::class);
     Route::apiResource('rol', RolController::class);
-
+    Route::apiResource('user', UserAdminController::class);
     Route::get('/user', function (Request $request) {
         return $request->user();
     })->middleware('auth:sanctum');
