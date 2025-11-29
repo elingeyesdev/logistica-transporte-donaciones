@@ -1,8 +1,6 @@
 @php
-    $pers = optional($solicitud->solicitante ?? null);
-    $dest = optional($solicitud->destino ?? null);
-@endphp
-@php
+    $solicitud = $solicitud ?? new \App\Models\Solicitud;
+
     $pers = optional($solicitud->solicitante ?? null);
     $dest = optional($solicitud->destino ?? null);
 
@@ -11,7 +9,10 @@
     $defaultLat = $latValue ?: -17.8146;
     $defaultLng = $lngValue ?: -63.1561;
     $defaultZoom = $latValue ? 13 : 6;
+
+    $tipoEmergencia = $tipoEmergencia ?? collect();
 @endphp
+
 
 
 <div class="row">
@@ -172,7 +173,7 @@
                 @foreach($tipoEmergencia as $tipo)
                     <option value="{{ $tipo->id_emergencia }}"
                         {{ old('id_tipoemergencia', $solicitud->id_tipoemergencia) == $tipo->id_emergencia ? 'selected' : '' }}>
-                        {{ $tipo->emergencia }} (Prioridad: {{ $tipo->prioridad }})
+                        {{ $tipo->emergencia }}
                     </option>
                 @endforeach
             </select>
@@ -222,11 +223,13 @@
 
 <div class="text-right">
     <button type="submit" class="btn btn-success">
-        <i class="fas fa-save"></i> Guardar Solicitud
+        <i class="fas fa-save"></i> Enviar Solicitud
     </button>
-    <a href="{{ route('solicitud.index') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
+    @auth
+        <a href="{{ route('solicitud.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    @endauth
 </div>
 
 <script>
@@ -241,8 +244,8 @@
     const mapContainer = document.getElementById('mapa-ubicacion');
     if (!mapContainer) return;
 
-    let defaultLat = parseFloat(mapContainer.dataset.lat || "-17.8146");
-    let defaultLng = parseFloat(mapContainer.dataset.lng || "-63.1561");
+    let defaultLat = parseFloat(mapContainer.dataset.lat || "-17.81463325");
+    let defaultLng = parseFloat(mapContainer.dataset.lng || "-63.15615466");
     let defaultZoom = parseInt(mapContainer.dataset.zoom || "6", 10);
 
     const latInput = document.getElementById('latitud');
@@ -260,8 +263,8 @@
     let marker = null;
 
     function setMarkerAndReverseGeocode(lat, lng) {
-      latInput.value = lat.toFixed(6);
-      lngInput.value = lng.toFixed(6);
+      latInput.value = lat;
+      lngInput.value = lng;
 
       if (marker) {
         marker.setLatLng([lat, lng]);
@@ -282,11 +285,11 @@
           if (data?.address) {
             const a = data.address;
 
-            let dir = a.road ?? '';
-            if (a.house_number) dir += ' ' + a.house_number;
-            if (a.neighbourhood) dir += ', ' + a.neighbourhood;
-            if (a.suburb) dir += ', ' + a.suburb;
-            if (a.city || a.town) dir += ', ' + (a.city || a.town);
+            let dir = a.road ?? ' ';
+            if (a.house_number) dir += ' ' + a.house_number + ', ';
+            if (a.neighbourhood) dir += a.neighbourhood +', ';
+            if (a.suburb) dir +=a.suburb + ', ';
+            if (a.city || a.town) dir += (a.city || a.town);
 
             ubicacionInput.value = dir || data.display_name || `${lat}, ${lng}`;
 

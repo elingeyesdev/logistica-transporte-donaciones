@@ -7,7 +7,7 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1>Tracking del Paquete: {{ $paquete->codigo }}</h1>
-        <a href="{{ route('paquete.index') }}" class="btn btn-primary">
+        <a href="{{ route('seguimiento.index') }}" class="btn btn-primary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
     </div>
@@ -74,7 +74,8 @@
                 <tbody>
                 @foreach($historial as $h)
                     <tr>
-                        <td>{{ $h->fecha_actualizacion }}</td>
+                        
+                        <td> {{ \Carbon\Carbon::parse($h->fecha_actualizacion)->format('d/m/Y - H:m') }}</td>
                         <td>{{ $h->estado }}</td>
                         <td>{{ optional($h->ubicacion)->zona }}</td>
                         <td>{{ $h->conductor_nombre }}</td>

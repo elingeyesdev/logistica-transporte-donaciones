@@ -3,7 +3,9 @@
 @section('template_title')
     {{ __('Crear') }} Solicitud
 @endsection
-
+@if (!auth()->check())
+    @section('layout_topnav', true)
+@endif
 @push('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="

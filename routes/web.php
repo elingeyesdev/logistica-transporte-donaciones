@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SolicitudController;
 use App\Http\Controllers\paqueteController;
@@ -19,25 +19,93 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\DashboardController;
 
-Route::get('/', function () {
-    return view('welcome');
+//rutas publicas
+Auth::routes();
+Route::get('solicitud/buscar', [SolicitudController::class, 'buscarPorCodigo'])
+        ->name('solicitud.buscar');
+Route::get('/', [SolicitudController::class, 'create'])->name('solicitud.public.create');
+
+Route::get('solicitud/create', [SolicitudController::class, 'create'])
+    ->name('solicitud.create');
+Route::post('solicitud', [SolicitudController::class, 'store'])
+    ->name('solicitud.store');
+
+//PUBLICAS PARA EL API GATEWAY
+Route::post('/api/solicitud', [SolicitudController::class, 'store']);
+Route::get('/api/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'service' => 'logistica',
+    ]);
 });
 
-Auth::routes();
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
+        ->name('home');
+    Route::resource('solicitud', SolicitudController::class)
+        ->except(['create', 'store']);
+    Route::post('solicitud/{id}/aprobar', [SolicitudController::class, 'aprobar'])
+        ->name('solicitud.aprobar');
+    Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar'])
+        ->name('solicitud.negar');
+    Route::resource('solicitante', SolicitanteController::class)
+        ->except(['destroy']);
+    Route::resource('paquete', PaqueteController::class);
+    Route::resource('destino', DestinoController::class)
+        ->except(['destroy']);
+    Route::resource('marca', MarcaController::class);
+    Route::resource('vehiculo', VehiculoController::class);
+    Route::resource('tipo-vehiculo', TipoVehiculoController::class);
+    Route::resource('conductor', ConductorController::class);
+    Route::get('/seguimiento/tracking/{id_paquete}', 
+        [HistorialSeguimientoDonacioneController::class, 'tracking'])
+        ->name('seguimiento.tracking');
+    Route::resource('seguimiento', HistorialSeguimientoDonacioneController::class);
+
+    Route::resource('ubicacion', UbicacionController::class)->except(['destroy']);
+
+});
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+    Route::resource('estado', EstadoController::class);
+    Route::resource('reporte', ReporteController::class);
+    Route::resource('tipo-licencia', TipoLicenciaController::class);
+    Route::resource('tipo-emergencia', TipoEmergenciaController::class);
+    Route::resource('rol', RolController::class);
+    Route::get('/usuario', [UserAdminController::class, 'index'])
+        ->name('usuarios.index');
+
+    Route::post('/usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAdmin'])
+        ->name('usuarios.toggleAdmin');
+
+    Route::post('/usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo'])
+        ->name('usuarios.toggleActivo');
+
+    Route::post('/usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRol'])
+        ->name('usuarios.cambiarRol');
+    Route::delete('solicitante/{solicitante}', [SolicitanteController::class, 'destroy'])
+        ->name('solicitante.destroy');
+    Route::delete('destino/{destino}', [DestinoController::class, 'destroy'])
+        ->name('destino.destroy');
+    Route::delete('ubicacion/{ubicacion}', [UbicacionController::class, 'destroy'])
+        ->name('ubicacion.destroy');
+});
+
+
+
+/** 
 Route::get('solicitud/buscar', [SolicitudController::class, 'buscarPorCodigo'])->name('solicitud.buscar');
 Route::resource('solicitud', SolicitudController::class);
 Route::resource('paquete', paqueteController::class);
 Route::resource('estado', EstadoController::class);
 Route::resource('solicitante', SolicitanteController::class);
-Route::resource('ubicacion', UbicacionController::class);
 Route::resource('destino', controller: DestinoController::class);
 
 
 Route::resource('reporte', ReporteController::class);
-
-
-Route::resource('seguimiento', HistorialSeguimientoDonacioneController::class);
 
 Route::resource('tipo-licencia', TipoLicenciaController::class);
 
@@ -53,32 +121,10 @@ Route::resource('marca', MarcaController::class);
 
 Route::resource('rol', RolController::class);
 
-
-Route::post('/api/solicitud', [SolicitudController::class, 'store']);
-
-Route::get('/api/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'service' => 'logistica',
-    ]);
-});
-
 Route::get('/usuario', [UserAdminController::class, 'index'])->name('usuarios.index');
 Route::post('/usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAdmin'])->name('usuarios.toggleAdmin');
 Route::post('/usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo'])->name('usuarios.toggleActivo');
 Route::post('/usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRol'])->name('usuarios.cambiarRol');
-
-//MANEJO DE SOLICITUDES
-
-Route::post('solicitud/{id}/aprobar', [SolicitudController::class, 'aprobar'])->name('solicitud.aprobar');
-
-Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar'])->name('solicitud.negar');
-
-Route::get('/seguimiento/tracking/{id_paquete}', 
-    [HistorialSeguimientoDonacioneController::class, 'tracking'])
-    ->name('seguimiento.tracking');
-
-// Dashboard
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+ */
 
 

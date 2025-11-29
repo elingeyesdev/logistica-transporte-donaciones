@@ -1,8 +1,10 @@
 <?php
-
+use App\Providers\AppServiceProvider;
+use App\Providers\AuthServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\VerificarAdmin;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,7 +17,15 @@ return Application::configure(basePath: dirname(__DIR__))
          $middleware->validateCsrfTokens(except: [
             'api/*', 
         ]);
+         $middleware->alias([
+            'admin' => VerificarAdmin::class,
+        ]);
+
     })
+    ->withProviders([
+        AppServiceProvider::class,
+        AuthServiceProvider::class,
+    ])
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

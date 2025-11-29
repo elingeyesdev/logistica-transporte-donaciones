@@ -16,9 +16,15 @@ class HistorialSeguimientoDonacioneController extends Controller
 {
     public function index(Request $request): View
     {
-        $historialSeguimientoDonaciones = HistorialSeguimientoDonacione::with(['paquete'])->paginate();
-        return view('seguimiento.index', compact('historialSeguimientoDonaciones'))
-            ->with('i', ($request->input('page', 1) - 1) * $historialSeguimientoDonaciones->perPage());
+        $historialSeguimientoDonaciones = HistorialSeguimientoDonacione::with([
+                'paquete.solicitud',
+                'ubicacion',
+            ])
+            ->orderBy('fecha_actualizacion', 'desc')
+            ->get()
+            ->groupBy('id_paquete');
+
+        return view('seguimiento.index', compact('historialSeguimientoDonaciones'));
     }
 
     public function create(): View

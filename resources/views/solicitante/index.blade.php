@@ -50,13 +50,24 @@
 										<td >{{ $solicitante->telefono }}</td>
 
                                             <td>
-                                                <form action="{{ route('solicitante.destroy', $solicitante->id_solicitante) }}" method="POST">
                                                     <a class="btn btn-sm btn-primary " href="{{ route('solicitante.show', $solicitante->id_solicitante) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
                                               {{--  <a class="btn btn-sm btn-success" href="{{ route('solicitante.edit', $solicitante->id_solicitante) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>--}}
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Seguro que quieres eliminiar este registro?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
-                                                </form>
+                                                   @auth
+                                                        @if(auth()->user()->administrador)
+                                                            <form action="{{ route('solicitante.destroy', $solicitante->id_solicitante) }}"
+                                                                method="POST"
+                                                                style="display:inline-block">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                        class="btn btn-danger btn-sm"
+                                                                        onclick="event.preventDefault(); confirm('Seguro que quieres eliminiar este registro?') ? this.closest('form').submit() : false;">
+                                                                    <i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    @endauth
+
                                             </td>
                                         </tr>
                                     @endforeach

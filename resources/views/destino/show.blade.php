@@ -19,11 +19,6 @@
                     </div>
 
                     <div class="card-body bg-white">
-                        
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Id Destino:</strong>
-                                    {{ $destino->id_destino }}
-                                </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Comunidad:</strong>
                                     {{ $destino->comunidad }}

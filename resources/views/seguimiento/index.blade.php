@@ -16,69 +16,91 @@
                                 {{ __('Historial Seguimiento de Paquetes') }}
                             </span>
 
-                             <div class="float-right">
-                                <a href="{{ route('seguimiento.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Crear Nuevo') }}
-                                </a>
-                              </div>
                         </div>
                     </div>
-                    @if ($message = Session::get('success'))
-                        <div class="alert alert-success m-4">
-                            <p>{{ $message }}</p>
-                        </div>
-                    @endif
+                                        <div class="card-body bg-white">
+                        <div class="row">
+                            @forelse ($historialSeguimientoDonaciones as $idPaquete => $registros)
+                                @php
+                                    $ultimo = $registros->sortByDesc('fecha_actualizacion')->first();
 
-                    <div class="card-body bg-white">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="thead">
-                                    <tr>
-                                        <th>No</th>
-                                        
-									<th >Id Historial</th>
-									<th >Ci Usuario</th>
-									<th >Estado</th>
-									<th >Fecha Actualizacion</th>
-									<th >Imagen Evidencia</th>
-									<th >Id Paquete</th>
-									<th >Id Ubicacion</th>
+                                    $paquete   = optional($ultimo->paquete);
+                                    $solicitud = optional($paquete->solicitud);
+                                    $ubicacion = optional($ultimo->ubicacion);
 
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($historialSeguimientoDonaciones as $historialSeguimientoDonacione)
-                                        <tr>
-                                            <td>{{ ++$i }}</td>
-                                            
-										<td >{{ $historialSeguimientoDonacione->id_historial }}</td>
-										<td >{{ $historialSeguimientoDonacione->ci_usuario }}</td>
-										<td >{{ $historialSeguimientoDonacione->estado }}</td>
-										<td >{{ $historialSeguimientoDonacione->fecha_actualizacion }}</td>
-                                        @if($historialSeguimientoDonacione->imagen_evidencia)
-                                            <img src="{{ asset('storage/' . $historialSeguimientoDonacione->imagen_evidencia) }}" class="img-fluid" />
-                                        @endif
-										<td >{{ $historialSeguimientoDonacione->id_paquete }}</td>
-										<td >{{ $historialSeguimientoDonacione->id_ubicacion }}</td>
+                                    $codigoSeguimiento = $solicitud->codigo_seguimiento ?? '—';
+                                    $estado            = $ultimo->estado ?? '—';
 
-                                            <td>
-                                                <form action="{{ route('seguimiento.destroy', $historialSeguimientoDonacione->id_historial) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('seguimiento.show', $historialSeguimientoDonacione->id_historial) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('seguimiento.edit', $historialSeguimientoDonacione->id_historial) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Seguro que quieres eliminiar este registro?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    $ubicacionActual = $ubicacion->direccion
+                                        ?? trim(
+                                            ($ubicacion->zona ?? '') . ' ' .
+                                            ($ubicacion->latitud ?? '') . ' ' .
+                                            ($ubicacion->longitud ?? '')
+                                        );
+
+                                    $badgeClass = 'badge-secondary';
+                                    if (strcasecmp($estado, 'Pendiente') === 0) {
+                                        $badgeClass = 'badge-warning';
+                                    } elseif (strcasecmp($estado, 'En Camino') === 0 || strcasecmp($estado, 'En camino') === 0) {
+                                        $badgeClass = 'badge-info';
+                                    } elseif (strcasecmp($estado, 'Entregado') === 0 || strcasecmp($estado, 'Entregada') === 0) {
+                                        $badgeClass = 'badge-success';
+                                    }
+                                @endphp
+
+                                <div class="col-md-3">
+                                    <div class="card mb-3 shadow-sm bg-light">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Paquete {{ $codigoSeguimiento  }}</strong><br>
+                                            </div>
+                                            <span class="badge {{ $badgeClass }} text-uppercase" style="font-weight:600; font-size: small;">
+                                                {{ $estado }}
+                                            </span>
+                                        </div>
+
+                                        <div class="card-body">
+                                            <p class="mb-1">
+                                                <strong>Estado actual:</strong> {{ $estado }}
+                                            </p>
+                                            <p class="mb-1">
+                                                <strong>Ubicación actual:</strong>
+                                                {{ $ubicacionActual ?: '—' }}
+                                            </p>
+                                            <p class="mb-1">
+                                                <strong>Última actualización:</strong>
+                                                {{ \Carbon\Carbon::parse($ultimo->fecha_actualizacion)->format('d/m/Y H:i') }}
+                                            </p>
+                                            <p class="mb-0 text-muted">
+                                                Registros de seguimiento: {{ $registros->count() }}
+                                            </p>
+                                        </div>
+
+                                        <div class="card-footer d-flex justify-content-between">
+                                            <a class="btn btn-sm btn-dark"
+                                               href="{{ route('seguimiento.tracking', $idPaquete) }}">
+                                                Ver mapa
+                                            </a>
+
+                                            @auth
+                                                @if(auth()->user()->administrador)
+                                                    <a href="{{ route('paquete.show', $idPaquete) }}"
+                                                       class="btn btn-sm btn-secondary">
+                                                        Ver paquete
+                                                    </a>
+                                                @endif
+                                            @endauth
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-12">
+                                    <p class="text-muted">No hay seguimientos registrados.</p>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
-                </div>
-                {!! $historialSeguimientoDonaciones->withQueryString()->links() !!}
+                    </div>
             </div>
         </div>
     </div>

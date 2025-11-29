@@ -66,7 +66,7 @@ return [
 
     'logo' => '<b>D.A.S</b> Logística',
     'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
-    'logo_img_class' => 'brand-image img-circle elevation-3',
+    'logo_img_class' => 'brand-image img-circle',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
     'logo_img_alt' => 'Admin Logo',
@@ -301,12 +301,6 @@ return [
     */
 
     'menu' => [
-        // Navbar items:
-        [
-            'type' => 'navbar-search',
-            'text' => 'Buscar',
-            'topnav_right' => true,
-        ],
         [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
@@ -314,104 +308,110 @@ return [
 
         // Sidebar items:
         [
-            'type' => 'sidebar-menu-search',
-            'text' => 'Buscar',
-        ],
-        [
             'text' => 'Dashboard',
             'route' => 'dashboard',
             'icon' => 'fas fa-tachometer-alt',
+            'can'   => 'admin',
         ],
         [
             'text' => 'Solicitudes',
             'url'  => 'solicitud',
             'icon' => 'fas fa-fw fa-file',
+            'can'   => 'voluntario',
          ],
 
         [
             'text' => 'Paquetes',
             'url'  => 'paquete',
             'icon' => 'fas fa-fw fa-box',
+            'can'   => 'voluntario',
         ],
         [
             'text' => 'Tipo de Emergencia',
             'url'  => 'tipo-emergencia',
             'icon' => 'fas fa-fw fa-plus',
+            'can'   => 'admin',
         ],
         [
             'text' => 'Estados',
             'url'  => 'estado',
             'icon' => 'fas fa-flag',
+            'can'   => 'admin',
         ],
         [
             'text' => 'Solicitantes',
             'url'  => 'solicitante',
             'icon' => 'fas fa-user-friends',
+            'can'   => 'voluntario',
         ],
         [
             'text' => 'Destinos',
             'url'  => 'destino',
             'icon' => 'fas fa-map-marker-alt',
+            'can'   => 'voluntario',
         ],
         [
             'text' => 'Ubicaciones',
             'url'  => 'ubicacion',
             'icon' => 'fas fa-map-pin',
+            'can'   => 'voluntario',
         ],
          [
             'text' => 'Voluntarios',
             'url'  => 'usuario',
             'icon' => 'fas fa-user',
+            'can'   => 'admin',
         ],
          [
             'text' => 'Reportes',
             'url'  => 'reporte',
             'icon' => 'fas fa-book',
+            'can'   => 'admin',
         ],
         [
             'text' => 'Seguimiento de Paquetes',
             'url'  => 'seguimiento',
             'icon' => 'fas fa-map',
+            'can'   => 'voluntario',
         ],
          [
             'text' => 'Licencias',
             'url'  => 'tipo-licencia',
             'icon' => 'fas fa-id-card',
+            'can'   => 'admin',
         ],
          [
             'text' => 'Conductores',
             'url'  => 'conductor',
             'icon' => 'fas fa-users',
+            'can'   => 'voluntario',
         ],
          [
             'text' => 'Marcas',
             'url'  => 'marca',
             'icon' => 'fas fa-flag-checkered',
+            'can'   => 'voluntario',
         ],
         [
             'text' => 'Vehiculos',
             'url'  => 'vehiculo',
             'icon' => 'fas fa-car',
+            'can'   => 'voluntario',
         ],
          [
             'text' => 'Tipo de Vehiculo',
             'url'  => 'tipo-vehiculo',
             'icon' => 'fas fa-th-large',
+            'can'   => 'voluntario',
         ],
          [
             'text' => 'Roles',
             'url'  => 'rol',
             'icon' => 'fas fa-user-shield',
+            'can'   => 'admin',
         ],
 
-        ['header' => 'Ajustes'],
-
-        [
-            'text' => 'Cambiar Contraseña',
-            'url' => 'admin/settings',
-            'icon' => 'fas fa-fw fa-lock',
-        ],
-    ],
+    ], 
 
     /*
     |--------------------------------------------------------------------------
