@@ -20,38 +20,50 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\Auth\LoginController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
 
+//PUBLICOS
 Route::get('/health', function () {
     return response()->json([
-        'status' => 'ok',
+        'status'  => 'ok',
         'service' => 'logistica',
     ]);
 });
+Route::post('login', [LoginController::class, 'apiLogin']);
 
-Route::apiResource('solicitud', SolicitudController::class);
-Route::apiResource('paquete', PaqueteController::class);
-Route::apiResource('estado', EstadoController::class);
-Route::apiResource('solicitante', SolicitanteController::class);
-Route::apiResource('ubicacion', UbicacionController::class);
-Route::apiResource('destino', DestinoController::class);
-Route::apiResource('reporte', ReporteController::class);
-Route::apiResource('seguimiento', HistorialSeguimientoDonacioneController::class);
-Route::apiResource('tipo-licencia', TipoLicenciaController::class);
-Route::apiResource('conductor', ConductorController::class);
-Route::apiResource('tipo-vehiculo', TipoVehiculoController::class);
-Route::apiResource('vehiculo', VehiculoController::class);
-Route::apiResource('tipo-emergencia', TipoEmergenciaController::class);
-Route::apiResource('marca', MarcaController::class);
-Route::apiResource('rol', RolController::class);
+//PARA DONACIONES (renato y helder)
+Route::post('solicitud-publica', [SolicitudController::class, 'store']);
+
+
+Route::middleware(['auth:sanctum', 'activo'])->group(function () {
+
+    Route::apiResource('solicitud', SolicitudController::class)->except(['store']);
+    Route::apiResource('paquete', PaqueteController::class);
+    Route::apiResource('estado', EstadoController::class);
+    Route::apiResource('solicitante', SolicitanteController::class);
+    Route::apiResource('ubicacion', UbicacionController::class);
+    Route::apiResource('destino', DestinoController::class);
+    Route::apiResource('reporte', ReporteController::class);
+    Route::apiResource('seguimiento', HistorialSeguimientoDonacioneController::class);
+    Route::apiResource('tipo-licencia', TipoLicenciaController::class);
+    Route::apiResource('conductor', ConductorController::class);
+    Route::apiResource('tipo-vehiculo', TipoVehiculoController::class);
+    Route::apiResource('vehiculo', VehiculoController::class);
+    Route::apiResource('tipo-emergencia', TipoEmergenciaController::class);
+    Route::apiResource('marca', MarcaController::class);
+    Route::apiResource('rol', RolController::class);
+
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    })->middleware('auth:sanctum');
+
+});
+
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('usuario', [UserAdminController::class, 'index']);
+    Route::post('usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAdmin']);
+    Route::post('usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo']);
+    Route::post('usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRol']);
+});
 
 Route::post('solicitud/{id}/aprobar', [SolicitudController::class, 'aprobar']);
 Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar']);
-
-Route::get('usuario', [UserAdminController::class, 'index']);
-Route::post('usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAdmin']);
-Route::post('usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo']);
-Route::post('usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRol']);
-Route::post('login', [LoginController::class, 'apiLogin']);

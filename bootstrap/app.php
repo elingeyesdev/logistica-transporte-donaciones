@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Middleware\VerificarActivo;
 use App\Providers\AppServiceProvider;
 use App\Providers\AuthServiceProvider;
 use Illuminate\Foundation\Application;
@@ -19,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
          $middleware->alias([
             'admin' => VerificarAdmin::class,
+            'activo'=> VerificarActivo::class
         ]);
 
     })

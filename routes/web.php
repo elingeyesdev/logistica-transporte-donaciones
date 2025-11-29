@@ -39,7 +39,7 @@ Route::get('/api/health', function () {
     ]);
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'activo'])->group(function () {
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
         ->name('home');
@@ -64,6 +64,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('seguimiento', HistorialSeguimientoDonacioneController::class);
 
     Route::resource('ubicacion', UbicacionController::class)->except(['destroy']);
+
+    Route::middleware(['auth'])->group(function () {
+        Route::view('/perfil/pendiente', 'users.pendiente')
+        ->name('perfil.pendiente');
+});
 
 });
 
