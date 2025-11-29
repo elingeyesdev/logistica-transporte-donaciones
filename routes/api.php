@@ -35,22 +35,21 @@ Route::post('solicitud-publica', [SolicitudController::class, 'store']);
 
 
 Route::middleware(['auth:sanctum', 'activo'])->group(function () {
-
-    Route::apiResource('solicitud', SolicitudController::class)->except(['store']);
-    Route::apiResource('paquete', PaqueteController::class);
-    Route::apiResource('estado', EstadoController::class);
-    Route::apiResource('solicitante', SolicitanteController::class);
-    Route::apiResource('ubicacion', UbicacionController::class);
-    Route::apiResource('destino', DestinoController::class);
-    Route::apiResource('reporte', ReporteController::class);
-    Route::apiResource('seguimiento', HistorialSeguimientoDonacioneController::class);
-    Route::apiResource('tipo-licencia', TipoLicenciaController::class);
-    Route::apiResource('conductor', ConductorController::class);
-    Route::apiResource('tipo-vehiculo', TipoVehiculoController::class);
-    Route::apiResource('vehiculo', VehiculoController::class);
-    Route::apiResource('tipo-emergencia', TipoEmergenciaController::class);
-    Route::apiResource('marca', MarcaController::class);
-    Route::apiResource('rol', RolController::class);
+    Route::apiResource('solicitud', SolicitudController::class)->except(['store'])->names('api.solicitud');
+    Route::apiResource('paquete', PaqueteController::class)->names('api.paquete');
+    Route::apiResource('estado', EstadoController::class)->names('api.estado');
+    Route::apiResource('solicitante', SolicitanteController::class)->names('api.solicitante');
+    Route::apiResource('ubicacion', UbicacionController::class)->names('api.ubicacion');
+    Route::apiResource('destino', DestinoController::class)->names('api.destino');
+    Route::apiResource('reporte', ReporteController::class)->names('api.reporte');
+    Route::apiResource('seguimiento', HistorialSeguimientoDonacioneController::class)->names('api.seguimiento');
+    Route::apiResource('tipo-licencia', TipoLicenciaController::class)->names('api.licencia');
+    Route::apiResource('conductor', ConductorController::class)->names('api.conductor');
+    Route::apiResource('tipo-vehiculo', TipoVehiculoController::class)->names('api.tipovehiculo');
+    Route::apiResource('vehiculo', VehiculoController::class)->names('api.vehiculo');
+    Route::apiResource('tipo-emergencia', TipoEmergenciaController::class)->names('api.marca');
+    Route::apiResource('marca', MarcaController::class)->names('api.marca');
+    Route::apiResource('rol', RolController::class)->names('api.rol');
     Route::apiResource('user', UserAdminController::class);
     Route::get('/user', function (Request $request) {
         return $request->user();
