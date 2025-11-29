@@ -330,4 +330,17 @@ class PaqueteController extends Controller
         return Redirect::route('paquete.index')
             ->with('success', 'Paquete eliminado correctamente');
     }
+
+    public function galeria()
+    {
+        // Fetch delivered packages
+        $paquetes = Paquete::with(['solicitud.solicitante', 'solicitud.destino'])
+            ->whereHas('estado', function ($query) {
+                $query->where('nombre_estado', 'Entregado'); // Corrected column name
+            })
+            ->get(); // Removed field restriction to include all necessary data
+
+        // Pass data to the gallery view
+        return view('galeria.index', compact('paquetes'));
+    }
 }

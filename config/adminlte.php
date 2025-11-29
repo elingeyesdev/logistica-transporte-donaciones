@@ -410,6 +410,12 @@ return [
             'icon' => 'fas fa-user-shield',
             'can'   => 'admin',
         ],
+         [
+            'text' => 'Galería de Agradecimiento',
+            'url'  => 'galeria',
+            'icon' => 'fas fa-images',
+            'can'   => 'voluntario',
+        ],
 
     ], 
 

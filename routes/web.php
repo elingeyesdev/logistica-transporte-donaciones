@@ -132,4 +132,7 @@ Route::post('/usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleA
 Route::post('/usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRol'])->name('usuarios.cambiarRol');
  */
 
+// Galería
+Route::get('/galeria', [PaqueteController::class, 'galeria'])->name('galeria.index');
+
 
