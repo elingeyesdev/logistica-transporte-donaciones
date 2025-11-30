@@ -13,7 +13,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        
         $total = Solicitud::count();
 
         $aceptadas = Solicitud::where(function($q){
@@ -28,13 +27,11 @@ class DashboardController extends Controller
             ? round(($aceptadas / ($aceptadas + $rechazadas)) * 100, 1)
             : 0;
 
-        
         $productosMasPedidos = Solicitud::whereNotNull('insumos_necesarios')
             ->where('insumos_necesarios', '!=', '')
             ->get()
             ->pluck('insumos_necesarios')
             ->flatMap(function($insumos) {
-                
                 return preg_split('/[,;\n\r]+/', $insumos, -1, PREG_SPLIT_NO_EMPTY);
             })
             ->map(function($item) {
@@ -43,14 +40,11 @@ class DashboardController extends Controller
             ->filter()
             ->countBy()
             ->sortDesc()
-            ->take(5); 
+            ->take(5);
 
-        
-        
         $idsEntregado = Estado::whereIn('nombre_estado', ['Entregado', 'entregado'])
             ->pluck('id_estado');
 
-        
         $paquetes = Paquete::whereIn('estado_id', $idsEntregado)
             ->selectRaw('
                 id_paquete,
@@ -62,25 +56,19 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        
         $promedioEntrega = Paquete::whereIn('estado_id', $idsEntregado)
             ->selectRaw('AVG(COALESCE(fecha_entrega::date, updated_at::date) - COALESCE(fecha_creacion::date, created_at::date)) as promedio')
             ->value('promedio');
-        
+
         $promedioEntrega = $promedioEntrega ? round($promedioEntrega, 1) : 0;
 
-        
         $totalPaquetes = Paquete::count();
         $paquetesEntregados = Paquete::whereIn('estado_id', $idsEntregado)->count();
 
-        
         $totalVoluntarios = User::where('activo', true)->count();
-        
-        
+
         $voluntariosConductores = Conductor::count();
 
-        
-       
         $topVoluntariosPaquetes = Paquete::selectRaw('id_encargado, COUNT(*) as total')
             ->whereNotNull('id_encargado')
             ->groupBy('id_encargado')
@@ -111,7 +99,8 @@ class DashboardController extends Controller
             'topVoluntariosPaquetes'
         );
 
-        if (request()->ajax()) {
+        // Always return JSON for API requests
+        if (request()->wantsJson() || request()->is('api/*')) {
             return response()->json($data);
         }
 

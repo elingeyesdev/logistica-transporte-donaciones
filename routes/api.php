@@ -19,6 +19,7 @@ use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\DashboardController;
 
 
 //PUBLICOS
@@ -66,3 +67,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
 Route::post('solicitud/{id}/aprobar', [SolicitudController::class, 'aprobar']);
 Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar']);
+
+Route::middleware(['auth:sanctum', 'activo'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('api.dashboard');
+});
