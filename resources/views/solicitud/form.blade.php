@@ -187,12 +187,55 @@
     <div class="col-md-12">
         <div class="form-group mb-3">
             <label for="insumos_necesarios">Insumos Necesarios</label>
-            <textarea required name="insumos_necesarios" id="insumos_necesarios"
-                      class="form-control @error('insumos_necesarios') is-invalid @enderror"
-                      rows="3" placeholder="Describa los insumos que necesita">{{ old('insumos_necesarios', $solicitud->insumos_necesarios) }}</textarea>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#insumosModal">
+                Seleccionar Insumos
+            </button>
+            <input type="hidden" name="insumos_necesarios" id="insumos_necesarios" value="{{ old('insumos_necesarios', $solicitud->insumos_necesarios) }}">
             @error('insumos_necesarios') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
-    </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="insumosModal" tabindex="-1" aria-labelledby="insumosModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="insumosModalLabel">Seleccionar Productos</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6>Seleccione los productos:</h6>
+                                <div id="productos-list" class="list-group">
+                                    <!-- Aquí se cargarán los productos dinámicamente -->
+                                </div>
+                                <nav aria-label="Page navigation" class="mt-3">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">4</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Productos seleccionados:</h6>
+                                <ul id="productos-seleccionados" class="list-group">
+                                    <!-- Aquí se mostrarán los productos seleccionados -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-success" id="guardarInsumos">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     @php
         $codigoSeguimiento = old('codigo_seguimiento', $solicitud->codigo_seguimiento);
         if (empty($codigoSeguimiento)) {
@@ -344,3 +387,89 @@
   }
 })();
 </script>
+
+@section('js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productosList = document.getElementById('productos-list');
+        const productosSeleccionados = document.getElementById('productos-seleccionados');
+        const insumosInput = document.getElementById('insumos_necesarios');
+        const cantidadPersonas = parseInt(document.getElementById('cantidad_personas').value || 0);
+
+        // Simular carga de productos desde el endpoint
+        const productos = [
+            { id_producto: 1, nombre: 'Camisa', descripcion: 'Camisa', stock_total: 125 },
+            { id_producto: 2, nombre: 'Polera', descripcion: 'Polera', stock_total: 89 },
+            { id_producto: 3, nombre: 'Pantalón', descripcion: 'Pantalón', stock_total: 67 },
+            { id_producto: 4, nombre: 'Abrigo', descripcion: 'Abrigo', stock_total: 45 },
+            { id_producto: 5, nombre: 'Arroz', descripcion: 'Arroz', stock_total: 200 },
+        ];
+
+        productos.forEach(producto => {
+            const item = document.createElement('div');
+            item.className = 'list-group-item';
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${producto.nombre}</strong><br>
+                        <small>Sugerido: ${producto.stock_total}</small>
+                    </div>
+                    <div class="input-group" style="width: 150px;">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-sm btn-outline-secondary decrement" data-id="${producto.id_producto}">-</button>
+                        </div>
+                        <input type="number" class="form-control cantidad" data-id="${producto.id_producto}" value="0" min="0">
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-outline-secondary increment" data-id="${producto.id_producto}">+</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-success aplicar" data-id="${producto.id_producto}" data-nombre="${producto.nombre}">Aplicar</button>
+                </div>
+            `;
+            productosList.appendChild(item);
+
+            // Incrementar cantidad
+            item.querySelector('.increment').addEventListener('click', function() {
+                const input = item.querySelector('.cantidad');
+                input.value = parseInt(input.value || 0) + 1;
+            });
+
+            // Decrementar cantidad
+            item.querySelector('.decrement').addEventListener('click', function() {
+                const input = item.querySelector('.cantidad');
+                input.value = Math.max(0, parseInt(input.value || 0) - 1);
+            });
+
+            // Aplicar producto seleccionado
+            item.querySelector('.aplicar').addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const nombre = this.getAttribute('data-nombre');
+                const cantidad = item.querySelector('.cantidad').value;
+
+                if (cantidad > 0) {
+                    const seleccionado = document.createElement('li');
+                    seleccionado.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    seleccionado.innerHTML = `
+                        <span>${nombre} (Cantidad: ${cantidad})</span>
+                        <button class="btn btn-sm btn-danger" data-id="${id}">Quitar</button>
+                    `;
+                    productosSeleccionados.appendChild(seleccionado);
+
+                    seleccionado.querySelector('button').addEventListener('click', function() {
+                        this.parentElement.remove();
+                    });
+                }
+            });
+        });
+
+        document.getElementById('guardarInsumos').addEventListener('click', function() {
+            const seleccionados = [];
+            productosSeleccionados.querySelectorAll('li').forEach(item => {
+                seleccionados.push(item.querySelector('span').textContent);
+            });
+            insumosInput.value = seleccionados.join(', ');
+            $('#insumosModal').modal('hide');
+        });
+    });
+</script>
+@endsection
