@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PaqueteActualizado;
+use App\Mail\PaqueteEntregado;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -219,13 +223,13 @@ class PaqueteController extends Controller
 
         if ($request->hasFile('imagen')) {
             $payload['imagen'] = $request->file('imagen')->store('paquetes', 'public');
-            \Log::info('Imagen actualizada:', [
+            Log::info('Imagen actualizada:', [
                 'ruta' => $payload['imagen'],
                 'existe' => file_exists(public_path('storage/' . $payload['imagen']))
             ]);
         } else {
             unset($payload['imagen']);
-            \Log::info('No se proporcionó una nueva imagen.');
+            Log::info('No se proporcionó una nueva imagen.');
         }
 
         $paquete->update($payload);
@@ -289,15 +293,50 @@ class PaqueteController extends Controller
             'conductor_ci'        => $conductorCi,
             'vehiculo_placa'      => $vehiculoPlaca,
         ]);
-    DB::commit();
+        DB::commit();
+        
+        $paquete->load([
+            'estado',
+            'solicitud.solicitante',
+            'conductor',
+            'vehiculo.marcaVehiculo',
+            'vehiculo.tipoVehiculo',
+        ]);
+
+        $destinatario = optional(optional($paquete->solicitud)->solicitante)->email;
+
+        if ($destinatario) {
+            Log::info('Enviando correo de paquete actualizado', [
+                'paquete_id' => $paquete->id_paquete,
+                'email' => optional($paquete->solicitud)->codigo_seguimiento,
+            ]);
+            Mail::to($destinatario)->send(
+                new PaqueteActualizado($paquete)
+            );
+
+            $estadoNombre = optional($paquete->estado)->nombre_estado;
+
+            if ($estadoNombre &&
+                (strcasecmp($estadoNombre, 'Entregado') === 0 ||
+                strcasecmp($estadoNombre, 'Entregada') === 0)) {
+
+                Log::info('Enviando correo de paquete Entregado', [
+                'paquete_id' => $paquete->id_paquete,
+                'email' => optional($paquete->solicitud)->codigo_seguimiento,
+                ]);
+                Mail::to($destinatario)->send(
+                    new PaqueteEntregado($paquete)
+                );
+            }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
     } catch (\Throwable $e) {
         DB::rollBack();
         throw $e;
-    }
-
-    if ($request->wantsJson()) {
-        return response()->json(['success' => true]);
     }
 
     return Redirect::route('paquete.index')->with('success', 'Paquete actualizado y registrado en historial.');
@@ -338,27 +377,20 @@ class PaqueteController extends Controller
 
     public function galeria()
     {
-        // Fetch delivered packages
-        $paquetes = Paquete::with(['solicitud.solicitante', 'solicitud.destino'])
-            ->whereHas('estado', function ($query) {
-                $query->where('nombre_estado', 'Entregado'); // Corrected column name
+        $paquetes = Paquete::with(['solicitud.solicitante', 'solicitud.destino']) ->whereHas('estado', function ($query) {
+                $query->where('nombre_estado', 'Entregado');
             })
-            ->get(); // Removed field restriction to include all necessary data
+            ->get(); 
+        Log::info('Paquetes entregados:', $paquetes->toArray());
 
-        // Debugging: Log the retrieved packages
-        \Log::info('Paquetes entregados:', $paquetes->toArray());
-
-        // Debugging: Log the image paths and package data
         foreach ($paquetes as $paquete) {
-            \Log::info('Paquete:', [
+            Log::info('Paquete:', [
                 'id' => $paquete->id,
                 'imagen' => $paquete->imagen,
                 'ruta_completa' => public_path('storage/paquetes/' . $paquete->imagen),
                 'existe' => file_exists(public_path('storage/paquetes/' . $paquete->imagen))
             ]);
         }
-
-        // Pass data to the gallery view
         return view('galeria.index', compact('paquetes'));
     }
 }

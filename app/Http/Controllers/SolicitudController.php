@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log;
 use App\Models\Solicitud;
 use App\Models\Solicitante;
 use App\Models\Destino;
@@ -13,6 +14,9 @@ use Illuminate\View\View;
 use App\Models\Paquete;
 use App\Models\Estado;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SolicitudRecibida;
+use App\Mail\SolicitudEstadoActualizado;
 
 class SolicitudController extends Controller
 {
@@ -84,6 +88,16 @@ class SolicitudController extends Controller
             ]);
 
             DB::commit();
+            if ($solicitante->email) {
+                $solicitud->load(['solicitante', 'destino']);
+                Log::info('Enviando correo de solicitud recibida', [
+                'solicitud_id' => $solicitud->id_solicitud,
+                'email' => optional($solicitud->solicitante)->email,
+                ]);
+                Mail::to($solicitante->email)->send(
+                    new SolicitudRecibida($solicitud)
+                );
+            }
 
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -229,6 +243,17 @@ class SolicitudController extends Controller
             ]);
 
             DB::commit();
+            $solicitud->load('solicitante');
+            if (optional($solicitud->solicitante)->email) {
+                Log::info('Enviando correo de solicitud aprobada', [
+                'solicitud_id' => $solicitud->id_solicitud,
+                'email' => optional($solicitud->solicitante)->email,
+                 ]);
+                Mail::to($solicitud->solicitante->email)->send(
+                    new SolicitudEstadoActualizado($solicitud)
+                );
+            }
+
         } catch (\Throwable $e) {
             DB::rollBack();
             throw $e;
@@ -253,7 +278,7 @@ class SolicitudController extends Controller
             'justificacion' => ['required', 'string', 'max:255'],
         ]);
 
-        $solicitud = Solicitud::findOrFail($id);
+        $solicitud = Solicitud::with('solicitante')->findOrFail($id);
 
         if ($solicitud->estado !== 'pendiente') {
             return redirect()->back()->with('error', 'Esta solicitud ya fue respondida.');
@@ -264,8 +289,18 @@ class SolicitudController extends Controller
             'estado'        => 'negada',
             'justificacion' => $request->justificacion,
         ]);
+        $solicitud->refresh();
+        if (optional($solicitud->solicitante)->email) {
+            Log::info('Enviando correo de solicitud negada', [
+                'solicitud_id' => $solicitud->id_solicitud,
+                'email' => optional($solicitud->solicitante)->email,
+            ]);
+            Mail::to($solicitud->solicitante->email)->send(
+            new SolicitudEstadoActualizado($solicitud)
+            );
+        }
 
-          if ($request->wantsJson()) {
+        if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Solicitud negada correctamente'
