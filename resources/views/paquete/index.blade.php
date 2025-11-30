@@ -98,9 +98,16 @@
                       <a class="btn btn-sm btn-dark mr-2" href="{{ route('paquete.show', $paquete->id_paquete) }}">
                         <i class="fa fa-eye"></i>
                       </a>
-                      <a class="btn btn-sm btn-info mr-2" href="{{ route('paquete.edit', $paquete->id_paquete) }}">
-                        <i class="fa fa-edit"></i>
-                      </a>
+                      @php
+                       $estadoNombre = $estado ?? optional($paquete->estado)->nombre_estado;
+                      @endphp
+
+                      @if( ! $estadoNombre || !in_array(strtolower($estadoNombre), ['entregado', 'entregada']) )
+                          <a class="btn btn-sm btn-info mr-2" href="{{ route('paquete.edit', $paquete->id_paquete) }}">
+                              <i class="fa fa-edit"></i>
+                          </a>
+                      @endif
+
                       <form action="{{ route('paquete.destroy', $paquete->id_paquete) }}"
                             method="POST" class="d-inline">
                         @csrf @method('DELETE')
