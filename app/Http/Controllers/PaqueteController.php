@@ -81,7 +81,7 @@ class PaqueteController extends Controller
 
             $estadoNombre = optional($paq->estado)->nombre_estado ?? 'Pendiente';
 
-            if (strcasecmp($estadoNombre, 'Entregada') === 0) {
+            if (strcasecmp($estadoNombre, 'Entregada') === 0 || strcasecmp($estadoNombre, 'Entregado') === 0) {
                 $paq->update(['fecha_entrega' => now()->toDateString()]);
             }
 
