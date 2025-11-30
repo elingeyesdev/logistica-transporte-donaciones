@@ -29,6 +29,13 @@ Route::get('solicitud/create', [SolicitudController::class, 'create'])
     ->name('solicitud.create');
 Route::post('solicitud', [SolicitudController::class, 'store'])
     ->name('solicitud.store');
+Route::get('/mi-solicitud/{codigo}/editar', [SolicitudController::class, 'publicEdit'])
+    ->name('solicitud.public.edit');
+Route::put('/mi-solicitud/{codigo}', [SolicitudController::class, 'publicUpdate'])
+    ->name('solicitud.public.update');
+Route::get('/mi-solicitud/{codigo}', [SolicitudController::class, 'publicShow'])
+    ->name('solicitud.public.show');
+
 
 //PUBLICAS PARA EL API GATEWAY
 Route::post('/api/solicitud', [SolicitudController::class, 'store']);
@@ -133,5 +140,3 @@ Route::post('/usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRo
  */
 
 Route::get('/galeria', [PaqueteController::class, 'galeria'])->name('galeria.index');
-
-

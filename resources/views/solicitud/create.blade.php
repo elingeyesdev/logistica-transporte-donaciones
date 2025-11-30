@@ -60,8 +60,7 @@
                                 <hr>
                                 <h5>Resultado de la búsqueda</h5>
                                 @php
-                                    $editable = ($solicitudEncontrada->estado === 'pendiente' || $solicitudEncontrada->estado === null)
-                                        && is_null($solicitudEncontrada->aprobada);
+                                    $editable = ($solicitudEncontrada->estado === 'pendiente' || $solicitudEncontrada->estado === null);
                                 @endphp
 
                                 <p><strong>Código:</strong> {{ $solicitudEncontrada->codigo_seguimiento }}</p>
@@ -69,25 +68,24 @@
                                     <strong>Estado:</strong>
                                     @if($solicitudEncontrada->aprobada === true)
                                         Aprobada
-                                    @elseif($solicitudEncontrada->aprobada === false)
+                                    @elseif($solicitudEncontrada->aprobada === false && $solicitudEncontrada->estado !== 'pendiente')
                                         Negada
                                     @else
                                         {{ $solicitudEncontrada->estado ?? 'pendiente' }}
                                     @endif
                                 </p>
 
-                                <div class="d-flex gap-2">
-                                    <a href="{{ route('solicitud.show', $solicitudEncontrada->id_solicitud) }}"
-                                       class="btn btn-info btn-sm">
-                                        Ver solicitud
+                                <div class="d-flex flex-row">
+                                    <a href="{{ route('solicitud.public.show', $solicitudEncontrada->codigo_seguimiento) }}" class="btn btn-info btn-sm">
+                                        Ver detalle
                                     </a>
-
                                     @if($editable)
-                                        <a href="{{ route('solicitud.edit', $solicitudEncontrada->id_solicitud) }}"
-                                           class="btn btn-warning btn-sm">
-                                            Editar mi solicitud
+                                        <a href="{{ route('solicitud.public.edit', $solicitudEncontrada->codigo_seguimiento) }}"
+                                        class="btn btn-dark btn-sm ml-2">
+                                            Editar solicitud
                                         </a>
                                     @endif
+
                                 </div>
                             @endif
                         </div>

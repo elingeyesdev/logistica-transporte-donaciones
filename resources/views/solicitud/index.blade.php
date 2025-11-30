@@ -9,14 +9,60 @@
   <div class="row">
     <div class="col-sm-12">
       <div class="card">
-       <div class="card-header">
-         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span id="card_title" style="font-size: larger; font-weight: bolder;">{{ __('Solicitudes') }}</span>
-          <a href="{{ route('solicitud.create') }}" class="btn btn-primary btn-sm">
-            <i class="fa fa-plus"></i> {{ __('Crear nueva') }}
-          </a>
+          <div class="card-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span id="card_title" style="font-size: larger; font-weight: bolder;">{{ __('Solicitudes') }}</span>
+              <a href="{{ route('solicitud.create') }}" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus"></i> {{ __('Crear nueva') }}
+              </a>
+            </div>
+          </div>
+        <div class="row mb-3 mt-3">
+          <div class="col-md-4 ml-4">
+            <label class="form-label mb-1 d-block">Estado</label>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Filtro por estado">
+                <button type="button"
+                        class="btn btn-outline-secondary btn-filtro-estado active"
+                        data-value="todos">
+                    Todas
+                </button>
+                <button type="button"
+                        class="btn btn-outline-secondary btn-filtro-estado"
+                        data-value="aprobada">
+                    Aprobadas
+                </button>
+                <button type="button"
+                        class="btn btn-outline-secondary btn-filtro-estado"
+                        data-value="negada">
+                    Negadas
+                </button>
+                <button type="button"
+                        class="btn btn-outline-secondary btn-filtro-estado"
+                        data-value="pendiente">
+                    Pendientes
+                </button>
+            </div>
         </div>
-       </div>
+
+        <div class="col-md-4">
+            <label class="form-label mb-1 d-block">Orden</label>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Orden de solicitudes">
+                <button type="button"
+                        class="btn btn-outline-secondary btn-filtro-orden active"
+                        data-value="recientes">
+                    Recientes primero
+                </button>
+                <button type="button"
+                        class="btn btn-outline-secondary btn-filtro-orden"
+                        data-value="antiguas">
+                    Antiguas primero
+                </button>
+            </div>
+        </div>
+        </div>
+
+
+ 
 
         @if ($message = Session::get('success'))
           <div class="alert alert-success m-4"><p>{{ $message }}</p></div>
@@ -32,87 +78,106 @@
           </style>
           <div class="row solicitud-uniform-row">
               @foreach ($solicituds as $solicitud)
-                  @php
-                      $pers = optional($solicitud->solicitante);
-                      $dest = optional($solicitud->destino);
-                      $key  = $solicitud->id_solicitud;
+                @php
+                    $pers = optional($solicitud->solicitante);
+                    $dest = optional($solicitud->destino);
+                    $key  = $solicitud->id_solicitud;
 
-                      $esPendienteYNoRespondida = $solicitud->estado === 'pendiente' || $solicitud->estado === null;
+                    $esPendienteYNoRespondida = $solicitud->estado === 'pendiente' || $solicitud->estado === null;
+                    $badgeClass   = 'badge-secondary';
+                    $estadoTexto  = $solicitud->estado ?? 'pendiente';
+                    $estadoFiltro = 'pendiente';
 
-                      $badgeClass = 'badge-secondary';
-                      $estadoTexto = $solicitud->estado ?? 'pendiente';
-                      if ($solicitud->aprobada === true && $solicitud->estado != 'pendiente' ) {
-                          $badgeClass = 'badge-success';
-                          $estadoTexto = 'aprobada';
-                      } elseif ($solicitud->aprobada === false && $solicitud->estado != 'pendiente') {
-                          $badgeClass = 'badge-danger';
-                          $estadoTexto = 'negada';
-                      }
-                      else {
-                        $badgeClass = 'badge-warning';
-                        $estadoTexto = 'pendiente';
-                      }
-                  @endphp
+                    if ($solicitud->aprobada === true && $solicitud->estado != 'pendiente') {
+                        $badgeClass   = 'badge-success';
+                        $estadoTexto  = 'aprobada';
+                        $estadoFiltro = 'aprobada';
+                    } elseif ($solicitud->aprobada === false && $solicitud->estado != 'pendiente') {
+                        $badgeClass   = 'badge-danger';
+                        $estadoTexto  = 'negada';
+                        $estadoFiltro = 'negada';
+                    } else {
+                        $badgeClass   = 'badge-warning';
+                        $estadoTexto  = 'pendiente';
+                        $estadoFiltro = 'pendiente';
+                    }
 
-                  <div class="col-md-3">
-                      <div class="card mb-3 shadow-sm bg-light">
-                          <div class="card-header d-flex justify-content-between align-items-center">
-                              <div style="font-size: large;">
-                                  <strong>Solicitud {{ $solicitud->codigo_seguimiento }}</strong><br>
-                              </div>
-                              <span class="badge {{ $badgeClass }} text-uppercase" style="font-weight:600; font-size: small;">
-                                  {{ $estadoTexto }}
-                              </span>
-                          </div>
+                    $fechaFiltro = $solicitud->created_at;
+                @endphp
 
-                          <div class="card-body">
-                              <p class="mb-1"><strong>Nombre:</strong> {{ $pers->nombre ?? '—' }} {{ $pers->apellido ?? '' }}</p>
-                              <p class="mb-1"><strong>CI:</strong> {{ $pers->ci ?? '—' }}</p>
-                              <p class="mb-1"><strong>Correo:</strong> {{ $pers->email ?? '—' }}</p>
-                              <p class="mb-1"><strong>Celular:</strong> {{ $pers->telefono ?? '—' }}</p>
+                <div class="col-md-3 solicitud-card"
+                    data-estado="{{ $estadoFiltro }}"
+                    data-fecha="{{ optional($fechaFiltro)->format('Y-m-d H:i:s') }}"
+                    data-fecha-ts="{{ optional($fechaFiltro)->timestamp ?? '' }}"
+                    data-id="{{ $key }}">
+                    <div class="card mb-3 shadow-sm bg-light">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div style="font-size: large;">
+                                <strong>Solicitud {{ $solicitud->codigo_seguimiento }}</strong><br>
+                            </div>
+                            <span class="badge {{ $badgeClass }} text-uppercase" style="font-weight:600; font-size: small;">
+                                {{ $estadoTexto }}
+                            </span>
+                        </div>
 
-                              <p class="mb-1"><strong>Comunidad:</strong> {{ $dest->comunidad ?? '—' }}</p>
-                              <p class="mb-1"><strong>Provincia:</strong> {{ $dest->provincia ?? '—' }}</p>
-                              <p class="mb-1"><strong>Ubicación:</strong> <span title="{{ $dest->direccion }}">{{ $dest->direccion ? \Illuminate\Support\Str::limit($dest->direccion, 60) : '—' }}</span></p>
+                        <div class="card-body">
+                            <p class="mb-1"><strong>Nombre:</strong> {{ $pers->nombre ?? '—' }} {{ $pers->apellido ?? '' }}</p>
+                            <p class="mb-1"><strong>CI:</strong> {{ $pers->ci ?? '—' }}</p>
+                            <p class="mb-1"><strong>Correo:</strong> {{ $pers->email ?? '—' }}</p>
+                            <p class="mb-1"><strong>Celular:</strong> {{ $pers->telefono ?? '—' }}</p>
 
-                              <div class="mt-auto">
-                                  <p class="mb-1"><strong>Tipo de Emergencia:</strong> {{ $solicitud->tipo_emergencia ?? '—' }}</p>
-                                  <p class="mb-1"><strong>Personas afectadas:</strong> {{ $solicitud->cantidad_personas }}</p>
-                                  <p class="mb-1"><strong>Fecha inicio:</strong> {{ \Carbon\Carbon::parse($solicitud->fecha_inicio)->format('d/m/Y') }}</p>
-                              </div>
-                          </div>
+                            <p class="mb-1"><strong>Comunidad:</strong> {{ $dest->comunidad ?? '—' }}</p>
+                            <p class="mb-1"><strong>Provincia:</strong> {{ $dest->provincia ?? '—' }}</p>
+                            <p class="mb-1"><strong>Ubicación:</strong>
+                                <span title="{{ $dest->direccion }}">
+                                    {{ $dest->direccion ? \Illuminate\Support\Str::limit($dest->direccion, 60) : '—' }}
+                                </span>
+                            </p>
 
-                          <div class="card-footer d-flex justify-content-between">
-                              <div >
-                                  <a class="btn btn-sm btn-dark mr-2" href="{{ route('solicitud.show', $key) }}">
-                                      <i class="fa fa-eye"></i>
-                                  </a>
-                                  <a class="btn btn-sm btn-info mr-2" href="{{ route('solicitud.edit', $key) }}">
-                                      <i class="fa fa-edit"></i>
-                                  </a>
-                                
-                              </div>
+                            <div class="mt-auto">
+                                <p class="mb-1"><strong>Tipo de Emergencia:</strong> {{ $solicitud->tipo_emergencia ?? '—' }}</p>
+                                <p class="mb-1"><strong>Personas afectadas:</strong> {{ $solicitud->cantidad_personas }}</p>
+                                <p class="mb-1">
+                                    <strong>Fecha inicio:</strong>
+                                    {{ \Carbon\Carbon::parse($solicitud->fecha_inicio)->format('d/m/Y') }}
+                                </p>
+                            </div>
+                        </div>
 
-                              <div>
-                                  @if($esPendienteYNoRespondida)
-                                      <form action="{{ route('solicitud.aprobar', $key) }}" method="POST" class="d-inline">
-                                          @csrf
-                                            <button 
-                                                type="button" class="btn btn-sm btn-dark btn-open-aprobar" data-id="{{ $key }}">
-                                                Aprobar
-                                            </button>
-                                      </form>
-                                     <button type="button" class="btn btn-sm btn-outline-dark btn-open-negar" data-id="{{ $key }}">
+                        <div class="card-footer d-flex justify-content-between">
+                            <div>
+                                <a class="btn btn-sm btn-dark mr-2" href="{{ route('solicitud.show', $key) }}">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                                @if ($solicitud->estado === 'pendiente')
+                                    <a class="btn btn-sm btn-info mr-2" href="{{ route('solicitud.edit', $key) }}">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                @endif
+                            </div>
+
+                            <div>
+                                @if($esPendienteYNoRespondida)
+                                    <form action="{{ route('solicitud.aprobar', $key) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-dark btn-open-aprobar"
+                                            data-id="{{ $key }}">
+                                            Aprobar
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-sm btn-outline-dark btn-open-negar" data-id="{{ $key }}">
                                         Negar
                                     </button>
-                                  @endif
+                                @endif
+                            </div>
+                        </div>
 
-                              </div>
-                          </div>
+                    </div>
+                </div>
+            @endforeach
 
-                      </div>
-                  </div>
-              @endforeach
           </div>
       </div>
 
@@ -199,6 +264,62 @@
         });
     </script>
 
+    @endpush
+    @push('js')
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const estadoButtons = document.querySelectorAll('.btn-filtro-estado');
+        const ordenButtons  = document.querySelectorAll('.btn-filtro-orden');
+        const container     = document.querySelector('.solicitud-uniform-row');
+
+        if (!container) return;
+
+        const allCards = Array.from(container.querySelectorAll('.solicitud-card'));
+
+        let estado = 'todos';
+        let orden  = 'recientes';
+
+        function aplicarFiltros() {
+            let cards = allCards.slice();
+            if (estado !== 'todos') {
+                cards = cards.filter(c => c.dataset.estado === estado);
+            }
+
+            cards.sort((a, b) => {
+                const ta = parseInt(a.dataset.fechaTs || '0', 10);
+                const tb = parseInt(b.dataset.fechaTs || '0', 10);
+
+                return (orden === 'recientes') ? (tb - ta) : (ta - tb);
+            });
+
+            allCards.forEach(c => c.style.display = 'none');
+
+            cards.forEach(c => {
+                c.style.display = '';
+                container.appendChild(c);
+            });
+        }
+
+        estadoButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                estadoButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                estado = this.dataset.value;
+                aplicarFiltros();
+            });
+        });
+
+        ordenButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                ordenButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                orden = this.dataset.value;
+                aplicarFiltros();
+            });
+        });
+        aplicarFiltros();
+    });
+    </script>
     @endpush
 
       </div>

@@ -18,8 +18,10 @@ class SolicitudController extends Controller
 {
     public function index(Request $request)
     {
-        $solicituds = Solicitud::with(['solicitante','destino'])->paginate();
-        
+        $solicituds = Solicitud::with(['solicitante', 'destino'])
+        ->orderByDesc('fecha_solicitud')
+        ->paginate();
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -297,4 +299,105 @@ class SolicitudController extends Controller
         ));
     }
 
+    //ACCIONES PUBLICAS
+       public function publicShow(string $codigo)
+        {
+            $solicitud = Solicitud::with(['solicitante', 'destino', 'tipoEmergencia'])
+                ->where('codigo_seguimiento', $codigo)
+                ->firstOrFail();
+            return view('solicitud.public-show', compact('solicitud'));
+        }
+
+        public function publicEdit(string $codigo)
+        {
+            $tipoEmergencia = \App\Models\TipoEmergencia::orderBy('prioridad', 'desc')->get();
+            $solicitud = Solicitud::with(['solicitante', 'destino', 'tipoEmergencia'])
+                ->where('codigo_seguimiento', $codigo)
+                ->firstOrFail();
+
+            $editable = ($solicitud->estado === 'pendiente');
+
+            if (!$editable) {
+                return redirect()
+                    ->route('solicitud.public.show', $codigo)
+                    ->with('error', 'Esta solicitud ya no puede ser editada.');
+            }
+            return view('solicitud.public-edit', compact('solicitud', 'tipoEmergencia'));
+        }
+
+        public function publicUpdate(Request $request, string $codigo)
+        {
+            $solicitud = Solicitud::with(['solicitante', 'destino', 'tipoEmergencia'])
+                ->where('codigo_seguimiento', $codigo)
+                ->firstOrFail();
+
+            $editable = ($solicitud->estado === 'pendiente');
+
+            if (!$editable) {
+                return redirect()
+                    ->route('solicitud.public.show', $codigo)
+                    ->with('error', 'Esta solicitud ya no puede ser editada.');
+            }
+            $data = $request->validate([
+                'nombre'               => 'required|string|max:255',
+                'apellido'             => 'required|string|max:255',
+                'carnet_identidad'     => 'required|string|max:50',
+                'correo_electronico'   => 'required|email|max:255',
+                'nro_celular'          => 'required|string|max:50',
+                'comunidad_solicitante'=> 'required|string|max:255',
+                'provincia'            => 'required|string|max:255',
+                'ubicacion'            => 'required|string|max:255',
+                'latitud'              => 'required|numeric',
+                'longitud'             => 'required|numeric',
+                'cantidad_personas'    => 'required|integer|min:1',
+                'fecha_inicio'         => 'required|date',
+                'id_tipoemergencia'    => 'required|exists:tipo_emergencia,id_emergencia',
+                'insumos_necesarios'   => 'required|string',
+            ]);
+            DB::beginTransaction();
+
+            try {
+
+                $solicitud->solicitante?->update([
+                    'nombre'  => $data['nombre'],
+                    'apellido'=> $data['apellido'],
+                    'ci'      => $data['carnet_identidad'] ?? null,
+                    'email'   => $data['correo_electronico'] ?? null,
+                    'telefono'=> $data['nro_celular'] ?? null,
+                ]);
+
+                $solicitud->destino?->update([
+                    'comunidad' => $data['comunidad_solicitante'] ?? null,
+                    'provincia' => $data['provincia'] ?? null,
+                    'direccion' => $data['ubicacion'] ?? null,
+                    'latitud'   => $data['latitud'] ?? null,
+                    'longitud'  => $data['longitud'] ?? null,
+                ]);
+
+                $solicitud->update([
+                    'cantidad_personas'  => $data['cantidad_personas'],
+                    'fecha_inicio'       => $data['fecha_inicio'],
+                    'id_tipoemergencia'  => $data['id_tipoemergencia'],
+                    'tipo_emergencia'    => $tipo->emergencia ?? $solicitud->tipo_emergencia,
+                    'insumos_necesarios' => $data['insumos_necesarios'],
+                ]);
+
+                DB::commit();
+
+            } catch (\Throwable $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $solicitud,
+                    'message' => 'Solicitud actualizada correctamente'
+                ]);
+            }
+            return redirect()
+                ->route('solicitud.public.show', $codigo)
+                ->with('success', 'Tu solicitud fue actualizada correctamente.');
+        }
 }
