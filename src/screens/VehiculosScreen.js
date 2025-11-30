@@ -345,7 +345,7 @@ export default function VehiculosScreen() {
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ej. ABC-1234"
+                placeholder="Ej. 1234ABC"
                 value={formData.placa}
                 onChangeText={text => handleChange('placa', text)}
                 autoCapitalize="characters"
