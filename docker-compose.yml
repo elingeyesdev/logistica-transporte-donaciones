@@ -13,6 +13,13 @@ services:
       DB_DATABASE: das_db
       DB_USERNAME: admin
       DB_PASSWORD: admin123
+      MAIL_MAILER: smtp
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: anagvs36@gmail.com
+      MAIL_PASSWORD: drhoiwwgiqboivtq
+      MAIL_ENCRYPTION: tls
+      MAIL_FROM_ADDRESS: anagvs36@gmail.com
     depends_on:
       - db
     networks:

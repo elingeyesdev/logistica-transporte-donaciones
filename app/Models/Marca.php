@@ -19,8 +19,8 @@ class Marca extends Model
     protected $primaryKey = 'id_marca';
     protected $perPage = 20;
     public $incrementing = true;
-public $keyType = 'int';
-public $timestamps = false;
+    public $keyType = 'int';
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.

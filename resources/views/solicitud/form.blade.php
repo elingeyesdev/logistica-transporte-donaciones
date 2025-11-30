@@ -168,7 +168,7 @@
         <div class="form-group mb-3">
             <label for="id_tipoemergencia">Tipo de Emergencia</label><br>
             <select required name="id_tipoemergencia" id="id_tipoemergencia"
-                    class="form-select @error('id_tipoemergencia') is-invalid @enderror">
+                    class="form-control @error('id_tipoemergencia') is-invalid @enderror">
                 <option value="">Seleccione un tipo</option>
                 @foreach($tipoEmergencia as $tipo)
                     <option value="{{ $tipo->id_emergencia }}"
@@ -186,12 +186,14 @@
 
     <div class="col-md-12">
         <div class="form-group mb-3">
-            <label for="insumos_necesarios">Insumos Necesarios</label>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#insumosModal">
-                Seleccionar Insumos
-            </button>
-            <input type="hidden" name="insumos_necesarios" id="insumos_necesarios" value="{{ old('insumos_necesarios', $solicitud->insumos_necesarios) }}">
-            @error('insumos_necesarios') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            <label for="insumos_necesarios">Insumos Necesarios</label><br>
+            <div class="d-flex">
+                <button type="button" class="btn btn-primary mb-3 mr-3" style="min-width: fit-content;" data-toggle="modal" data-target="#insumosModal">
+                    Seleccionar Insumos
+                </button>
+                <input readonly class="form-control" name="insumos_necesarios" id="insumos_necesarios" value="{{ old('insumos_necesarios', $solicitud->insumos_necesarios) }}">
+                @error('insumos_necesarios') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
         </div>
 
         <!-- Modal -->
@@ -209,7 +211,6 @@
                             <div class="col-md-8">
                                 <h6>Seleccione los productos:</h6>
                                 <div id="productos-list" class="list-group">
-                                    <!-- Aquí se cargarán los productos dinámicamente -->
                                 </div>
                                 <nav aria-label="Page navigation" class="mt-3">
                                     <ul class="pagination justify-content-center">
@@ -223,7 +224,6 @@
                             <div class="col-md-4">
                                 <h6>Productos seleccionados:</h6>
                                 <ul id="productos-seleccionados" class="list-group">
-                                    <!-- Aquí se mostrarán los productos seleccionados -->
                                 </ul>
                             </div>
                         </div>
@@ -264,15 +264,19 @@
 
 </div>
 
-<div class="text-right">
+<div class="d-flex text-right mt-3 ml-2">
+    <div class="mr-3">
+        @auth
+            <a href="{{ route('solicitud.index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        @endauth
+    </div>
+   <div class="align-items-right">
     <button type="submit" class="btn btn-success">
         <i class="fas fa-save"></i> Enviar Solicitud
     </button>
-    @auth
-        <a href="{{ route('solicitud.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Volver
-        </a>
-    @endauth
+   </div>
 </div>
 
 <script>
@@ -396,7 +400,6 @@
         const insumosInput = document.getElementById('insumos_necesarios');
         const cantidadPersonas = parseInt(document.getElementById('cantidad_personas').value || 0);
 
-        // Simular carga de productos desde el endpoint
         const productos = [
             { id_producto: 1, nombre: 'Camisa', descripcion: 'Camisa', stock_total: 125 },
             { id_producto: 2, nombre: 'Polera', descripcion: 'Polera', stock_total: 89 },
@@ -416,53 +419,60 @@
                     </div>
                     <div class="input-group" style="width: 150px;">
                         <div class="input-group-prepend">
-                            <button class="btn btn-sm btn-outline-secondary decrement" data-id="${producto.id_producto}">-</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary decrement" data-id="${producto.id_producto}">-</button>
                         </div>
                         <input type="number" class="form-control cantidad" data-id="${producto.id_producto}" value="0" min="0">
                         <div class="input-group-append">
-                            <button class="btn btn-sm btn-outline-secondary increment" data-id="${producto.id_producto}">+</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary increment" data-id="${producto.id_producto}">+</button>
                         </div>
                     </div>
-                    <button class="btn btn-sm btn-success aplicar" data-id="${producto.id_producto}" data-nombre="${producto.nombre}">Aplicar</button>
+                    <button type="button" class="btn btn-sm btn-success aplicar" data-id="${producto.id_producto}" data-nombre="${producto.nombre}">Aplicar</button>
                 </div>
             `;
+
             productosList.appendChild(item);
 
-            // Incrementar cantidad
-            item.querySelector('.increment').addEventListener('click', function() {
+            item.querySelector('.increment').addEventListener('click', function(e) {
+                e.preventDefault();
                 const input = item.querySelector('.cantidad');
                 input.value = parseInt(input.value || 0) + 1;
             });
 
-            // Decrementar cantidad
-            item.querySelector('.decrement').addEventListener('click', function() {
+            item.querySelector('.decrement').addEventListener('click', function(e) {
+                e.preventDefault();
                 const input = item.querySelector('.cantidad');
                 input.value = Math.max(0, parseInt(input.value || 0) - 1);
             });
 
-            // Aplicar producto seleccionado
-            item.querySelector('.aplicar').addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const nombre = this.getAttribute('data-nombre');
-                const cantidad = item.querySelector('.cantidad').value;
+        item.querySelector('.aplicar').addEventListener('click', function(e) {
+            e.preventDefault();
 
-                if (cantidad > 0) {
-                    const seleccionado = document.createElement('li');
-                    seleccionado.className = 'list-group-item d-flex justify-content-between align-items-center';
-                    seleccionado.innerHTML = `
-                        <span>${nombre} (Cantidad: ${cantidad})</span>
-                        <button class="btn btn-sm btn-danger" data-id="${id}">Quitar</button>
-                    `;
-                    productosSeleccionados.appendChild(seleccionado);
+            const id = this.getAttribute('data-id');
+            const nombre = this.getAttribute('data-nombre');
+            const cantidad = item.querySelector('.cantidad').value;
 
-                    seleccionado.querySelector('button').addEventListener('click', function() {
-                        this.parentElement.remove();
-                    });
-                }
-            });
+            if (cantidad > 0) {
+                const label = `${nombre} x${cantidad}`;
+
+                const seleccionado = document.createElement('li');
+                seleccionado.className = 'list-group-item d-flex justify-content-between align-items-center';
+                seleccionado.innerHTML = `
+                    <span>${label}</span>
+                    <button type="button" class="btn btn-sm btn-danger" data-id="${id}">Quitar</button>
+                `;
+                productosSeleccionados.appendChild(seleccionado);
+
+                seleccionado.querySelector('button').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    this.parentElement.remove();
+                });
+            }
         });
 
-        document.getElementById('guardarInsumos').addEventListener('click', function() {
+        });
+
+        document.getElementById('guardarInsumos').addEventListener('click', function(e) {
+             e.preventDefault();
             const seleccionados = [];
             productosSeleccionados.querySelectorAll('li').forEach(item => {
                 seleccionados.push(item.querySelector('span').textContent);
