@@ -52,6 +52,64 @@
             {!! $errors->first('id_marca', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
 
+        <div class="form-group mb-2 mb20">
+            <label for="color" class="form-label">Color</label>
+            @php
+                $colores = [
+                    'Rojo',
+                    'Blanco',
+                    'Plomo',
+                    'Negro',
+                    'Azul',
+                    'Dorado',
+                    'Guindo/Rojo Oscuro',
+                    'Verde',
+                    'Otro'
+                ];
+                
+                $colorActual = old('color', $vehiculo?->color);
+                $personalizado = $colorActual && !in_array($colorActual, $colores, true);
+                $colorActual = $personalizado ? 'Otro' : $colorActual;
+                $customColor = old('color_otro', $personalizado ? $colorActual : '');
+            @endphp
+
+            <select name="color" id="color"
+                    class="form-select @error('color') is-invalid @enderror">
+                <option value="">Seleccione un color</option>
+                @foreach($colores as $color)
+                    <option value="{{ $color }}"
+                        {{ $colorActual === $color ? 'selected' : '' }}>
+                        {{ $color }}
+                    </option>
+                @endforeach
+            </select>
+            {!! $errors->first('color', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+            <input
+                type="text" name="color_otro" id="color_otro" class="form-control mt-2 @error('color_otro') is-invalid @enderror {{ $personalizado ? '' : 'd-none' }}" 
+                placeholder="Especifique el color" value="{{ $customColor }}">
+            {!! $errors->first('color_otro', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const selectColor = document.getElementById('color');
+                const inputOtro = document.getElementById('color_otro');
+
+                if (!selectColor || !inputOtro) return;
+
+                function toggleColorOtro() {
+                    if (selectColor.value === 'Otro') {
+                        inputOtro.classList.remove('d-none');
+                    } else {
+                        inputOtro.classList.add('d-none');
+                        inputOtro.value = '';
+                    }
+                }
+
+                selectColor.addEventListener('change', toggleColorOtro);
+                toggleColorOtro();
+            });
+        </script>
+
     </div>
     <div class="col-md-12 mt20 mt-2">
         <button type="submit" class="btn btn-primary">{{ __('Guardar') }}</button>

@@ -211,6 +211,7 @@
                                  @if($marca->id_marca || !empty($vehiculo->modelo)) 
                                     — {{ $marca->nombre_marca ?? $marca->nombre ?? 'Sin marca' }}
                                     {{ $vehiculo->modelo ?? '' }}
+                                    {{ $vehiculo->color ?? '' }}
                                 @endif
                             @else
                                 —

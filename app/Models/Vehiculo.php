@@ -31,7 +31,7 @@ class Vehiculo extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['placa', 'capacidad_aproximada', 'id_tipovehiculo', 'modelo_anio', 'modelo', 'marca', 'id_marca',];
+    protected $fillable = ['placa', 'capacidad_aproximada', 'id_tipovehiculo', 'modelo_anio', 'modelo', 'marca', 'id_marca','color'];
 
 
     /**

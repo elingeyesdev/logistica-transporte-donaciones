@@ -59,37 +59,35 @@
                     </span>
                   </div>
 
-                  <div class="card-body">
+                  <div class="card-body gap-2 justify-content-center">
 
-                    <p class="mb-1"><strong>Solicitante:</strong> 
+                    <p class="mb-3"><strong>Solicitante:</strong> 
                       {{ $pers->nombre ?? '—' }} {{ $pers->apellido ?? '' }}
                     </p>
 
-                    <p class="mb-1"><strong>CI:</strong> {{ $pers->ci ?? '—' }}</p>
+                    <p class="mb-3"><strong>CI:</strong> {{ $pers->ci ?? '—' }}</p>
 
-                    <p class="mb-1"><strong>Comunidad:</strong> {{ $dest->comunidad ?? '—' }}</p>
+                    <p class="mb-3"><strong>Comunidad:</strong> {{ $dest->comunidad ?? '—' }}</p>
 
-                    <p class="mb-1"><strong>Emergencia:</strong> {{ $sol->tipo_emergencia ?? '—' }}</p>
+                    <p class="mb-3"><strong>Emergencia:</strong> {{ $sol->tipo_emergencia ?? '—' }}</p>
 
-                    <hr>
-
-                    <div class="mt-auto">
-                      <p class="mb-1"><strong>Ubicación:</strong>
+                    <div class="">
+                      <p class="mb-3"><strong>Ubicación:</strong>
                         <span title="{{ $paquete->ubicacion_actual }}">{{ ($paquete->ubicacion_actual ? \Illuminate\Support\Str::limit(trim(\Illuminate\Support\Str::before($paquete->ubicacion_actual, '-')), 55) : '—') }}</span>
                       </p>
 
-                      <p class="mb-1"><strong>Fecha Creación:</strong> 
+                      <p class="mb-3"><strong>Fecha Creación:</strong> 
                         {{ \Carbon\Carbon::parse($paquete->created_at)->format('d/m/Y') }}
                       </p>
 
-                      <p class="mb-1"><strong>Fecha Entrega:</strong> 
+                      <p class="mb-3"><strong>Fecha Entrega:</strong> 
                         {{ \Carbon\Carbon::parse($paquete->fecha_entrega)->format('d/m/Y') ?? '—' }}
                       </p>
                     </div>
 
                   </div>
 
-                  <div class="card-footer d-flex justify-content-between">
+                  <div class="card-footer d-flex justify-content-between mt-0">
 
                     <div>
                       <a class="btn btn-sm btn-dark mr-2" href="{{ route('paquete.show', $paquete->id_paquete) }}">

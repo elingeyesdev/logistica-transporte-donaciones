@@ -19,11 +19,6 @@
                     </div>
 
                     <div class="card-body bg-white">
-                        
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Id Vehiculo:</strong>
-                                    {{ $vehiculo->id_vehiculo }}
-                                </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Placa:</strong>
                                     {{ $vehiculo->placa }}
@@ -47,6 +42,10 @@
                                   <div class="form-group mb-2 mb20">
                                     <strong>Marca:</strong>
                                     {{ $vehiculo->marca }}
+                                </div>
+                                <div class="form-group mb-2 mb20">
+                                    <strong>Color:</strong>
+                                    {{ $vehiculo->color }}
                                 </div>
                     </div>
                 </div>

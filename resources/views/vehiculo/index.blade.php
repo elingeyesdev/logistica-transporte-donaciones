@@ -34,22 +34,19 @@
                             <table class="table table-striped table-hover">
                                 <thead class="thead">
                                     <tr>
-                                     
-									<th >Id Vehiculo</th>
 									<th >Placa</th>
 									<th >Capacidad Aproximada</th>
 									<th >Tipo</th>
 									<th >Modelo Anio</th>
 									<th >Modelo</th>
                                     <th >Marca</th>
-
+                                    <th >Color</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($vehiculo as $veh)
                                         <tr>                                            
-										<td >{{ $veh->id_vehiculo }}</td>
 										<td >{{ $veh->placa }}</td>
 										<td >{{ $veh->capacidad_aproximada }}</td>
 										<td >{{ $veh->tipoVehiculo?->nombre_tipo_vehiculo ?? 'Sin tipo asignado' }}</td>
@@ -60,7 +57,7 @@
                                                 ?? optional($veh->marcaVehiculo)->nombre
                                                 ?? 'Sin marca' }}
                                         </td>
-
+                                        <td >{{ $veh-> color }}</td>
                                             <td>
                                                 <form action="{{ route('vehiculo.destroy', $veh->id_vehiculo) }}" method="POST">
                                                     <a class="btn btn-sm btn-primary " href="{{ route('vehiculo.show', $veh->id_vehiculo) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>

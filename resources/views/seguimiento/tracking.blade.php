@@ -12,7 +12,7 @@
 @endsection
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1>Tracking del Paquete: {{ $paquete->codigo }}</h1>
+        <h1>Tracking del Paquete: {{ $paquete->solicitud->codigo_seguimiento }}</h1>
         <a href="{{ route('seguimiento.index') }}" class="btn btn-primary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
@@ -28,13 +28,16 @@
         <div class="card-body row">
 
             <div class="col-md-4">
-                <strong>Código:</strong> {{ $paquete->codigo }}<br>
+                <h5>Información de la Solicitud</h5>
+
+                <strong>Código:</strong> {{ $paquete->solicitud->codigo_seguimiento }}<br>
                 <strong>Estado:</strong> {{ optional($paquete->estado)->nombre_estado }}<br>
                 <strong>Fecha creación:</strong> {{ $paquete->fecha_creacion }}<br>
             </div>
 
             <div class="col-md-4">
-                <strong>Solicitante:</strong> 
+                <h5>Información del Solicitante</h5>
+                <strong>Nombre Completo:</strong> 
                     {{ optional($paquete->solicitud->solicitante)->nombre }} 
                     {{ optional($paquete->solicitud->solicitante)->apellido }}<br>
                 <strong>CI:</strong> {{ optional($paquete->solicitud->solicitante)->ci }}<br>
@@ -43,13 +46,14 @@
             </div>
 
             <div class="col-md-4">
+             <h5>Información del Transporte</h5>
                 <strong>Conductor:</strong> 
                     {{ optional($paquete->conductor)->nombre }} 
                     {{ optional($paquete->conductor)->apellido }}<br>
                 <strong>CI:</strong> {{ optional($paquete->conductor)->ci }}<br>
                 <strong>Vehículo:</strong> 
-                    {{ optional($paquete->vehiculo)->placa }}
-                    ({{ optional($paquete->vehiculo->marcaVehiculo)->nombre_marca }})<br>
+                    {{ optional($paquete->vehiculo)->placa }}, 
+                    {{ optional($paquete->vehiculo->marcaVehiculo)->nombre_marca }} {{ optional($paquete->vehiculo)->modelo }} {{ optional($paquete->vehiculo)->color }}<br>
             </div>
 
         </div>
@@ -85,7 +89,7 @@
                         <td>{{ $h->estado }}</td>
                         <td>{{ optional($h->ubicacion)->zona }}</td>
                         <td>{{ $h->conductor_nombre }}</td>
-                        <td>{{ $h->vehiculo_placa }}</td>
+                        <td>{{ $h->vehiculo_placa }} </td>
                     </tr>
                 @endforeach
                 </tbody>

@@ -24,12 +24,12 @@ class VehiculoRequest extends FormRequest
         return [
 			'placa' => ['required', 'regex:/^\d{3,4}[A-Z]{3}$/'],
 			'capacidad_aproximada' => 'string',
-			 'modelo_anio' => ['nullable','integer','min:1975'],
+			'modelo_anio' => ['nullable','integer','min:1975'],
 			'modelo' => 'string',
             'marca' => 'string',
             'id_tipovehiculo' => ['required', 'integer'],
             'id_marca' => ['nullable','integer','exists:marca,id_marca'],
-
+            'color'=>['nullable', 'string']
         ];
     }
 }
