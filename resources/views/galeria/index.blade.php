@@ -21,16 +21,18 @@
                 <div class="col-md-4 mb-4">
                     <div class="card">
                         @php
-                            $imagePath = asset('storage/paquetes/' . $paquete->imagen);
+                            $imageUrl = $paquete->imagen
+                                ? route('paquete.imagen', $paquete->id_paquete)
+                                : null;
                         @endphp
-                        <p>Ruta generada: {{ $imagePath }}</p>
-                        @if(file_exists(public_path('storage/' . $paquete->imagen)))
-                            <img src="{{ $imagePath }}" class="card-img-top" alt="Foto de entrega">
+                        @if($imageUrl)
+                            <img src="{{ $imageUrl }}" class="card-img-top" alt="Foto de entrega">
                         @else
                             <img src="{{ asset('images/default-placeholder.png') }}" class="card-img-top" alt="Imagen no disponible">
                         @endif
+
                         <div class="card-body">
-                            <h5 class="card-title">Comunidad: {{ $paquete->solicitud->destino->comunidad }}</h5>
+                            <h5 class="">Donación entregada a la comunidad {{ $paquete->solicitud->destino->comunidad }} </h5>
                             <p class="card-text">Fecha de Entrega: {{ \Carbon\Carbon::parse($paquete->fecha_entrega)->format('d/m/Y') }}</p>
                         </div>
                     </div>
