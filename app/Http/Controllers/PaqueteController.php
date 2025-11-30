@@ -219,8 +219,13 @@ class PaqueteController extends Controller
 
         if ($request->hasFile('imagen')) {
             $payload['imagen'] = $request->file('imagen')->store('paquetes', 'public');
-        }else {
+            \Log::info('Imagen actualizada:', [
+                'ruta' => $payload['imagen'],
+                'existe' => file_exists(public_path('storage/' . $payload['imagen']))
+            ]);
+        } else {
             unset($payload['imagen']);
+            \Log::info('No se proporcionó una nueva imagen.');
         }
 
         $paquete->update($payload);
@@ -339,6 +344,19 @@ class PaqueteController extends Controller
                 $query->where('nombre_estado', 'Entregado'); // Corrected column name
             })
             ->get(); // Removed field restriction to include all necessary data
+
+        // Debugging: Log the retrieved packages
+        \Log::info('Paquetes entregados:', $paquetes->toArray());
+
+        // Debugging: Log the image paths and package data
+        foreach ($paquetes as $paquete) {
+            \Log::info('Paquete:', [
+                'id' => $paquete->id,
+                'imagen' => $paquete->imagen,
+                'ruta_completa' => public_path('storage/paquetes/' . $paquete->imagen),
+                'existe' => file_exists(public_path('storage/paquetes/' . $paquete->imagen))
+            ]);
+        }
 
         // Pass data to the gallery view
         return view('galeria.index', compact('paquetes'));

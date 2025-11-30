@@ -212,7 +212,7 @@
                             <tr>
                                 <td><a href="{{ route('paquete.show', $paq->id_paquete) }}">#{{ $paq->id_paquete }}</a></td>
                                 <td>{{ $paq->fecha_creacion }}</td>
-                                <td>{{ $paq->fecha_entrega }}</td>
+                                <td>{{ \Carbon\Carbon::parse($paq->fecha_entrega)->format('d/m/Y') }}</td>
                                 <td class="text-right">
                                     <span class="badge badge-{{ $paq->dias_entrega > 7 ? 'danger' : ($paq->dias_entrega > 3 ? 'warning' : 'success') }}">
                                         {{ round($paq->dias_entrega, 1) }} días

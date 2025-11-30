@@ -183,7 +183,7 @@
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha Entrega:</strong>
-                            {{ $paquete->fecha_entrega ?? '—'}}
+                            {{ \Carbon\Carbon::parse($paquete->fecha_entrega)->format('d/m/Y') ?? '—'}}
                         </div>
 
                         @php
