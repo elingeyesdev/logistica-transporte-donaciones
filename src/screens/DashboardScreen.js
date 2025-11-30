@@ -12,14 +12,14 @@ export default function DashboardScreen() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const config = await getApiConfig(); // Obtener configuración con token
+      const config = await getApiConfig(); 
       const response = await axios.get(`${API_BASE_URL}/dashboard`, config);
 
-      console.log('Respuesta completa de la API:', JSON.stringify(response.data, null, 2)); // Log detallado para depurar la respuesta completa
+      console.log('Respuesta completa de la API:', JSON.stringify(response.data, null, 2)); 
 
-      // Ajustar el mapeo de datos según la estructura de la API
+      
       const mappedData = {
-        total: response.data.total || response.data.listadoSolicitud || 0, // Verificar claves alternativas
+        total: response.data.total || response.data.listadoSolicitud || 0, 
         aceptadas: response.data.aceptadas || 0,
         rechazadas: response.data.rechazadas || 0,
         tasa: response.data.tasa || 0,
@@ -27,7 +27,7 @@ export default function DashboardScreen() {
         voluntariosConductores: response.data.voluntariosConductores || 0,
       };
 
-      console.log('Datos mapeados para el dashboard:', mappedData); // Log para verificar los datos mapeados
+      console.log('Datos mapeados para el dashboard:', mappedData); 
 
       setData(mappedData);
     } catch (error) {
@@ -51,7 +51,7 @@ export default function DashboardScreen() {
   }
 
   if (!data) {
-    console.log('Estado de los datos en el renderizado:', data); // Log para verificar el estado de los datos
+    console.log('Estado de los datos en el renderizado:', data); 
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>No se pudo cargar el dashboard.</Text>
@@ -71,18 +71,18 @@ export default function DashboardScreen() {
         </View>
 
         <View style={styles.row}>
-          <SmallBox color="info" title="Solicitudes Totales" value={data.total} footer="Más info" />
-          <SmallBox color="success" title="Aceptadas" value={data.aceptadas} footer="Ver aceptadas" />
+          <SmallBox color="info" title="Solicitudes Totales" value={data.total}  />
+          <SmallBox color="success" title="Aceptadas" value={data.aceptadas}  />
         </View>
 
         <View style={styles.row}>
-          <SmallBox color="danger" title="Rechazadas" value={data.rechazadas} footer="Ver rechazadas" />
-          <SmallBox color="warning" title="Tasa de Aprobación" value={`${data.tasa}%`} footer="Info" />
+          <SmallBox color="danger" title="Rechazadas" value={data.rechazadas}  />
+          <SmallBox color="warning" title="Tasa de Aprobación" value={`${data.tasa}%`}  />
         </View>
 
         <View style={styles.row}>
-          <SmallBox color="purple" title="Total Voluntarios" value={data.totalVoluntarios} footer="Ver voluntarios" />
-          <SmallBox color="teal" title="Voluntarios Conductores" value={data.voluntariosConductores} footer="Ver conductores" />
+          <SmallBox color="purple" title="Total Voluntarios" value={data.totalVoluntarios}  />
+          <SmallBox color="teal" title="Voluntarios Conductores" value={data.voluntariosConductores}  />
         </View>
 
         <View style={styles.cardContainer}>
