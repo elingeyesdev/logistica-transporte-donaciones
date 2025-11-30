@@ -72,7 +72,7 @@ class PaqueteController extends Controller
 
             $data = $request->validated();
 
-            $data['fecha_aprobacion'] = now()->toDateString();
+            $data['fecha_entrega']   = null;
             $data['id_encargado']     = Auth::user()->ci;
             $data['codigo']           = $this->makeCodigoPaquete();
 
@@ -217,6 +217,54 @@ class PaqueteController extends Controller
         try {
 
         $oldEstadoId = $paquete->estado_id;
+        $newEstadoId = (int) $request->input('estado_id');
+
+        $oldEstado = Estado::find($oldEstadoId);
+        $newEstado = Estado::find($newEstadoId);
+
+        $oldNombre = optional($oldEstado)->nombre_estado;
+        $newNombre = optional($newEstado)->nombre_estado;
+
+        if ($oldNombre && $newNombre) {
+            $oldIsPendiente = strcasecmp($oldNombre, 'Pendiente') === 0;
+            $newIsPendiente = strcasecmp($newNombre, 'Pendiente') === 0;
+            $newIsEnCamino  = strcasecmp($newNombre, 'En Camino') === 0
+                        || strcasecmp($newNombre, 'En camino') === 0;
+
+            if ($oldIsPendiente && !$newIsEnCamino) {
+                DB::rollBack();
+
+                $mensaje = 'Un paquete en estado "Pendiente" solo puede pasar a "En Camino".';
+
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors'  => ['estado_id' => [$mensaje]],
+                    ], 422);
+                }
+
+                return back()
+                    ->withErrors(['estado_id' => $mensaje])
+                    ->withInput();
+            }
+
+            if (!$oldIsPendiente && $newIsPendiente) {
+                DB::rollBack();
+
+                $mensaje = 'No puedes regresar el paquete al estado "Pendiente".';
+
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors'  => ['estado_id' => [$mensaje]],
+                    ], 422);
+                }
+
+                return back()
+                    ->withErrors(['estado_id' => $mensaje])
+                    ->withInput();
+            }
+        }
 
         $payload = $request->validated();
         $payload['id_encargado'] = optional(Auth::user())->ci ?? $paquete->id_encargado ?? null;
@@ -236,8 +284,17 @@ class PaqueteController extends Controller
 
         $estadoNombre = optional($paquete->estado)->nombre_estado ?? 'Pendiente';
 
-        if (strcasecmp($estadoNombre, 'Entregado') === 0 || strcasecmp($estadoNombre, 'Entregada') === 0) {
-            $paquete->update(['fecha_entrega' => now()->toDateString()]);
+        $entregado = $estadoNombre &&
+            (strcasecmp($estadoNombre, 'Entregado') === 0 ||
+            strcasecmp($estadoNombre, 'Entregada') === 0);
+        if ($entregado) {
+            if (is_null($paquete->fecha_entrega)) {
+                $paquete->update(['fecha_entrega' => now()->toDateString()]);
+            }
+        } else {
+            if (!is_null($paquete->fecha_entrega)) {
+                $paquete->update(['fecha_entrega' => null]);
+            }
         }
 
         $lat  = $request->input('latitud');

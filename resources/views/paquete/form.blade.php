@@ -197,12 +197,6 @@
           <input type="text" class="form-control" value="{{ $paquete->codigo ?? 'Se generará al guardar' }}" disabled>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="form-group mb-2 mb20">
-          <label class="form-label">Fecha Aprobación</label>
-          <input type="text" class="form-control" value="{{ $paquete->fecha_aprobacion ?? now()->format('Y-m-d') }}" disabled>
-        </div>
-      </div>
     </div>
 
     <div class="text-right mt-2">

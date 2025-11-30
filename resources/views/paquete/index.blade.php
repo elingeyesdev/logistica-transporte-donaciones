@@ -81,8 +81,13 @@
                       </p>
 
                       <p class="mb-3"><strong>Fecha Entrega:</strong> 
-                        {{ \Carbon\Carbon::parse($paquete->fecha_entrega)->format('d/m/Y') ?? '—' }}
+                        @if($paquete->fecha_entrega)
+                            {{ \Carbon\Carbon::parse($paquete->fecha_entrega)->format('d/m/Y') }}
+                        @else
+                            —
+                        @endif
                       </p>
+
                     </div>
 
                   </div>
