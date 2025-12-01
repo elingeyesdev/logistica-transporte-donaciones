@@ -11,6 +11,10 @@ import {
   ActivityIndicator,
   FlatList,
   Platform,
+  KeyboardAvoidingView,
+  Keyboard,
+  TouchableWithoutFeedback,
+
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
@@ -303,6 +307,11 @@ export default function ConductoresScreen() {
         onRequestClose={() => setModalCrearVisible(false)}
       >
         <View style={styles.overlayBackdrop}>
+         <KeyboardAvoidingView
+          style={styles.keyboardAvoidingContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? -40 : 0}
+        >
           <View style={styles.modalCard}>
             <View style={styles.modalHeaderCard}>
               <View style={styles.modalHeaderContent}>
@@ -388,8 +397,10 @@ export default function ConductoresScreen() {
               </TouchableOpacity>
             </View>
           </View>
+        </KeyboardAvoidingView>  
         </View>
       </Modal>
+
     </AdminLayout>
   );
 }
@@ -490,7 +501,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     marginLeft: 18,
   },
-  // Overlay modal new styles replacing old full-screen modal
   overlayBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',
@@ -499,8 +509,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalCard: {
-    width: '92%',
+    width: '100%',
     maxHeight: '90%',
+    minWidth:320,
     backgroundColor: '#ffffff',
     borderRadius: 12,
     overflow: 'hidden',
@@ -575,7 +586,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: adminlteColors.dark,
   },
-  // Inline licencia selector styles
   licenciaInlineContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',

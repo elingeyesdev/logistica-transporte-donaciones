@@ -25,22 +25,40 @@ export const getSolicitudes = async () => {
 
 export const approveSolicitud = async (id) => {
   try {
-    const response = await api.post(`/solicitud/${id}/aprobar`);
+    const response = await api.post(`/solicitud/${id}/aprobar`, null, {
+      timeout: 30000,
+    });
     console.log('Solicitud aprobada:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error al aprobar solicitud:', error.response?.data || error.message);
-    throw error;
+    const isTimeout =
+      error.code === 'ECONNABORTED' ||
+      (error.message && error.message.toLowerCase().includes('timeout'));
+
+    console.error(
+      'Error al aprobar solicitud:',
+      error.response?.data || error.message
+    );
+    throw { ...error, isTimeout };
   }
 };
 
-export const denySolicitud = async (id) => {
+export const denySolicitud = async (id, justificacion) => {
   try {
-    const response = await api.post(`/solicitud/${id}/negar`);
+    const response = await api.post(`/solicitud/${id}/negar`, { justificacion }, {
+      timeout: 30000,
+    });
     console.log('Solicitud negada:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error al negar solicitud:', error.response?.data || error.message);
-    throw error;
+    const isTimeout =
+      error.code === 'ECONNABORTED' ||
+      (error.message && error.message.toLowerCase().includes('timeout'));
+
+    console.error(
+      'Error al negar solicitud:',
+      error.response?.data || error.message
+    );
+    throw { ...error, isTimeout };
   }
 };

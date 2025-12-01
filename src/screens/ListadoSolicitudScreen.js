@@ -8,6 +8,11 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { adminlteColors } from '../theme/adminlte';
@@ -260,7 +265,7 @@ const obtenerSolicitudesFiltradas = () => {
       if (!processingIds.includes(id)) {
         setProcessingIds(prev => [...prev, id]);
         try {
-          await denySolicitud(id);
+          await denySolicitud(id, motivoRechazo);
           setSolicitudes(prev => prev.map(s => (s.id === id ? { ...s, estado: 'rechazadas' } : s)));
           Alert.alert('Éxito', `Solicitud #${solicitudSeleccionada.codigoSolicitud} rechazada exitosamente`);
           setModalRechazoVisible(false);
@@ -347,6 +352,7 @@ const obtenerSolicitudesFiltradas = () => {
         return adminlteColors.danger;
       case 'sin_contestar':
       case 'pendiente':
+      case 'pendientes':
         return '#ffc107';
       default:
         return adminlteColors.secondary;
@@ -364,6 +370,7 @@ const obtenerSolicitudesFiltradas = () => {
         return 'Negada';
       case 'sin_contestar':
       case 'pendiente':
+      case 'pendientes': 
         return 'Pendiente';
       default:
         return 'Pendiente';
@@ -578,7 +585,7 @@ const obtenerSolicitudesFiltradas = () => {
                   <Text style={styles.btnVerDetalleText}>Ver Detalle</Text>
                 </TouchableOpacity>
 
-                {(solicitud.estado === 'sin_contestar' || solicitud.estado === 'pendiente' || !solicitud.estado) && (
+                {(solicitud.estado === 'pendientes' || solicitud.estado === 'pendiente' || !solicitud.estado) && (
                   <>
                     <TouchableOpacity
                       style={[styles.btnAprobar, processingIds.includes(solicitud.id) && styles.btnDisabled]}
@@ -728,62 +735,78 @@ const obtenerSolicitudesFiltradas = () => {
         onRequestClose={() => setModalRechazoVisible(false)}
       >
         <View style={styles.overlayBackdrop}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeaderCard}>
-              <Text style={styles.modalHeaderTitle}>Confirmar Rechazo</Text>
-              <TouchableOpacity
-                onPress={() => setModalRechazoVisible(false)}
-                style={styles.modalCloseButton}
-              >
-                <MaterialIcons name="close" size={24} color="#ffffff" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalBodyCard}>
-              <Text style={styles.modalBodyText}>
-                ¿Estás seguro que deseas rechazar la solicitud?
-              </Text>
-
-              <View style={styles.formGroup}>
-                <Text style={styles.label}>Motivo del rechazo:</Text>
-                              <TextInput
-                  style={styles.textInput}
-                  placeholder="Ingrese el motivo del rechazo"
-                  value={motivoRechazo}
-                  onChangeText={setMotivoRechazo}
-                />
-              </View>
-              
-              {motivoRechazo ? (
-                <View style={styles.motivoSeleccionadoContainer}>
-                  <Text style={styles.motivoSeleccionadoText}>
-                    Motivo ingresado: {motivoRechazo}
-                  </Text>
+          <KeyboardAvoidingView
+            style={styles.keyboardAvoidingContainer}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={styles.modalCard}>
+                <View style={styles.modalHeaderCard}>
+                  <Text style={styles.modalHeaderTitle}>Confirmar Rechazo</Text>
+                  <TouchableOpacity
+                    onPress={() => setModalRechazoVisible(false)}
+                    style={styles.modalCloseButton}
+                  >
+                    <MaterialIcons name="close" size={24} color="#ffffff" />
+                  </TouchableOpacity>
                 </View>
-              ) : null}
-            </ScrollView>
 
-            <View style={styles.modalFooterCard}>
-              <TouchableOpacity
-                style={styles.modalFooterButtonSecondary}
-                onPress={() => setModalRechazoVisible(false)}
-              >
-                <Text style={styles.modalFooterButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.modalFooterButtonDanger,
-                  !motivoRechazo && styles.modalFooterButtonDisabled,
-                ]}
-                onPress={confirmarRechazo}
-                disabled={!motivoRechazo}
-              >
-                <Text style={styles.modalFooterButtonText}>Confirmar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+                <ScrollView
+                  style={styles.modalBodyCard}
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={{ paddingBottom: 24 }}
+                >
+                  <Text style={styles.modalBodyText}>
+                    ¿Estás seguro que deseas rechazar la solicitud?
+                  </Text>
+
+                  <View style={styles.formGroup}>
+                    <Text style={styles.label}>Motivo del rechazo:</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Ingrese el motivo del rechazo"
+                      value={motivoRechazo}
+                      onChangeText={setMotivoRechazo}
+                      multiline
+                      numberOfLines={4}
+                      placeholderTextColor="#C0C0C0"
+                    />
+                  </View>
+
+                  {motivoRechazo ? (
+                    <View style={styles.motivoSeleccionadoContainer}>
+                      <Text style={styles.motivoSeleccionadoText}>
+                        Motivo ingresado: {motivoRechazo}
+                      </Text>
+                    </View>
+                  ) : null}
+                </ScrollView>
+
+                <View style={styles.modalFooterCard}>
+                  <TouchableOpacity
+                    style={styles.modalFooterButtonSecondary}
+                    onPress={() => setModalRechazoVisible(false)}
+                  >
+                    <Text style={styles.modalFooterButtonText}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.modalFooterButtonDanger,
+                      !motivoRechazo && styles.modalFooterButtonDisabled,
+                    ]}
+                    onPress={confirmarRechazo}
+                    disabled={!motivoRechazo}
+                  >
+                    <Text style={styles.modalFooterButtonText}>Confirmar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
+
     </AdminLayout>
   );
 }
@@ -1165,4 +1188,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+  textInput: {
+  borderWidth: 1,
+  borderColor: '#ced4da',
+  borderRadius: 4,
+  paddingHorizontal: 10,
+  paddingVertical: 8,
+  fontSize: 14,
+  backgroundColor: '#ffffff',
+  minHeight: 80,
+  textAlignVertical: 'top',
+  
+},
+
 });

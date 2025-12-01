@@ -9,6 +9,10 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
@@ -175,6 +179,11 @@ export default function MarcasScreen() {
         onRequestClose={() => setModalCrearVisible(false)}
       >
         <View style={styles.overlayBackdrop}>
+          <KeyboardAvoidingView
+          style={styles.keyboardAvoidingContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
           <View style={styles.modalCard}>
             <View style={styles.modalHeaderCard}>
               <View style={styles.modalHeaderContent}>
@@ -240,6 +249,7 @@ export default function MarcasScreen() {
               </TouchableOpacity>
             </View>
           </View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
     </AdminLayout>
@@ -341,14 +351,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-  },
-  modalCard: {
-    width: '92%',
-    maxHeight: '90%',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    overflow: 'hidden',
-    elevation: 6,
   },
   modalHeaderCard: {
     flexDirection: 'row',
@@ -452,5 +454,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: adminlteColors.muted,
     textAlign: 'center',
+  },
+  modalCard: {
+    width: '100%',
+    maxHeight: '90%',
+    minWidth:340,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 6,
+  },
+  modalHeaderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: adminlteColors.primary,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    justifyContent: 'space-between',
+  },
+  modalBodyCard: {
+    paddingHorizontal: 18,
+    paddingVertical: 16,
   },
 });

@@ -110,7 +110,7 @@ export default function DashboardScreen() {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 0, paddingBottom:5, margin:0}}
+      contentContainerStyle={{ paddingHorizontal: 0, paddingBottom:40,paddingTop:10, margin:0}}
     >
       <View style={{ minWidth: 370}}> 
         <View style={[styles.tableHeaderRow, { paddingVertical: 6 }]}>

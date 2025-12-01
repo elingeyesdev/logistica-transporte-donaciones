@@ -10,6 +10,12 @@ import {
   Alert,
   ActivityIndicator,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+
+
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
@@ -319,6 +325,11 @@ export default function VehiculosScreen() {
         onRequestClose={() => setModalCrearVisible(false)}
       >
         <View style={styles.overlayBackdrop}>
+                 <KeyboardAvoidingView
+                  style={styles.keyboardAvoidingContainer}
+                  behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+                  keyboardVerticalOffset={Platform.OS === 'ios' ? -40 : 0}
+                >
           <View style={styles.modalCard}>
             <View style={styles.modalHeaderCard}>
               <View style={styles.modalHeaderContent}>
@@ -528,9 +539,8 @@ export default function VehiculosScreen() {
               <Text style={styles.modalFooterButtonText}>Crear</Text>
             </TouchableOpacity>
             </View>
-
-          {/* Selectores inline, sin modales externos */}
           </View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
     </AdminLayout>

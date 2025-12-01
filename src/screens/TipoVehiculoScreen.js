@@ -9,6 +9,10 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
@@ -171,6 +175,11 @@ export default function TipoVehiculoScreen() {
         onRequestClose={() => setModalCrearVisible(false)}
       >
         <View style={styles.overlayBackdrop}>
+                   <KeyboardAvoidingView
+          style={styles.keyboardAvoidingContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
           <View style={styles.modalCard}>
             <View style={styles.modalHeaderCard}>
               <View style={styles.modalHeaderContent}>
@@ -230,6 +239,7 @@ export default function TipoVehiculoScreen() {
             </TouchableOpacity>
             </View>
           </View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
     </AdminLayout>

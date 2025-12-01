@@ -254,7 +254,7 @@ export default function VoluntarioScreen() {
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Detalle</Text>
-              s
+              
             </View>
 
             <View style={styles.modalBody}>

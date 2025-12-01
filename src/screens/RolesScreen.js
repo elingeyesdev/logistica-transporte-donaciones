@@ -8,7 +8,12 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
+
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
@@ -20,11 +25,7 @@ const rolesIniciales = [
   },
   {
     id: 2,
-    nombreRol: 'Conductor',
-  },
-  {
-    id: 3,
-    nombreRol: 'Coordinador',
+    nombreRol: 'Voluntario-Conductor',
   },
   {
     id: 4,
@@ -146,14 +147,21 @@ export default function RolesScreen() {
         </View>
       </ScrollView>
 
-      {/* Modal Crear Rol */}
-      <Modal
-        visible={modalCrearVisible}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setModalCrearVisible(false)}
-      >
-        <View style={styles.modalContainer}>
+      {/* Modal Crear Rol - centrado, con overlay y KeyboardAvoidingView */}
+<Modal
+  visible={modalCrearVisible}
+  animationType="fade"
+  transparent={true}
+  onRequestClose={() => setModalCrearVisible(false)}
+>
+  <View style={styles.overlayBackdrop}>
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoidingContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? -30 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.modalCard}>
           <View style={styles.modalHeader}>
             <View style={styles.modalHeaderContent}>
               <FontAwesome5
@@ -172,7 +180,11 @@ export default function RolesScreen() {
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.modalBody}>
+          <ScrollView
+            style={styles.modalBody}
+            contentContainerStyle={{ paddingBottom: 24 }}
+            keyboardShouldPersistTaps="handled"
+          >
             <View style={styles.formGroup}>
               <Text style={styles.label}>
                 Nombre Rol <Text style={styles.required}>*</Text>
@@ -212,7 +224,11 @@ export default function RolesScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  </View>
+</Modal>
+
     </AdminLayout>
   );
 }
@@ -389,4 +405,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+    overlayBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  keyboardAvoidingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  modalCard: {
+    backgroundColor: adminlteColors.cardBg,
+    borderRadius: 8,
+    width: '100%',
+    height:'30%',
+    minHeight: 220,
+    maxWidth: 500,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+
 });
