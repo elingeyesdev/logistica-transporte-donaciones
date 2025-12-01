@@ -398,7 +398,6 @@
         const productosList = document.getElementById('productos-list');
         const productosSeleccionados = document.getElementById('productos-seleccionados');
         const insumosInput = document.getElementById('insumos_necesarios');
-        const cantidadPersonas = parseInt(document.getElementById('cantidad_personas').value || 0);
 
         const productos = [
             { id_producto: 1, nombre: 'Camisa', descripcion: 'Camisa', stock_total: 125 },
@@ -449,23 +448,30 @@
 
             const id = this.getAttribute('data-id');
             const nombre = this.getAttribute('data-nombre');
-            const cantidad = item.querySelector('.cantidad').value;
+            const cantidad = parseInt(item.querySelector('.cantidad').value);
 
             if (cantidad > 0) {
-                const label = `${nombre} x${cantidad}`;
+                const existente = productosSeleccionados.querySelector(`li[data-id="${id}"]`);
 
-                const seleccionado = document.createElement('li');
-                seleccionado.className = 'list-group-item d-flex justify-content-between align-items-center';
-                seleccionado.innerHTML = `
-                    <span>${label}</span>
-                    <button type="button" class="btn btn-sm btn-danger" data-id="${id}">Quitar</button>
-                `;
-                productosSeleccionados.appendChild(seleccionado);
+                if (existente) {
+                    const cantidadSpan = existente.querySelector('.cantidad-span');
+                    const nuevaCantidad = parseInt(cantidadSpan.textContent) + cantidad;
+                    cantidadSpan.textContent = nuevaCantidad;
+                } else {
+                    const seleccionado = document.createElement('li');
+                    seleccionado.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    seleccionado.setAttribute('data-id', id);
+                    seleccionado.innerHTML = `
+                        <span>${nombre} x<span class="cantidad-span">${cantidad}</span></span>
+                        <button type="button" class="btn btn-sm btn-danger" data-id="${id}">Quitar</button>
+                    `;
+                    productosSeleccionados.appendChild(seleccionado);
 
-                seleccionado.querySelector('button').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    this.parentElement.remove();
-                });
+                    seleccionado.querySelector('button').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        this.parentElement.remove();
+                    });
+                }
             }
         });
 
