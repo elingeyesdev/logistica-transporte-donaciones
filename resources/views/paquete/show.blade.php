@@ -182,10 +182,15 @@
                             {{ \Carbon\Carbon::parse($paquete->fecha_creacion)->format('d/m/Y') }}
                         </div>
                         @php
-                            $fechaEntregaDetalle = $paquete->fecha_entrega
-                                ? ($paquete->fecha_entrega instanceof \Carbon\Carbon
-                                    ? $paquete->fecha_entrega->format('d/m/Y')
-                                    : \Carbon\Carbon::parse($paquete->fecha_entrega)->format('d/m/Y'))
+                            $estadoNombreDetalle = optional($paquete->estado)->nombre_estado;
+                            $isEntregadoDetalle = $estadoNombreDetalle
+                                ? \Illuminate\Support\Str::contains(strtolower($estadoNombreDetalle), 'entreg')
+                                : false;
+                            $fechaEntregaSource = $paquete->fecha_entrega ?: ($isEntregadoDetalle ? $paquete->updated_at : null);
+                            $fechaEntregaDetalle = $fechaEntregaSource
+                                ? ($fechaEntregaSource instanceof \Carbon\Carbon
+                                    ? $fechaEntregaSource->format('d/m/Y')
+                                    : \Carbon\Carbon::parse($fechaEntregaSource)->format('d/m/Y'))
                                 : null;
                         @endphp
                         <div class="form-group mb-2 mb20">
