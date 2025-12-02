@@ -323,8 +323,92 @@
     @endpush
 
       </div>
+    @if ($solicituds->hasPages())
+        <nav aria-label="Paginación de solicitudes" class="mt-3 mb-3">
+            <ul class="pagination justify-content-center mb-0">
+                @if ($solicituds->onFirstPage())
+                    <li class="page-item disabled">
+                        <span class="page-link">Primera</span>
+                    </li>
+                @else
+                    <li class="page-item">
+                        <a class="page-link" href="{{ $solicituds->url(1) }}">Primera</a>
+                    </li>
+                @endif
+                @if ($solicituds->onFirstPage())
+                    <li class="page-item disabled">
+                        <span class="page-link">Anterior</span>
+                    </li>
+                @else
+                    <li class="page-item">
+                        <a class="page-link" href="{{ $solicituds->previousPageUrl() }}" rel="prev">Anterior</a>
+                    </li>
+                @endif
+                @php
+                    $current = $solicituds->currentPage();
+                    $last    = $solicituds->lastPage();
+                    $start   = max(1, $current - 2);
+                    $end     = min($last, $current + 2);
+                @endphp
 
-      {!! $solicituds->withQueryString()->links() !!}
+                @if ($start > 1)
+                    <li class="page-item">
+                        <a class="page-link" href="{{ $solicituds->url(1) }}">1</a>
+                    </li>
+                    @if ($start > 2)
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                    @endif
+                @endif
+
+                @for ($page = $start; $page <= $end; $page++)
+                    @if ($page == $current)
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ $page }}</span>
+                        </li>
+                    @else
+                        <li class="page-item">
+                            <a class="page-link" href="{{ $solicituds->url($page) }}">{{ $page }}</a>
+                        </li>
+                    @endif
+                @endfor
+
+                @if ($end < $last)
+                    @if ($end < $last - 1)
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                    @endif
+                    <li class="page-item">
+                        <a class="page-link" href="{{ $solicituds->url($last) }}">{{ $last }}</a>
+                    </li>
+                @endif
+
+                @if ($solicituds->hasMorePages())
+                    <li class="page-item">
+                        <a class="page-link" href="{{ $solicituds->nextPageUrl() }}" rel="next">Siguiente</a>
+                    </li>
+                @else
+                    <li class="page-item disabled">
+                        <span class="page-link">Siguiente</span>
+                    </li>
+                @endif
+
+                @if ($solicituds->hasMorePages())
+                    <li class="page-item">
+                        <a class="page-link" href="{{ $solicituds->url($last) }}">Última</a>
+                    </li>
+                @else
+                    <li class="page-item disabled">
+                        <span class="page-link">Última</span>
+                    </li>
+                @endif
+
+            </ul>
+        </nav>
+    @endif
+
     </div>
   </div>
 </div>

@@ -22,16 +22,19 @@ class SolicitudController extends Controller
 {
     public function index(Request $request)
     {
-        $solicituds = Solicitud::with(['solicitante', 'destino'])
-        ->orderByDesc('fecha_solicitud')
-        ->paginate();
+        $query = Solicitud::with(['solicitante', 'destino'])
+            ->orderByDesc('fecha_solicitud');
 
         if ($request->wantsJson()) {
+            $solicituds = $query->get();
+
             return response()->json([
                 'success' => true,
-                'data' => $solicituds
+                'data'    => $solicituds,
             ]);
         }
+        $solicituds = $query->paginate();
+
         return view('solicitud.index', compact('solicituds'))
             ->with('i', ($request->input('page', 1) - 1) * $solicituds->perPage());
     }
