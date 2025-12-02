@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Conductor;
 use App\Models\Estado;
 use App\Models\Rol;
+use App\Models\Vehiculo;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -19,6 +20,22 @@ class DashboardController extends Controller
 
         $estadoAceptado = ['Aprobada','Aceptada','aprobada','aceptada'];
         $estadoRechazado = ['Rechazada','Negada','rechazada','negada'];
+
+        $estadoCatalogo = Estado::select('id_estado','nombre_estado')->get();
+        $normalizeEstado = fn($nombre) => strtolower(trim($nombre ?? ''));
+
+        $estadosEntregadosObjetivo = ['entregado','entregada'];
+        $estadosEnCaminoObjetivo = [
+            'en camino','en tránsito','en transito','en ruta','en viaje','en transporte'
+        ];
+
+        $idsEntregado = $estadoCatalogo
+            ->filter(fn($estado) => in_array($normalizeEstado($estado->nombre_estado), $estadosEntregadosObjetivo, true))
+            ->pluck('id_estado');
+
+        $idsEnCamino = $estadoCatalogo
+            ->filter(fn($estado) => in_array($normalizeEstado($estado->nombre_estado), $estadosEnCaminoObjetivo, true))
+            ->pluck('id_estado');
 
         $aceptadas = Solicitud::whereIn('estado', $estadoAceptado)->count();
 
@@ -43,9 +60,6 @@ class DashboardController extends Controller
             ->sortDesc()
             ->take(5);
 
-        $idsEntregado = Estado::whereIn('nombre_estado', ['Entregado', 'entregado'])
-            ->pluck('id_estado');
-
         $paquetes = Paquete::whereIn('estado_id', $idsEntregado)
             ->selectRaw('
                 id_paquete,
@@ -66,9 +80,6 @@ class DashboardController extends Controller
         $totalPaquetes = Paquete::count();
         $paquetesEntregados = Paquete::whereIn('estado_id', $idsEntregado)->count();
 
-        $idsEnCamino = Estado::whereIn('nombre_estado', ['En camino','En Camino','En tránsito','En transito','En ruta','En Ruta'])
-            ->pluck('id_estado');
-
         $totalVoluntarios = User::where('activo', true)->count();
 
         $voluntariosConductores = Conductor::count();
@@ -81,14 +92,30 @@ class DashboardController extends Controller
             ->map(function($solicitud){
                 $fechaCarbon = $solicitud->fecha_solicitud ? Carbon::parse($solicitud->fecha_solicitud) : null;
                 $fecha = $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha';
-                $solicitante = trim(($solicitud->solicitante->nombre ?? '') . ' ' . ($solicitud->solicitante->apellido ?? ''));
+                $fechaInicioCarbon = $solicitud->fecha_inicio ? Carbon::parse($solicitud->fecha_inicio) : null;
+                $solicitanteModel = optional($solicitud->solicitante);
+                $destino = optional($solicitud->destino);
+                $solicitante = trim(($solicitanteModel->nombre ?? '') . ' ' . ($solicitanteModel->apellido ?? ''));
                 return [
                     'id' => $solicitud->id_solicitud,
                     'codigo' => $solicitud->codigo_seguimiento ?? 'SIN-CODIGO',
                     'solicitante' => $solicitante !== '' ? $solicitante : 'Sin solicitante',
-                    'comunidad' => $solicitud->destino->comunidad ?? 'Sin comunidad',
+                    'comunidad' => $destino->comunidad ?? 'Sin comunidad',
                     'fecha' => $fecha,
                     'fecha_iso' => $fechaCarbon ? $fechaCarbon->toDateString() : null,
+                    'estado' => $solicitud->estado ?? 'Sin estado',
+                    'tipo_emergencia' => $solicitud->tipo_emergencia ?? 'Sin tipo',
+                    'cantidad_personas' => $solicitud->cantidad_personas,
+                    'insumos' => $solicitud->insumos_necesarios,
+                    'fecha_inicio' => $fechaInicioCarbon ? $fechaInicioCarbon->format('d/m/Y') : 'Sin fecha',
+                    'solicitante_ci' => $solicitanteModel->ci ?? '—',
+                    'solicitante_correo' => $solicitanteModel->email ?? '—',
+                    'solicitante_telefono' => $solicitanteModel->telefono ?? '—',
+                    'provincia' => $destino->provincia ?? '—',
+                    'direccion' => $destino->direccion ?? '—',
+                    'latitud' => $destino->latitud,
+                    'longitud' => $destino->longitud,
+                    'justificacion' => $solicitud->justificacion,
                 ];
             })
             ->values();
@@ -101,14 +128,29 @@ class DashboardController extends Controller
             ->map(function($solicitud){
                 $fechaCarbon = $solicitud->fecha_solicitud ? Carbon::parse($solicitud->fecha_solicitud) : null;
                 $fecha = $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha';
-                $solicitante = trim(($solicitud->solicitante->nombre ?? '') . ' ' . ($solicitud->solicitante->apellido ?? ''));
+                $fechaInicioCarbon = $solicitud->fecha_inicio ? Carbon::parse($solicitud->fecha_inicio) : null;
+                $solicitanteModel = optional($solicitud->solicitante);
+                $destino = optional($solicitud->destino);
+                $solicitante = trim(($solicitanteModel->nombre ?? '') . ' ' . ($solicitanteModel->apellido ?? ''));
                 return [
                     'id' => $solicitud->id_solicitud,
                     'codigo' => $solicitud->codigo_seguimiento ?? 'SIN-CODIGO',
                     'solicitante' => $solicitante !== '' ? $solicitante : 'Sin solicitante',
-                    'comunidad' => $solicitud->destino->comunidad ?? 'Sin comunidad',
+                    'comunidad' => $destino->comunidad ?? 'Sin comunidad',
                     'fecha' => $fecha,
                     'fecha_iso' => $fechaCarbon ? $fechaCarbon->toDateString() : null,
+                    'estado' => $solicitud->estado ?? 'Sin estado',
+                    'tipo_emergencia' => $solicitud->tipo_emergencia ?? 'Sin tipo',
+                    'cantidad_personas' => $solicitud->cantidad_personas,
+                    'insumos' => $solicitud->insumos_necesarios,
+                    'fecha_inicio' => $fechaInicioCarbon ? $fechaInicioCarbon->format('d/m/Y') : 'Sin fecha',
+                    'solicitante_ci' => $solicitanteModel->ci ?? '—',
+                    'solicitante_correo' => $solicitanteModel->email ?? '—',
+                    'solicitante_telefono' => $solicitanteModel->telefono ?? '—',
+                    'provincia' => $destino->provincia ?? '—',
+                    'direccion' => $destino->direccion ?? '—',
+                    'latitud' => $destino->latitud,
+                    'longitud' => $destino->longitud,
                 ];
             })
             ->values();
@@ -196,7 +238,7 @@ class DashboardController extends Controller
             });
 
         $rolVoluntarioId = Rol::where('titulo_rol', 'Voluntario')->value('id_rol');
-        $voluntariosListado = User::with('rol')
+        $voluntariosListadoCollection = User::with('rol')
             ->when($rolVoluntarioId, function($q) use ($rolVoluntarioId) {
                 $q->where('id_rol', $rolVoluntarioId);
             }, function($q) {
@@ -207,7 +249,9 @@ class DashboardController extends Controller
             ->where('activo', true)
             ->orderBy('nombre')
             ->limit(50)
-            ->get()
+            ->get();
+
+        $voluntariosListado = $voluntariosListadoCollection
             ->map(function($user){
                 return [
                     'id' => $user->id,
@@ -216,8 +260,94 @@ class DashboardController extends Controller
                     'telefono' => $user->telefono ?? 'Sin teléfono',
                     'ci' => $user->ci ?? 'S/N',
                 ];
-            })
-            ->values();
+            });
+
+        $voluntariosCi = $voluntariosListado->pluck('ci')->filter()->unique();
+        $paquetesPorVoluntario = [];
+
+        if ($voluntariosCi->isNotEmpty()) {
+            $paquetesPorVoluntario = Paquete::with(['estado','solicitud'])
+                ->whereIn('id_encargado', $voluntariosCi)
+                ->orderByDesc(DB::raw('COALESCE(fecha_creacion, created_at)'))
+                ->get()
+                ->groupBy('id_encargado')
+                ->map(function($items) {
+                    return $items->take(3)->map(function($paquete) {
+                        $solicitud = optional($paquete->solicitud);
+                        $codigoSolicitud = $solicitud->codigo_seguimiento ?? 'SIN-CODIGO';
+                        $fechaBase = $paquete->fecha_creacion ?? $paquete->created_at;
+                        return [
+                            'id' => $paquete->id_paquete,
+                            'solicitud_codigo' => $codigoSolicitud,
+                            'estado' => optional($paquete->estado)->nombre_estado ?? 'Sin estado',
+                            'fecha' => $fechaBase ? Carbon::parse($fechaBase)->format('d/m/Y') : 'Sin fecha',
+                        ];
+                    })->values();
+                })
+                ->toArray();
+        }
+
+        $voluntariosListado = $voluntariosListado->map(function($voluntario) use ($paquetesPorVoluntario) {
+            $ci = $voluntario['ci'] ?? null;
+            $voluntario['paquetes'] = $ci && isset($paquetesPorVoluntario[$ci])
+                ? $paquetesPorVoluntario[$ci]
+                : [];
+            return $voluntario;
+        })->values();
+
+        $vehiculosCollection = Vehiculo::with(['marcaVehiculo','tipoVehiculo'])
+            ->orderBy('placa')
+            ->limit(50)
+            ->get();
+
+        $vehiculosListado = $vehiculosCollection->map(function($vehiculo) {
+            $marca = optional($vehiculo->marcaVehiculo);
+            $tipo = optional($vehiculo->tipoVehiculo);
+            return [
+                'id' => $vehiculo->id_vehiculo,
+                'placa' => $vehiculo->placa ?? 'Sin placa',
+                'marca' => $marca->nombre_marca ?? $marca->nombre ?? 'Sin marca',
+                'modelo' => $vehiculo->modelo ?? '-',
+                'color' => $vehiculo->color ?? '-',
+                'tipo' => $tipo->nombre_tipo_vehiculo ?? 'Sin tipo',
+            ];
+        });
+
+        $vehiculosIds = $vehiculosCollection->pluck('id_vehiculo')->filter()->unique();
+        $paquetesPorVehiculo = [];
+
+        if ($vehiculosIds->isNotEmpty()) {
+            $paquetesPorVehiculo = Paquete::with(['estado','solicitud'])
+                ->whereIn('id_vehiculo', $vehiculosIds)
+                ->orderByDesc(DB::raw('COALESCE(fecha_creacion, created_at)'))
+                ->get()
+                ->groupBy('id_vehiculo')
+                ->map(function($items) {
+                    return $items->take(3)->map(function($paquete) {
+                        $solicitud = optional($paquete->solicitud);
+                        $fechaCarbon = $paquete->fecha_creacion
+                            ? Carbon::parse($paquete->fecha_creacion)
+                            : ($paquete->created_at ? Carbon::parse($paquete->created_at) : null);
+                        return [
+                            'id' => $paquete->id_paquete,
+                            'codigo_paquete' => $paquete->codigo ?? ('PKG-'.$paquete->id_paquete),
+                            'solicitud_codigo' => $solicitud->codigo_seguimiento ?? 'SIN-CODIGO',
+                            'estado' => optional($paquete->estado)->nombre_estado ?? 'Sin estado',
+                            'fecha' => $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha',
+                            'fecha_iso' => $fechaCarbon ? $fechaCarbon->toDateString() : null,
+                        ];
+                    })->values();
+                })
+                ->toArray();
+        }
+
+        $vehiculosListado = $vehiculosListado->map(function($vehiculo) use ($paquetesPorVehiculo) {
+            $id = $vehiculo['id'] ?? null;
+            $vehiculo['paquetes'] = $id && isset($paquetesPorVehiculo[$id])
+                ? $paquetesPorVehiculo[$id]
+                : [];
+            return $vehiculo;
+        })->values();
 
         $data = compact(
             'total',
@@ -237,7 +367,8 @@ class DashboardController extends Controller
             'solicitudesPorComunidad',
             'voluntariosListado',
             'paquetesEntregadosListado',
-            'paquetesEnCaminoListado'
+            'paquetesEnCaminoListado',
+            'vehiculosListado'
         );
 
         // Always return JSON for API requests
