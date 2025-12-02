@@ -67,16 +67,49 @@ export default function PaqueteScreen() {
   };
 
   const seleccionarImagen = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permiso requerido',
+        'Necesitamos acceso a tu galería para que puedas seleccionar una imagen del paquete.'
+      );
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 0.8,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       setImagenUri(result.assets[0].uri);
     }
   };
+
+  const tomarFoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permiso requerido',
+        'Necesitamos acceso a tu cámara para que puedas tomar una foto del paquete.'
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setImagenUri(result.assets[0].uri);
+    }
+  };
+
 
 const normalizarPaquetes = (listaBack, solicitudesIndex = {}) =>
   (listaBack || []).map((p) => {
@@ -144,7 +177,14 @@ const normalizarPaquetes = (listaBack, solicitudesIndex = {}) =>
     const found = estados.find((e) => String(e.id_estado) === String(id));
     return found ? found.nombre_estado : `ID ${id}`;
   };
-
+  const esEstadoEntregado = (id) => {
+    if (!id) return false;
+    const found = estados.find(
+      (e) => String(e.id_estado) === String(id)
+    );
+    if (!found || !found.nombre_estado) return false;
+    return found.nombre_estado.toLowerCase().includes('entregado');
+  };
 
 useEffect(() => {
     const fetchAll = async () => {
@@ -221,6 +261,12 @@ useEffect(() => {
     if (isNaN(estadoIdNum)) {
       Alert.alert('Estado inválido', 'El estado debe ser un número válido.');
       return;
+    }
+
+     let nuevaFechaEntrega = null;
+
+    if (esEstadoEntregado(estadoIdNum)) {
+      nuevaFechaEntrega = paqueteActual.fechaEntrega || fechaEntrega || new Date().toISOString().slice(0, 10);
     }
 
     try {
@@ -321,7 +367,7 @@ useEffect(() => {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.itemTitle}>
-                    Paquete {p.codigo ? `#${p.codigoSolicitud}` : `ID ${String(p.id).slice(-4)}`}
+                    Paquete {p.codigo ? p.codigoSolicitud : `ID ${String(p.id).slice(-4)}`}
                   </Text>
                 </View>
               </View>
@@ -602,43 +648,50 @@ useEffect(() => {
               ) : null}
             </View>
 
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>Fecha Entrega (opcional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="YYYY-MM-DD"
-                value={fechaEntrega}
-                onChangeText={setFechaEntrega}
-                placeholderTextColor={adminlteColors.muted}
-              />
-            </View>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Imagen (obligatoria)</Text>
 
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>Imagen (obligatoria)</Text>
+            <View style={styles.imageButtonsRow}>
+              <TouchableOpacity
+                onPress={tomarFoto}
+                style={styles.btnImagenSecundario}
+              >
+                <FontAwesome5
+                  name="camera"
+                  size={14}
+                  color="#ffffff"
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={styles.btnImagenText}>Tomar foto</Text>
+              </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={seleccionarImagen}
-                style={{
-                  backgroundColor: adminlteColors.primary,
-                  padding: 10,
-                  borderRadius: 6,
-                  alignItems: 'center',
-                  marginBottom: 12,
-                }}
+                style={styles.btnImagenPrimario}
               >
-                <Text style={{ color: '#fff', fontWeight: '600' }}>
-                  Seleccionar Imagen
-                </Text>
-              </TouchableOpacity>
-
-              {imagenUri && (
-                <Image
-                  source={{ uri: imagenUri }}
-                  style={{ width: '100%', height: 180, borderRadius: 8 }}
-                  resizeMode="cover"
+                <FontAwesome5
+                  name="images"
+                  size={14}
+                  color="#ffffff"
+                  style={{ marginRight: 6 }}
                 />
-              )}
+                <Text style={styles.btnImagenText}>Galería</Text>
+              </TouchableOpacity>
             </View>
+
+            {imagenUri && (
+              <Image
+                source={{ uri: imagenUri }}
+                style={styles.previewImagen}
+                resizeMode="cover"
+              />
+            )}
+
+            <Text style={styles.smallTextMuted}>
+              Esta imagen se usará como evidencia de la entrega del paquete.
+            </Text>
+          </View>
+
           </ScrollView>
 
           <View style={styles.modalFooter}>
@@ -778,13 +831,23 @@ useEffect(() => {
             key={e.id_estado}
             style={styles.pickerItem}
             onPress={() => {
-              setEstadoEntrega(String(e.id_estado));
+              const idSel = String(e.id_estado);
+              setEstadoEntrega(idSel);
+
+              const nombre = (e.nombre_estado || '').toLowerCase();
+              if (nombre.includes('entregado')) {
+                setFechaEntrega((prev) => prev || new Date().toISOString().slice(0, 10));
+              } else {
+                setFechaEntrega('');
+              }
+
               setShowEstadoPicker(false);
             }}
           >
             <Text style={styles.pickerItemText}>{e.nombre_estado}</Text>
           </TouchableOpacity>
         ))}
+
       </ScrollView>
     </View>
   </TouchableOpacity>
@@ -975,6 +1038,47 @@ pickerItem: {
 pickerItemText: {
   fontSize: 14,
   color: adminlteColors.dark,
+},
+imageButtonsRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  marginBottom: 4,
+  marginTop: 12,
+},
+
+btnImagenPrimario: {
+  flex: 1,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: adminlteColors.primary,
+  paddingVertical: 10,
+  borderRadius: 6,
+  marginLeft: 6,
+},
+
+btnImagenSecundario: {
+  flex: 1,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: adminlteColors.info,
+  paddingVertical: 10,
+  borderRadius: 6,
+  marginRight: 6,
+},
+
+btnImagenText: {
+  color: '#ffffff',
+  fontSize: 13,
+  fontWeight: '600',
+},
+
+previewImagen: {
+  width: '100%',
+  height: 180,
+  borderRadius: 8,
+  marginBottom: 8,
 },
 
 

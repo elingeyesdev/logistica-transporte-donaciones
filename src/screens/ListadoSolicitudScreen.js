@@ -24,7 +24,7 @@ const solicitudesIniciales = [
   {
     id: 1,
     numero: '001',
-    estado: 'sin_contestar',
+    estado: 'pendiente',
     fecha: '2025-01-10',
     solicitante: 'María González López',
     email: 'maria.gonzalez@email.com',
@@ -32,42 +32,6 @@ const solicitudesIniciales = [
     direccion: 'Comunidad San José, Chiquitos',
     fechaTexto: '10 de Enero, 2025',
     productos: ['Agua potable', 'Alimentos', 'Frazadas'],
-  },
-  {
-    id: 2,
-    numero: '002',
-    estado: 'aprobadas',
-    fecha: '2025-01-09',
-    solicitante: 'Carlos Rodríguez Vega',
-    email: 'carlos.rodriguez@email.com',
-    ci: '87654321',
-    direccion: 'Comunidad El Carmen, Ñuflo de Chávez',
-    fechaTexto: '9 de Enero, 2025',
-    productos: ['Kit primeros auxilios', 'Medicamentos', 'Carpas'],
-  },
-  {
-    id: 3,
-    numero: '003',
-    estado: 'rechazadas',
-    fecha: '2025-01-08',
-    solicitante: 'Ana María Silva',
-    email: 'ana.silva@email.com',
-    ci: '11223344',
-    direccion: 'Comunidad Santa Ana, Velasco',
-    fechaTexto: '8 de Enero, 2025',
-    productos: ['Ropa', 'Calzado', 'Colchones'],
-  },
-  {
-    id: 4,
-    numero: '004',
-    estado: 'sin_contestar',
-    fecha: '2025-01-11',
-    solicitante: 'Pedro Martínez Cruz',
-    email: 'pedro.martinez@email.com',
-    ci: '55667788',
-    direccion: 'Comunidad San Pedro, Guarayos',
-    fechaTexto: '11 de Enero, 2025',
-    productos: ['Artículos de higiene', 'Utensilios de cocina', 'Linternas'],
   },
 ];
 
@@ -267,7 +231,7 @@ const obtenerSolicitudesFiltradas = () => {
         try {
           await denySolicitud(id, motivoRechazo);
           setSolicitudes(prev => prev.map(s => (s.id === id ? { ...s, estado: 'rechazadas' } : s)));
-          Alert.alert('Éxito', `Solicitud #${solicitudSeleccionada.codigoSolicitud} rechazada exitosamente`);
+          Alert.alert('Éxito', `Solicitud ${solicitudSeleccionada.codigoSolicitud} rechazada exitosamente`);
           setModalRechazoVisible(false);
           setMotivoRechazo('');
           setMotivoSeleccionado('');
@@ -470,7 +434,7 @@ const obtenerSolicitudesFiltradas = () => {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.solicitudCardTitle}>
-                    Solicitud #{solicitud.codigoSolicitud}
+                    Solicitud {solicitud.codigoSolicitud}
                   </Text>
                 </View>
                 <View
@@ -654,7 +618,7 @@ const obtenerSolicitudesFiltradas = () => {
                 <View style={styles.detalleContent}>
                   <View>
                     <Text style={styles.alertInfoTitle}>
-                      Detalles de la Solicitud #{solicitudSeleccionada.codigoSolicitud}
+                      Detalles de la Solicitud {solicitudSeleccionada.codigoSolicitud}
                     </Text>
                     <View style={styles.detalleSection}>
                       <Text style={styles.detalleLabel}>Solicitante:</Text>

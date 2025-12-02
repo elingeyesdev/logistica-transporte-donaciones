@@ -15,13 +15,17 @@ export const getSolicitudes = async () => {
   try {
     const response = await api.get('/solicitud');
     console.log('Solicitudes API respuesta:', response.data);
-    const solicitudes = response.data?.data?.data || [];
+    const solicitudes = response.data?.data || [];
     return solicitudes;
   } catch (error) {
-    console.error('Error al obtener solicitudes:', error.response?.data || error.message);
+    console.error(
+      'Error al obtener solicitudes:',
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
+
 
 export const approveSolicitud = async (id) => {
   try {
