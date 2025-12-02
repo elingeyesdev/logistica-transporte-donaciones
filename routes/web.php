@@ -18,8 +18,7 @@ use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\DashboardController;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Paquete;
+
 //rutas publicas
 Auth::routes();
 Route::get('solicitud/buscar', [SolicitudController::class, 'buscarPorCodigo'])
@@ -30,24 +29,6 @@ Route::get('solicitud/create', [SolicitudController::class, 'create'])
     ->name('solicitud.create');
 Route::post('solicitud', [SolicitudController::class, 'store'])
     ->name('solicitud.store');
-Route::get('/mi-solicitud/{codigo}/editar', [SolicitudController::class, 'publicEdit'])
-    ->name('solicitud.public.edit');
-Route::put('/mi-solicitud/{codigo}', [SolicitudController::class, 'publicUpdate'])
-    ->name('solicitud.public.update');
-Route::get('/mi-solicitud/{codigo}', [SolicitudController::class, 'publicShow'])
-    ->name('solicitud.public.show');
-
-Route::get('/galeria', [PaqueteController::class, 'galeria'])->name('galeria.index');
-
-Route::get('/paquete-imagen/{paquete}', function (Paquete $paquete) {
-    $path = $paquete->imagen;
-    if (!$path || !Storage::disk('public')->exists($path)) {
-        abort(404);
-    }
-    $fullPath = Storage::disk('public')->path($path);
-    return response()->file($fullPath);
-})->name('paquete.imagen');
-
 
 //PUBLICAS PARA EL API GATEWAY
 Route::post('/api/solicitud', [SolicitudController::class, 'store']);
@@ -150,4 +131,8 @@ Route::post('/usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAd
 Route::post('/usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo'])->name('usuarios.toggleActivo');
 Route::post('/usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRol'])->name('usuarios.cambiarRol');
  */
+
+// Galería
+Route::get('/galeria', [PaqueteController::class, 'galeria'])->name('galeria.index');
+
 
