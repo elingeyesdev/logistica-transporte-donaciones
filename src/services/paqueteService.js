@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 import { api } from './apiClient';
+import NetInfo from '@react-native-community/netinfo';
+import { savePaquetesOffline, getPaquetesOffline } from '../offline/paqueteOfflineStore';
+import { queuePaqueteUpdate } from '../offline/queueOfflineUpdates';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -12,18 +15,40 @@ const axiosInstance = axios.create({
 });
 
 export const getPaquetes = async () => {
+
+  const net = await NetInfo.fetch();
+
+  if (!net.isConnected) {
+    const offline = await getPaquetesOffline();
+    console.log('Usando paquetes desde cache offline:', offline.length);
+    return offline;
+  }
   try {
     const response = await api.get('/paquete');
     console.log('Paquetes API respuesta:', response.data);
     const paquetes = response.data?.data?.data || [];
+    await savePaquetesOffline(paquetes);
     return paquetes;
   } catch (error) {
-    console.error('Error al obtener paquetes:', error.response?.data || error.message);
-    throw error;
+    //console.error('Error al obtener paquetes:', error.response?.data || error.message);
+    //throw error;
+    console.error(
+      'Error al obtener paquetes online, intentando cache offline:',
+      error.response?.data || error.message
+    );
+
+    const offline = await getPaquetesOffline();
+    return offline;
   }
 };
 
-export const updatePaquete = async (id, data) => {
+export const updatePaquete = async (id, data, options = {}) => {
+  const net = await NetInfo.fetch();
+  if (!net.isConnected && !options.forceOnline) {
+    await queuePaqueteUpdate(id, data);
+    console.log('Sin conexión. Actualización encolada para paquete:', id);
+    return { success: true, offline: true };
+  }
   const formData = new FormData();
   formData.append('id_solicitud', String(data.id_solicitud));
   formData.append('estado_id', String(data.estado_id));
@@ -76,3 +101,4 @@ export const updatePaquete = async (id, data) => {
   }
 
 };
+

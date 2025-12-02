@@ -110,52 +110,51 @@ export default function PaqueteScreen() {
     }
   };
 
+  const normalizarPaquetes = (listaBack, solicitudesIndex = {}) =>
+    (listaBack || []).map((p) => {
+      const solicitudKey =
+        p.id_solicitud != null ? String(p.id_solicitud) : null;
 
-const normalizarPaquetes = (listaBack, solicitudesIndex = {}) =>
-  (listaBack || []).map((p) => {
-    const solicitudKey =
-      p.id_solicitud != null ? String(p.id_solicitud) : null;
+      const solicitud =
+        solicitudKey && solicitudesIndex[solicitudKey]
+          ? solicitudesIndex[solicitudKey]
+          : null;
 
-    const solicitud =
-      solicitudKey && solicitudesIndex[solicitudKey]
-        ? solicitudesIndex[solicitudKey]
-        : null;
+      const codigoSolicitud =
+        solicitud?.codigo ??
+        solicitud?.codigo_seguimiento ??
+        null;
+      const comunidadSolicitud =
+        solicitud?.comunidad ??
+        solicitud?.comunidad_solicitante ??
+        solicitud?.comunidad_nombre ??
+        null;
 
-    const codigoSolicitud =
-      solicitud?.codigo ??
-      solicitud?.codigo_seguimiento ??
-      null;
-    const comunidadSolicitud =
-      solicitud?.comunidad ??
-      solicitud?.comunidad_solicitante ??
-      solicitud?.comunidad_nombre ??
-      null;
+      return {
+        id: p.id_paquete,
+        codigo:
+          p.codigo ??
+          codigoSolicitud ??
+          (solicitudKey ? `SOL-${solicitudKey}` : null),
 
-    return {
-      id: p.id_paquete,
-      codigo:
-        p.codigo ??
-        codigoSolicitud ??
-        (solicitudKey ? `SOL-${solicitudKey}` : null),
+        id_solicitud: p.id_solicitud,
+        codigoSolicitud,
+        comunidadSolicitud,
 
-      id_solicitud: p.id_solicitud,
-      codigoSolicitud,
-      comunidadSolicitud,
+        estado_id: p.estado_id,
+        estadoNombre: p.estado?.nombre_estado ?? '—',
+        ubicacionActual: p.ubicacion_actual ?? '—',
 
-      estado_id: p.estado_id,
-      estadoNombre: p.estado?.nombre_estado ?? '—',
-      ubicacionActual: p.ubicacion_actual ?? '—',
+        fechaAprobacion: p.fecha_aprobacion ?? p.created_at ?? '—',
 
-      fechaAprobacion: p.fecha_aprobacion ?? p.created_at ?? '—',
-
-      fechaEntrega: p.fecha_entrega ?? null,
-      latitud: p.latitud,
-      longitud: p.longitud,
-      zona: p.zona ?? '',
-      id_conductor: p.id_conductor,
-      id_vehiculo: p.id_vehiculo,
-    };
-  });
+        fechaEntrega: p.fecha_entrega ?? null,
+        latitud: p.latitud,
+        longitud: p.longitud,
+        zona: p.zona ?? '',
+        id_conductor: p.id_conductor,
+        id_vehiculo: p.id_vehiculo,
+      };
+    });
 
   const getConductorLabelById = (id) => {
     if (!id) return 'Sin asignar';
@@ -177,6 +176,7 @@ const normalizarPaquetes = (listaBack, solicitudesIndex = {}) =>
     const found = estados.find((e) => String(e.id_estado) === String(id));
     return found ? found.nombre_estado : `ID ${id}`;
   };
+
   const esEstadoEntregado = (id) => {
     if (!id) return false;
     const found = estados.find(
@@ -186,22 +186,28 @@ const normalizarPaquetes = (listaBack, solicitudesIndex = {}) =>
     return found.nombre_estado.toLowerCase().includes('entregado');
   };
 
-useEffect(() => {
+  useEffect(() => {
     const fetchAll = async () => {
       try {
-          const solicitudes = await getSolicitudes();
-          const solicitudesIndex = {};
+        // 1) Cargar solicitudes (online/offline) y armar índice
+        const solicitudes = await getSolicitudes();
+        const solicitudesIndex = {};
 
-          (solicitudes || []).forEach((s) => {
-            if (s.id_solicitud != null) {
-              solicitudesIndex[String(s.id_solicitud)] = s;
-            }
-          });
+        (solicitudes || []).forEach((s) => {
+          if (s.id_solicitud != null) {
+            solicitudesIndex[String(s.id_solicitud)] = s;
+          }
+        });
 
+        // 🔹 Guardamos el índice en estado para reusar luego
+        setSolicitudesMap(solicitudesIndex);
+
+        // 2) Cargar paquetes (online/offline) y normalizar con ese índice
         const lista = await getPaquetes();
         const normalizados = normalizarPaquetes(lista, solicitudesIndex);
         setPaquetes(normalizados);
 
+        // 3) Resto de catálogos
         const respCond = await conductorService.getConductores();
         if (respCond.success) {
           setConductores(respCond.data || []);
@@ -218,6 +224,7 @@ useEffect(() => {
         console.error('Error cargando datos:', err);
       }
     };
+
     fetchAll();
   }, []);
 
@@ -263,10 +270,13 @@ useEffect(() => {
       return;
     }
 
-     let nuevaFechaEntrega = null;
+    let nuevaFechaEntrega = null;
 
     if (esEstadoEntregado(estadoIdNum)) {
-      nuevaFechaEntrega = paqueteActual.fechaEntrega || fechaEntrega || new Date().toISOString().slice(0, 10);
+      nuevaFechaEntrega =
+        paqueteActual.fechaEntrega ||
+        fechaEntrega ||
+        new Date().toISOString().slice(0, 10);
     }
 
     try {
@@ -275,6 +285,7 @@ useEffect(() => {
         codigo: paqueteActual.codigo,
         estado_id: estadoIdNum,
         zona: zona || null,
+        // mantenemos tu lógica actual, puedes cambiar a nuevaFechaEntrega si quieres
         fecha_entrega: fechaEntrega || null,
         latitud,
         longitud,
@@ -283,12 +294,20 @@ useEffect(() => {
         imagenUri,
       };
 
-      await updatePaquete(paqueteActual.id, payload);
+      const result = await updatePaquete(paqueteActual.id, payload);
 
-      Alert.alert('Éxito', 'Paquete actualizado correctamente');
+      if (result?.offline) {
+        Alert.alert(
+          'Sin conexión',
+          'Los cambios se guardaron en el dispositivo y se enviarán automáticamente cuando tengas internet.'
+        );
+      } else {
+        Alert.alert('Éxito', 'Paquete actualizado correctamente');
+      }
 
+      // 🔹 IMPORTANTE: volver a normalizar usando solicitudesMap
       const lista = await getPaquetes();
-      setPaquetes(normalizarPaquetes(lista));
+      setPaquetes(normalizarPaquetes(lista, solicitudesMap));
 
       setModalVisible(false);
       resetForm();
@@ -300,7 +319,7 @@ useEffect(() => {
 
   const formatFechaAprobacion = (isoString) => {
     if (!isoString) return '—';
-    
+
     const clean = isoString.replace(/\.\d+Z$/, 'Z');
 
     const date = new Date(clean);
@@ -319,7 +338,7 @@ useEffect(() => {
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-      }).format(date); 
+      }).format(date);
     } catch (e) {
       const pad = (n) => String(n).padStart(2, '0');
       const d = date.getDate();
@@ -330,7 +349,6 @@ useEffect(() => {
       return `${pad(d)}/${pad(m)}/${y} ${pad(h)}:${pad(min)}`;
     }
   };
-
 
   const obtenerColorBorde = (index) => {
     const colors = [

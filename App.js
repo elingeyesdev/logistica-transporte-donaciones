@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect } from "react";
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -28,12 +28,25 @@ import { getStoredSession } from './src/services/authService';
 import { AuthProvider } from './src/context/AuthContext';
 import { AdminOnly } from './src/navigation/ProtectedScreens';
 
+import { listenConnection } from "./src/offline/connectivity";
+import { syncPending } from "./src/offline/syncManager";
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [initialRoute, setInitialRoute] = React.useState('Login');
   const [checkingSession, setCheckingSession] = React.useState(true);
+  useEffect(() => {
+    const unsub = listenConnection((online) => {
+      if (online) {
+        syncPending();
+      }
+    });
 
+    return () => {
+      if (unsub) unsub();
+    };
+  }, []);
   React.useEffect(() => {
     const checkSession = async () => {
       try {

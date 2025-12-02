@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 import { api } from './apiClient';
+import NetInfo from '@react-native-community/netinfo';
+import {
+  saveSolicitudesOffline,
+  getSolicitudesOffline,
+} from '../offline/solicitudOfflineStore';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -12,19 +17,31 @@ const axiosInstance = axios.create({
 });
 
 export const getSolicitudes = async () => {
+  const net = await NetInfo.fetch();
+  if (!net.isConnected) {
+    const offline = await getSolicitudesOffline();
+    console.log('Usando solicitudes desde cache offline:', offline.length);
+    return offline;
+  }
+
   try {
     const response = await api.get('/solicitud');
     console.log('Solicitudes API respuesta:', response.data);
     const solicitudes = response.data?.data || [];
+    await saveSolicitudesOffline(solicitudes);
+
     return solicitudes;
   } catch (error) {
     console.error(
-      'Error al obtener solicitudes:',
+      'Error al obtener solicitudes online, intentando cache offline:',
       error.response?.data || error.message
     );
-    throw error;
+
+    const offline = await getSolicitudesOffline();
+    return offline;
   }
 };
+
 
 
 export const approveSolicitud = async (id) => {
