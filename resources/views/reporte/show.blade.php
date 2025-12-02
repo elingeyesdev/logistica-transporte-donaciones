@@ -19,24 +19,18 @@
                     </div>
 
                     <div class="card-body bg-white">
-                        
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Id Reporte:</strong>
-                                    {{ $reporte->id_reporte }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Direccion Archivo:</strong>
-                                    {{ $reporte->direccion_archivo }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Fecha Reporte:</strong>
-                                    {{ $reporte->fecha_reporte }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Gestion:</strong>
-                                    {{ $reporte->gestion }}
-                                </div>
-
+                        <div class="form-group mb-2 mb20">
+                            <strong>Direccion Archivo:</strong>
+                            {{ $reporte->direccion_archivo }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Fecha Reporte:</strong>
+                            {{ \Carbon\Carbon::parse($reporte->fecha_reporte)->format('d/m/Y') }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Gestion:</strong>
+                            {{ $reporte->gestion }}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -55,6 +55,10 @@ Route::middleware(['auth:sanctum', 'activo'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     })->middleware('auth:sanctum');
+    
+    Route::post('solicitud/{id}/aprobar', [SolicitudController::class, 'aprobar']);
+    Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar']);
+
 
 });
 
@@ -64,9 +68,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo']);
     Route::post('usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRol']);
 });
-
-Route::post('solicitud/{id}/aprobar', [SolicitudController::class, 'aprobar']);
-Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar']);
 
 Route::middleware(['auth:sanctum', 'activo'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('api.dashboard');

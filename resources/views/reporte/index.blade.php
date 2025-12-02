@@ -34,9 +34,6 @@
                             <table class="table table-striped table-hover">
                                 <thead class="thead">
                                     <tr>
-                                        <th>No</th>
-                                        
-									<th >Id Reporte</th>
 									<th >Direccion Archivo</th>
 									<th >Fecha Reporte</th>
 									<th >Gestion</th>
@@ -47,11 +44,9 @@
                                 <tbody>
                                     @foreach ($reportes as $reporte)
                                         <tr>
-                                            <td>{{ ++$i }}</td>
-                                            
-										<td >{{ $reporte->id_reporte }}</td>
 										<td >{{ $reporte->direccion_archivo }}</td>
-										<td >{{ $reporte->fecha_reporte }}</td>
+										<td>{{ \Carbon\Carbon::parse($reporte->fecha_reporte)->format('d/m/Y') }}</td>
+
 										<td >{{ $reporte->gestion }}</td>
 
                                             <td>
