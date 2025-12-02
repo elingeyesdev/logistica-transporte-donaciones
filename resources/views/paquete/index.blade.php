@@ -35,6 +35,24 @@
                 $dest = optional($sol->destino);
 
                 $estado = optional($paquete->estado)->nombre_estado;
+                $estadoLower = $estado ? strtolower($estado) : null;
+
+                $fechaCreacionDisplay = $paquete->fecha_creacion ?? $paquete->created_at;
+                $fechaCreacionFormatted = $fechaCreacionDisplay
+                  ? ($fechaCreacionDisplay instanceof \Carbon\Carbon
+                    ? $fechaCreacionDisplay->format('d/m/Y')
+                    : \Carbon\Carbon::parse($fechaCreacionDisplay)->format('d/m/Y'))
+                  : '—';
+
+                $fechaEntregaSource = $paquete->fecha_entrega;
+                if (!$fechaEntregaSource && $estadoLower && \Illuminate\Support\Str::contains($estadoLower, 'entreg')) {
+                  $fechaEntregaSource = $paquete->updated_at;
+                }
+                $fechaEntregaFormatted = $fechaEntregaSource
+                  ? ($fechaEntregaSource instanceof \Carbon\Carbon
+                    ? $fechaEntregaSource->format('d/m/Y')
+                    : \Carbon\Carbon::parse($fechaEntregaSource)->format('d/m/Y'))
+                  : null;
 
                 $badgeClass = match($estado) {
                     'Pendiente' => 'badge-warning',
@@ -77,15 +95,11 @@
                       </p>
 
                       <p class="mb-3"><strong>Fecha Creación:</strong> 
-                        {{ \Carbon\Carbon::parse($paquete->created_at)->format('d/m/Y') }}
+                        {{ $fechaCreacionFormatted }}
                       </p>
 
                       <p class="mb-3"><strong>Fecha Entrega:</strong> 
-                        @if($paquete->fecha_entrega)
-                            {{ \Carbon\Carbon::parse($paquete->fecha_entrega)->format('d/m/Y') }}
-                        @else
-                            —
-                        @endif
+                        {{ $fechaEntregaFormatted ?? '—' }}
                       </p>
 
                     </div>

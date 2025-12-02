@@ -181,9 +181,16 @@
                             <strong>Fecha de Creacion:</strong>
                             {{ \Carbon\Carbon::parse($paquete->fecha_creacion)->format('d/m/Y') }}
                         </div>
+                        @php
+                            $fechaEntregaDetalle = $paquete->fecha_entrega
+                                ? ($paquete->fecha_entrega instanceof \Carbon\Carbon
+                                    ? $paquete->fecha_entrega->format('d/m/Y')
+                                    : \Carbon\Carbon::parse($paquete->fecha_entrega)->format('d/m/Y'))
+                                : null;
+                        @endphp
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha Entrega:</strong>
-                            {{ \Carbon\Carbon::parse($paquete->fecha_entrega)->format('d/m/Y') ?? '—'}}
+                            {{ $fechaEntregaDetalle ?? '—' }}
                         </div>
 
                         @php

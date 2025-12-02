@@ -35,6 +35,12 @@ class paquete extends Model
     protected $primaryKey = 'id_paquete';
     protected $fillable = ['id_paquete', 'id_solicitud','id_encargado', 'estado_id','imagen', 'ubicacion_actual', 'fecha_creacion','fecha_aprobacion','fecha_entrega','id_conductor','id_vehiculo',];
 
+    protected $casts = [
+        'fecha_creacion'   => 'datetime',
+        'fecha_aprobacion' => 'datetime',
+        'fecha_entrega'    => 'datetime',
+    ];
+
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
