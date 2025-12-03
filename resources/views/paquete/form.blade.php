@@ -115,14 +115,40 @@
 
         {!! $errors->first('imagen', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
 
-        @if($paquete->imagen)
-            <div class="mt-2">
-                <img src="{{ asset('storage/' . $paquete->imagen) }}"
+        <div class="mt-3" id="preview-container">
+            @if($paquete->imagen)
+                <img id="preview-imagen" src="{{ asset('storage/' . $paquete->imagen) }}"
                     alt="Imagen paquete"
-                    style="max-height:120px">
-            </div>
-        @endif
+                    class="img-thumbnail"
+                    style="max-height:200px; border-radius:8px;">
+            @else
+                <img id="preview-imagen" src="#" alt="Vista previa"
+                    class="img-thumbnail d-none"
+                    style="max-height:200px; border-radius:8px;">
+            @endif
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputImagen = document.getElementById('imagen');
+            const previewImagen = document.getElementById('preview-imagen');
+
+            if (inputImagen && previewImagen) {
+                inputImagen.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            previewImagen.src = event.target.result;
+                            previewImagen.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
 
 
     <div id="geo-alert" class="alert alert-warning d-none" role="alert"></div>
