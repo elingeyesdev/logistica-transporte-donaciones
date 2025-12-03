@@ -27,17 +27,17 @@
                     Todas
                 </button>
                 <button type="button"
-                        class="btn btn-outline-secondary btn-filtro-estado"
+                        class="btn btn-outline-success btn-filtro-estado"
                         data-value="aprobada">
                     Aprobadas
                 </button>
                 <button type="button"
-                        class="btn btn-outline-secondary btn-filtro-estado"
+                        class="btn btn-outline-danger btn-filtro-estado"
                         data-value="negada">
                     Negadas
                 </button>
                 <button type="button"
-                        class="btn btn-outline-secondary btn-filtro-estado"
+                        class="btn btn-outline-warning btn-filtro-estado"
                         data-value="pendiente">
                     Pendientes
                 </button>
@@ -76,21 +76,56 @@
               flex-direction:column; 
               width:100%;
               border-radius: 12px;
-              transition: transform 0.2s, box-shadow 0.2s;
+              border-top: 5px solid #6c757d;
+              transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+              position: relative;
+              overflow: hidden;
+            }
+            .solicitud-uniform-row .card::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: -100%;
+              width: 100%;
+              height: 100%;
+              background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+              transition: left 0.5s;
+              pointer-events: none;
+            }
+            .solicitud-uniform-row .card:hover::before {
+              left: 100%;
             }
             .solicitud-uniform-row .card:hover {
-              transform: translateY(-4px);
-              box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+              transform: translateY(-6px) scale(1.02);
+              box-shadow: 0 12px 28px rgba(0,0,0,0.18);
             }
+            .solicitud-uniform-row .card.badge-success {border-top-color: #28a745;}
+            .solicitud-uniform-row .card.badge-danger {border-top-color: #dc3545;}
+            .solicitud-uniform-row .card.badge-warning {border-top-color: #ffc107;}
             .solicitud-uniform-row .card-header {
               border-radius: 12px 12px 0 0;
+              background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%);
+              border-bottom: 2px solid #e9ecef;
             }
             .solicitud-uniform-row .card-footer {
               margin-top:auto;
               border-radius: 0 0 12px 12px;
+              background: #f8f9fa;
+              border-top: 1px solid #e9ecef;
             }
-            .solicitud-uniform-row .card-body {flex:1; min-height:340px; display:flex; flex-direction:column;}
+            .solicitud-uniform-row .card-body {
+              flex:1; 
+              min-height:340px; 
+              display:flex; 
+              flex-direction:column;
+              background: #fff;
+            }
             .solicitud-uniform-row .card-body .mt-auto p {margin-bottom:4px;}
+            .solicitud-uniform-row .badge {
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              font-weight: 700;
+              font-size: 0.8rem;
+            }
           </style>
           <div class="row solicitud-uniform-row">
               @foreach ($solicituds as $solicitud)
@@ -126,12 +161,12 @@
                     data-fecha="{{ optional($fechaFiltro)->format('Y-m-d H:i:s') }}"
                     data-fecha-ts="{{ optional($fechaFiltro)->timestamp ?? '' }}"
                     data-id="{{ $key }}">
-                    <div class="card mb-3 shadow-sm bg-light">
+                    <div class="card mb-3 shadow-sm bg-white {{ $badgeClass }}">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <div style="font-size: large;">
                                 <strong>Solicitud {{ $solicitud->codigo_seguimiento }}</strong><br>
                             </div>
-                            <span class="badge {{ $badgeClass }} text-uppercase" style="font-weight:600; font-size: small;">
+                            <span class="badge {{ $badgeClass }} text-uppercase">
                                 {{ $estadoTexto }}
                             </span>
                         </div>

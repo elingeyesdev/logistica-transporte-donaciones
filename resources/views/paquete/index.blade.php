@@ -26,20 +26,56 @@
               flex-direction:column; 
               width:100%;
               border-radius: 12px;
-              transition: transform 0.2s, box-shadow 0.2s;
+              border-top: 5px solid #6c757d;
+              transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+              position: relative;
+              overflow: hidden;
+            }
+            .paquete-uniform-row .card::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: -100%;
+              width: 100%;
+              height: 100%;
+              background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+              transition: left 0.5s;
+              pointer-events: none;
+            }
+            .paquete-uniform-row .card:hover::before {
+              left: 100%;
             }
             .paquete-uniform-row .card:hover {
-              transform: translateY(-4px);
-              box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+              transform: translateY(-6px) scale(1.02);
+              box-shadow: 0 12px 28px rgba(0,0,0,0.18);
             }
+            .paquete-uniform-row .card.badge-warning {border-top-color: #ffc107;}
+            .paquete-uniform-row .card.badge-info {border-top-color: #17a2b8;}
+            .paquete-uniform-row .card.badge-success {border-top-color: #28a745;}
+            .paquete-uniform-row .card.badge-secondary {border-top-color: #6c757d;}
             .paquete-uniform-row .card-header {
               border-radius: 12px 12px 0 0;
+              background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%);
+              border-bottom: 2px solid #e9ecef;
             }
             .paquete-uniform-row .card-footer {
               margin-top:auto;
               border-radius: 0 0 12px 12px;
+              background: #f8f9fa;
+              border-top: 1px solid #e9ecef;
             }
-            .paquete-uniform-row .card-body {flex:1; display:flex; flex-direction:column; min-height:320px;}
+            .paquete-uniform-row .card-body {
+              flex:1; 
+              display:flex; 
+              flex-direction:column; 
+              min-height:320px;
+              background: #fff;
+            }
+            .paquete-uniform-row .badge {
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              font-weight: 700;
+              font-size: 0.8rem;
+            }
           </style>
           <div class="row paquete-uniform-row">
 
@@ -80,7 +116,7 @@
               @endphp
 
               <div class="col-md-3">
-                <div class="card mb-3 shadow-sm bg-light">
+                <div class="card mb-3 shadow-sm bg-white {{ $badgeClass }}">
 
                   <div class="card-header d-flex justify-content-between align-items-center">
                     <div style="font-size: large;">
