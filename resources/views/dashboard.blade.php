@@ -81,7 +81,7 @@
                                 <option value="aceptadas">Aceptadas</option>
                                 <option value="negadas">Negadas</option>
                             </select>
-                            <ul id="filter-solicitudes-result" class="list-group">
+                            <ul id="filter-solicitudes-result" class="list-group d-none">
                                 <li class="list-group-item text-muted" id="filter-solicitudes-placeholder">
                                     Selecciona "Comunidad", "Aceptadas" o "Negadas" para ver la lista.
                                 </li>
@@ -113,7 +113,7 @@
                                 <option value="en_camino">En camino</option>
                                 <option value="vehiculos">Vehículos</option>
                             </select>
-                            <ul id="filter-paquetes-result" class="list-group">
+                            <ul id="filter-paquetes-result" class="list-group d-none">
                                 <li class="list-group-item text-muted">
                                     Selecciona "Voluntarios", "Entregadas", "En camino" o "Vehículos" para ver la lista.
                                 </li>
@@ -419,8 +419,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const generatePaquetesBtn = document.getElementById('btn-generar-paquetes');
     const dateFromInput = document.getElementById('filter-date-from');
     const dateToInput = document.getElementById('filter-date-to');
-    let listHidden = false;
-    let paquetesListHidden = false;
+    let listHidden = true;
+    let paquetesListHidden = true;
 
     function formatForReport(dateStr) {
         if (!dateStr) return '';
@@ -464,34 +464,34 @@ document.addEventListener('DOMContentLoaded', function() {
             const insumos = item.insumos ? item.insumos.replace(/\n/g, '<br>') : '—';
             const justificacion = item.justificacion ? item.justificacion.replace(/\n/g, '<br>') : null;
             return `
-                <li style="list-style:none;">
-                    <div style="border:1px solid #dcdcdc; border-radius:10px; padding:14px; margin-bottom:12px;">
-                        <h3 style="margin:0 0 6px;">${item.codigo} · ${item.solicitante || 'Sin solicitante'}</h3>
-                        <p style="margin:0 0 10px; color:#555;">
+                <li style="list-style:none; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="border:1px solid #d1d5db; border-radius:9px; padding:10px 12px; margin-bottom:10px; page-break-inside: avoid; break-inside: avoid;">
+                        <h3 style="margin:0 0 4px; font-size:1rem;">${item.codigo} · ${item.solicitante || 'Sin solicitante'}</h3>
+                        <p style="margin:0 0 8px; color:#4b5563; font-size:0.9rem;">
                             Estado: ${item.estado || '-'} · Tipo: ${item.tipo_emergencia || '-'}
                         </p>
-                        <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.92rem; color:#333;">
+                        <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:0.88rem; color:#1f2937;">
                             <span><strong>Fecha solicitud:</strong> ${item.fecha || '-'}</span>
                             <span><strong>Fecha inicio:</strong> ${item.fecha_inicio || '-'}</span>
                             <span><strong>Personas:</strong> ${item.cantidad_personas ?? '-'}</span>
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Solicitante:</strong> ${item.solicitante || '-'} (CI ${item.solicitante_ci || '-'})<br>
                             <strong>Contacto:</strong> ${item.solicitante_correo || '-'} · ${item.solicitante_telefono || '-'}
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Destino:</strong> ${item.comunidad || '-'}${provincia}<br>
                             <strong>Dirección:</strong> ${direccion}<br>
                             <strong>Coordenadas:</strong> ${coords}
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Insumos necesarios:</strong>
-                            <div style="margin-top:4px; white-space:pre-wrap;">${insumos}</div>
+                            <div style="margin-top:2px; white-space:pre-wrap;">${insumos}</div>
                         </div>
                         ${justificacion ? `
-                            <div style="margin-top:10px; font-size:0.92rem; background:#fff5f5; border:1px solid #f5c2c7; border-radius:6px; padding:10px;">
+                            <div style="margin-top:8px; font-size:0.88rem; background:#fff5f5; border:1px solid #f5c2c7; border-radius:6px; padding:8px;">
                                 <strong>Motivo del rechazo:</strong>
-                                <div style="margin-top:4px;">${justificacion}</div>
+                                <div style="margin-top:2px;">${justificacion}</div>
                             </div>
                         ` : ''}
                     </div>
@@ -509,38 +509,38 @@ document.addEventListener('DOMContentLoaded', function() {
                     : '<span style="color:#888;">Sin insumos especificados.</span>';
                 const provincia = sol.provincia ? `, ${sol.provincia}` : '';
                 return `
-                    <div style="border:1px solid #e3e3e3; border-radius:8px; padding:12px; margin-bottom:10px; background:#fafafa;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                    <div style="border:1px solid #e3e3e3; border-radius:8px; padding:9px 11px; margin-bottom:8px; background:#fbfbfb; page-break-inside: avoid; break-inside: avoid;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:0.9rem;">
                             <div><strong>#${index + 1} · ${sol.codigo}</strong></div>
-                            <span style="font-size:0.9rem; color:#666;">Inicio: ${sol.fecha_inicio || '-'}</span>
+                            <span style="font-size:0.82rem; color:#6b7280;">Inicio: ${sol.fecha_inicio || '-'}</span>
                         </div>
-                        <div style="margin-top:6px; font-size:0.92rem; color:#333;">
+                        <div style="margin-top:4px; font-size:0.88rem; color:#1f2937;">
                             <strong>Tipo de emergencia:</strong> ${sol.tipo_emergencia || '-'} · <strong>Fecha solicitud:</strong> ${sol.fecha || '-'}
                         </div>
-                        <div style="margin-top:6px; font-size:0.92rem; color:#333;">
+                        <div style="margin-top:4px; font-size:0.88rem; color:#1f2937;">
                             <strong>Solicitante:</strong> ${sol.solicitante || 'Sin solicitante'} (CI ${sol.solicitante_ci || '-'})<br>
                             <strong>Contacto:</strong> ${sol.solicitante_correo || '-'} · ${sol.solicitante_telefono || '-'}
                         </div>
-                        <div style="margin-top:6px; font-size:0.92rem; color:#333;">
+                        <div style="margin-top:4px; font-size:0.88rem; color:#1f2937;">
                             <strong>Ubicación:</strong> ${sol.comunidad || 'Sin comunidad'}${provincia}<br>
                             <strong>Dirección:</strong> ${sol.direccion || '-'}
                         </div>
-                        <div style="margin-top:8px; font-size:0.92rem; color:#333;">
+                        <div style="margin-top:6px; font-size:0.88rem; color:#1f2937;">
                             <strong>Insumos necesarios:</strong>
-                            <div style="margin-top:4px; white-space:pre-wrap;">${insumos}</div>
+                            <div style="margin-top:2px; white-space:pre-wrap;">${insumos}</div>
                         </div>
                     </div>
                 `;
             }).join('');
 
             return `
-                <li style="list-style:none;">
-                    <div style="border:1px solid #dcdcdc; border-radius:10px; padding:14px; margin-bottom:12px;">
-                        <h3 style="margin:0 0 6px;">${item.nombre}</h3>
-                        <p style="margin:0 0 8px; color:#555;">
+                <li style="list-style:none; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="border:1px solid #d1d5db; border-radius:9px; padding:12px; margin-bottom:10px; page-break-inside: avoid; break-inside: avoid;">
+                        <h3 style="margin:0 0 4px; font-size:1.05rem;">${item.nombre}</h3>
+                        <p style="margin:0 0 6px; color:#4b5563; font-size:0.9rem;">
                             Total de solicitudes: ${item.total} · Última: ${item.ultimaFecha || '-'}
                         </p>
-                        ${item.provincia ? `<p style="margin:0 0 10px; color:#555;">Provincia: ${item.provincia}</p>` : ''}
+                        ${item.provincia ? `<p style="margin:0 0 8px; color:#4b5563; font-size:0.88rem;">Provincia: ${item.provincia}</p>` : ''}
                         <div style="padding-left:0; margin:0;">${solicitudesList}</div>
                     </div>
                 </li>
@@ -553,28 +553,28 @@ document.addEventListener('DOMContentLoaded', function() {
         return items.map(item => {
             const provincia = item.destino_provincia && item.destino_provincia !== '—' ? `, ${item.destino_provincia}` : '';
             return `
-                <li style="list-style:none;">
-                    <div style="border:1px solid #dcdcdc; border-radius:10px; padding:14px; margin-bottom:12px;">
-                        <h3 style="margin:0 0 6px;">${item.codigo} · Solicitud ${item.solicitud_codigo || '-'} </h3>
-                        <p style="margin:0 0 10px; color:#555;">
+                <li style="list-style:none; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="border:1px solid #d1d5db; border-radius:9px; padding:10px 12px; margin-bottom:10px; page-break-inside: avoid; break-inside: avoid;">
+                        <h3 style="margin:0 0 4px; font-size:1rem;">${item.codigo} · Solicitud ${item.solicitud_codigo || '-'} </h3>
+                        <p style="margin:0 0 8px; color:#4b5563; font-size:0.9rem;">
                             Estado: ${item.estado || '-'} · Entrega: ${item.fecha_entrega || item.fecha || '-'}
                         </p>
-                        <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.92rem; color:#333;">
+                        <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:0.88rem; color:#1f2937;">
                             <span><strong>Fecha creación:</strong> ${item.fecha_creacion || '-'}</span>
                             <span><strong>Fecha aprobación:</strong> ${item.fecha_aprobacion || '-'}</span>
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Solicitante:</strong> ${item.solicitante || '-'} (CI ${item.solicitante_ci || '-'})<br>
                             <strong>Contacto:</strong> ${item.solicitante_correo || '-'} · ${item.solicitante_telefono || '-'}
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Destino:</strong> ${item.destino_comunidad || '-'}${provincia}<br>
                             <strong>Dirección:</strong> ${item.destino_direccion || '-'}
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Ubicación actual:</strong> ${item.ubicacion_actual || '-'}
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Conductor:</strong> ${item.conductor || '-'} (CI ${item.conductor_ci || '-'}) · Tel: ${item.conductor_telefono || '-'}<br>
                             <strong>Vehículo:</strong> ${item.vehiculo || '-'} · Placa: ${item.vehiculo_placa || '-'}
                         </div>
@@ -592,32 +592,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? `${item.vehiculo || '-'} · ${item.vehiculo_marca}${item.vehiculo_modelo && item.vehiculo_modelo !== '—' ? ' · ' + item.vehiculo_modelo : ''}`
                 : (item.vehiculo || '-');
             return `
-                <li style="list-style:none;">
-                    <div style="border:1px solid #dcdcdc; border-radius:10px; padding:14px; margin-bottom:12px;">
-                        <h3 style="margin:0 0 6px;">${item.codigo} · Solicitud ${item.solicitud_codigo || '-'}</h3>
-                        <p style="margin:0 0 8px; color:#555;">
+                <li style="list-style:none; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="border:1px solid #d1d5db; border-radius:9px; padding:10px 12px; margin-bottom:10px; page-break-inside: avoid; break-inside: avoid;">
+                        <h3 style="margin:0 0 4px; font-size:1rem;">${item.codigo} · Solicitud ${item.solicitud_codigo || '-'}</h3>
+                        <p style="margin:0 0 6px; color:#4b5563; font-size:0.9rem;">
                             Estado: ${item.estado || '-'} · Última actualización: ${item.fecha || '-'}
                         </p>
-                        <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.92rem; color:#333;">
+                        <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:0.88rem; color:#1f2937;">
                             <span><strong>Tipo emergencia:</strong> ${item.tipo_emergencia || '-'}</span>
                             <span><strong>Fecha solicitud:</strong> ${item.fecha_solicitud_creacion || '-'}</span>
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Solicitante:</strong> ${item.solicitante || '-'} (CI ${item.solicitante_ci || '-'})<br>
                             <strong>Contacto:</strong> ${item.solicitante_correo || '-'} · ${item.solicitante_telefono || '-'}
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Destino:</strong> ${item.destino_comunidad || '-'}${provincia}<br>
                             <strong>Dirección:</strong> ${item.destino_direccion || '-'}
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Ubicación actual:</strong> ${item.ubicacion_actual || '-'}
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Conductor:</strong> ${item.conductor || '-'} (CI ${item.conductor_ci || '-'}) · Tel: ${item.conductor_telefono || '-'}<br>
                             <strong>Vehículo:</strong> ${vehiculoDetalle} · Color: ${item.vehiculo_color || '-'}
                         </div>
-                        <div style="margin-top:10px; font-size:0.92rem;">
+                        <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Voluntario encargado:</strong> ${item.voluntario || '-'} (CI ${item.voluntario_ci || '-'})
                         </div>
                     </div>
@@ -646,9 +646,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div><strong>Total de registros:</strong> ${report.count}</div>
                 </div>
                 <div style="margin-top:18px;">${listHtml}</div>
-                <div style="margin-top:20px; font-size:11px; color:${secondaryText}; text-align:right;">
-                    Documento generado automáticamente desde el dashboard.
-                </div>
             </div>
         `;
     }
@@ -694,6 +691,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 li.style.border = '1px solid #ddd';
                 li.style.borderRadius = '6px';
                 li.style.padding = '10px';
+                li.style.pageBreakInside = 'avoid';
+                li.style.breakInside = 'avoid';
             });
         }
         document.body.appendChild(wrapper);
@@ -820,8 +819,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (filterSelect) {
-        renderSolicitudesList(filterSelect.value);
+        // Inicialmente la lista permanece oculta hasta que el usuario escoja un filtro
         filterSelect.addEventListener('change', function() {
+            resultList.classList.remove('d-none');
+            listHidden = false;
+            updateToggleButton();
             renderSolicitudesList(this.value);
         });
         attachDateListeners();
@@ -1045,8 +1047,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (paquetesSelect) {
-        renderPaquetesList(paquetesSelect.value);
+        // La lista de paquetes también se mantiene oculta hasta seleccionar
         paquetesSelect.addEventListener('change', function() {
+            paquetesResultList.classList.remove('d-none');
+            paquetesListHidden = false;
+            updatePaquetesToggleButton();
             renderPaquetesList(this.value);
         });
     }
