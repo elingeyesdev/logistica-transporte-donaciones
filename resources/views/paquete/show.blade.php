@@ -161,7 +161,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <div class="footer">Documento generado automáticamente desde el sistema DAS.</div>
+                            <div class="footer">Documento generado desde el sistema DAS.</div>
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Código de Solicitud:</strong>

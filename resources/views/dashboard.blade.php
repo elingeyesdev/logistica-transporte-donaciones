@@ -500,6 +500,132 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
     }
 
+    function buildComunidadPdfCards(items) {
+        if (!items || !items.length) return '';
+        return items.map(item => {
+            const solicitudesList = (item.solicitudes || []).map((sol, index) => {
+                const insumos = sol.insumos
+                    ? sol.insumos.replace(/\n/g, '<br>')
+                    : '<span style="color:#888;">Sin insumos especificados.</span>';
+                const provincia = sol.provincia ? `, ${sol.provincia}` : '';
+                return `
+                    <div style="border:1px solid #e3e3e3; border-radius:8px; padding:12px; margin-bottom:10px; background:#fafafa;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                            <div><strong>#${index + 1} · ${sol.codigo}</strong></div>
+                            <span style="font-size:0.9rem; color:#666;">Inicio: ${sol.fecha_inicio || '-'}</span>
+                        </div>
+                        <div style="margin-top:6px; font-size:0.92rem; color:#333;">
+                            <strong>Tipo de emergencia:</strong> ${sol.tipo_emergencia || '-'} · <strong>Fecha solicitud:</strong> ${sol.fecha || '-'}
+                        </div>
+                        <div style="margin-top:6px; font-size:0.92rem; color:#333;">
+                            <strong>Solicitante:</strong> ${sol.solicitante || 'Sin solicitante'} (CI ${sol.solicitante_ci || '-'})<br>
+                            <strong>Contacto:</strong> ${sol.solicitante_correo || '-'} · ${sol.solicitante_telefono || '-'}
+                        </div>
+                        <div style="margin-top:6px; font-size:0.92rem; color:#333;">
+                            <strong>Ubicación:</strong> ${sol.comunidad || 'Sin comunidad'}${provincia}<br>
+                            <strong>Dirección:</strong> ${sol.direccion || '-'}
+                        </div>
+                        <div style="margin-top:8px; font-size:0.92rem; color:#333;">
+                            <strong>Insumos necesarios:</strong>
+                            <div style="margin-top:4px; white-space:pre-wrap;">${insumos}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <li style="list-style:none;">
+                    <div style="border:1px solid #dcdcdc; border-radius:10px; padding:14px; margin-bottom:12px;">
+                        <h3 style="margin:0 0 6px;">${item.nombre}</h3>
+                        <p style="margin:0 0 8px; color:#555;">
+                            Total de solicitudes: ${item.total} · Última: ${item.ultimaFecha || '-'}
+                        </p>
+                        ${item.provincia ? `<p style="margin:0 0 10px; color:#555;">Provincia: ${item.provincia}</p>` : ''}
+                        <div style="padding-left:0; margin:0;">${solicitudesList}</div>
+                    </div>
+                </li>
+            `;
+        }).join('');
+    }
+
+    function buildPaqueteEntregadoCards(items) {
+        if (!items || !items.length) return '';
+        return items.map(item => {
+            const provincia = item.destino_provincia && item.destino_provincia !== '—' ? `, ${item.destino_provincia}` : '';
+            return `
+                <li style="list-style:none;">
+                    <div style="border:1px solid #dcdcdc; border-radius:10px; padding:14px; margin-bottom:12px;">
+                        <h3 style="margin:0 0 6px;">${item.codigo} · Solicitud ${item.solicitud_codigo || '-'} </h3>
+                        <p style="margin:0 0 10px; color:#555;">
+                            Estado: ${item.estado || '-'} · Entrega: ${item.fecha_entrega || item.fecha || '-'}
+                        </p>
+                        <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.92rem; color:#333;">
+                            <span><strong>Fecha creación:</strong> ${item.fecha_creacion || '-'}</span>
+                            <span><strong>Fecha aprobación:</strong> ${item.fecha_aprobacion || '-'}</span>
+                        </div>
+                        <div style="margin-top:10px; font-size:0.92rem;">
+                            <strong>Solicitante:</strong> ${item.solicitante || '-'} (CI ${item.solicitante_ci || '-'})<br>
+                            <strong>Contacto:</strong> ${item.solicitante_correo || '-'} · ${item.solicitante_telefono || '-'}
+                        </div>
+                        <div style="margin-top:10px; font-size:0.92rem;">
+                            <strong>Destino:</strong> ${item.destino_comunidad || '-'}${provincia}<br>
+                            <strong>Dirección:</strong> ${item.destino_direccion || '-'}
+                        </div>
+                        <div style="margin-top:10px; font-size:0.92rem;">
+                            <strong>Ubicación actual:</strong> ${item.ubicacion_actual || '-'}
+                        </div>
+                        <div style="margin-top:10px; font-size:0.92rem;">
+                            <strong>Conductor:</strong> ${item.conductor || '-'} (CI ${item.conductor_ci || '-'}) · Tel: ${item.conductor_telefono || '-'}<br>
+                            <strong>Vehículo:</strong> ${item.vehiculo || '-'} · Placa: ${item.vehiculo_placa || '-'}
+                        </div>
+                    </div>
+                </li>
+            `;
+        }).join('');
+    }
+
+    function buildPaqueteEnCaminoCards(items) {
+        if (!items || !items.length) return '';
+        return items.map(item => {
+            const provincia = item.destino_provincia && item.destino_provincia !== '—' ? `, ${item.destino_provincia}` : '';
+            const vehiculoDetalle = item.vehiculo_marca && item.vehiculo_marca !== 'Sin marca'
+                ? `${item.vehiculo || '-'} · ${item.vehiculo_marca}${item.vehiculo_modelo && item.vehiculo_modelo !== '—' ? ' · ' + item.vehiculo_modelo : ''}`
+                : (item.vehiculo || '-');
+            return `
+                <li style="list-style:none;">
+                    <div style="border:1px solid #dcdcdc; border-radius:10px; padding:14px; margin-bottom:12px;">
+                        <h3 style="margin:0 0 6px;">${item.codigo} · Solicitud ${item.solicitud_codigo || '-'}</h3>
+                        <p style="margin:0 0 8px; color:#555;">
+                            Estado: ${item.estado || '-'} · Última actualización: ${item.fecha || '-'}
+                        </p>
+                        <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.92rem; color:#333;">
+                            <span><strong>Tipo emergencia:</strong> ${item.tipo_emergencia || '-'}</span>
+                            <span><strong>Fecha solicitud:</strong> ${item.fecha_solicitud_creacion || '-'}</span>
+                        </div>
+                        <div style="margin-top:10px; font-size:0.92rem;">
+                            <strong>Solicitante:</strong> ${item.solicitante || '-'} (CI ${item.solicitante_ci || '-'})<br>
+                            <strong>Contacto:</strong> ${item.solicitante_correo || '-'} · ${item.solicitante_telefono || '-'}
+                        </div>
+                        <div style="margin-top:10px; font-size:0.92rem;">
+                            <strong>Destino:</strong> ${item.destino_comunidad || '-'}${provincia}<br>
+                            <strong>Dirección:</strong> ${item.destino_direccion || '-'}
+                        </div>
+                        <div style="margin-top:10px; font-size:0.92rem;">
+                            <strong>Ubicación actual:</strong> ${item.ubicacion_actual || '-'}
+                        </div>
+                        <div style="margin-top:10px; font-size:0.92rem;">
+                            <strong>Conductor:</strong> ${item.conductor || '-'} (CI ${item.conductor_ci || '-'}) · Tel: ${item.conductor_telefono || '-'}<br>
+                            <strong>Vehículo:</strong> ${vehiculoDetalle} · Color: ${item.vehiculo_color || '-'}
+                        </div>
+                        <div style="margin-top:10px; font-size:0.92rem;">
+                            <strong>Voluntario encargado:</strong> ${item.voluntario || '-'} (CI ${item.voluntario_ci || '-'})
+                        </div>
+                    </div>
+                </li>
+            `;
+        }).join('');
+    }
+
     function exportCurrentReport(report, filenamePrefix) {
         if (!report || report.count <= 0 || !report.content) {
             alert('No hay datos para generar el reporte.');
@@ -510,8 +636,18 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         let listMarkup = report.content;
-        if (report.group === 'Solicitudes' && report.type !== 'comunidad' && report.items && report.items.length) {
-            listMarkup = buildSolicitudPdfCards(report.items);
+        if (report.group === 'Solicitudes' && report.items && report.items.length) {
+            if (report.type === 'comunidad') {
+                listMarkup = buildComunidadPdfCards(report.items);
+            } else {
+                listMarkup = buildSolicitudPdfCards(report.items);
+            }
+        } else if (report.group === 'Paquetes' && report.items && report.items.length) {
+            if (report.type === 'entregadas') {
+                listMarkup = buildPaqueteEntregadoCards(report.items);
+            } else if (report.type === 'en_camino') {
+                listMarkup = buildPaqueteEnCaminoCards(report.items);
+            }
         }
         const now = new Date();
         const day = String(now.getDate()).padStart(2, '0');
@@ -528,7 +664,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <p style="margin-bottom:12px;color:#555;">${report.subtitle} · Total: ${report.count} · Fecha: ${prettyDate}</p>
             <ul style="list-style:none;padding:0;margin:0;">${listMarkup}</ul>
         `;
-        const shouldStyleItems = !(report.group === 'Solicitudes' && report.type !== 'comunidad');
+        const hasCustomLayout = (report.group === 'Solicitudes') || (report.group === 'Paquetes' && ['entregadas','en_camino'].includes(report.type));
+        const shouldStyleItems = !hasCustomLayout;
         if (shouldStyleItems) {
             wrapper.querySelectorAll('li').forEach(li => {
                 li.style.marginBottom = '8px';
@@ -596,7 +733,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         provincia: item.provincia,
                         total: 0,
                         ultimaFecha: item.fecha,
-                        ultimaFechaIso: item.fecha_iso
+                        ultimaFechaIso: item.fecha_iso,
+                        solicitudes: []
                     };
                 }
                 acc[key].total += 1;
@@ -604,6 +742,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     acc[key].ultimaFecha = item.fecha;
                     acc[key].ultimaFechaIso = item.fecha_iso;
                 }
+                acc[key].solicitudes.push(item);
                 return acc;
             }, {});
 
@@ -700,10 +839,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPaquetesReport = null;
                 return;
             }
-            paquetesResultList.innerHTML = dataset.map(item => {
-                const paquetes = item.paquetes || [];
-                const paquetesHtml = paquetes.length
-                    ? paquetes.map(paq => `
+            const hasDateFilter = Boolean((dateFromInput && dateFromInput.value) || (dateToInput && dateToInput.value));
+            const filteredVoluntarios = [];
+            const renderedItems = dataset.map(item => {
+                const paquetesFiltrados = (item.paquetes || []).filter(passesDateFilter);
+                if (hasDateFilter && !paquetesFiltrados.length) {
+                    return null;
+                }
+                const paquetesParaMostrar = hasDateFilter ? paquetesFiltrados : (item.paquetes || []);
+                const paquetesHtml = paquetesParaMostrar.length
+                    ? paquetesParaMostrar.map(paq => `
                         <div class="border rounded p-2 mb-2">
                             <div><small class="text-muted">Código de Solicitud:</small> <strong>${paq.solicitud_codigo}</strong></div>
                             <div><small class="text-muted">Estado:</small> ${paq.estado}</div>
@@ -712,6 +857,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     `).join('')
                     : '<small class="text-muted">Sin paquetes registrados.</small>';
 
+                filteredVoluntarios.push(Object.assign({}, item, { paquetes: paquetesParaMostrar }));
                 return `
                     <li class="list-group-item">
                         <div>
@@ -726,8 +872,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </li>
                 `;
-            }).join('');
-            currentPaquetesReport = buildReportObject('Paquetes', type, dataset.length, paquetesResultList.innerHTML, { items: dataset });
+            }).filter(Boolean);
+
+            if (!renderedItems.length) {
+                paquetesResultList.innerHTML = `
+                    <li class="list-group-item text-muted">
+                        No se encontraron voluntarios con paquetes en el rango seleccionado.
+                    </li>
+                `;
+                currentPaquetesReport = null;
+                return;
+            }
+
+            paquetesResultList.innerHTML = renderedItems.join('');
+            currentPaquetesReport = buildReportObject('Paquetes', type, filteredVoluntarios.length, paquetesResultList.innerHTML, { items: filteredVoluntarios });
             return;
         }
 

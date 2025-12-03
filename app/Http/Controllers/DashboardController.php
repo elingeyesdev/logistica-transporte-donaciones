@@ -155,28 +155,68 @@ class DashboardController extends Controller
             })
             ->values();
 
-        $paquetesEntregadosListado = Paquete::with(['solicitud.solicitante','conductor'])
+        $paquetesEntregadosListado = Paquete::with([
+                'solicitud.solicitante',
+                'solicitud.destino',
+                'conductor',
+                'vehiculo',
+                'estado'
+            ])
             ->whereIn('estado_id', $idsEntregado)
             ->orderByDesc(DB::raw('COALESCE(fecha_entrega, updated_at)'))
             ->limit(50)
             ->get()
             ->map(function($paquete){
-                $fechaCarbon = $paquete->fecha_entrega ? Carbon::parse($paquete->fecha_entrega) : ($paquete->updated_at ? Carbon::parse($paquete->updated_at) : null);
-                $fecha = $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha';
-                $solicitante = optional(optional($paquete->solicitud)->solicitante);
+                $fechaEntregaCarbon = $paquete->fecha_entrega ? Carbon::parse($paquete->fecha_entrega) : ($paquete->updated_at ? Carbon::parse($paquete->updated_at) : null);
+                $fechaEntrega = $fechaEntregaCarbon ? $fechaEntregaCarbon->format('d/m/Y') : 'Sin fecha';
+                $fechaCreacionCarbon = $paquete->fecha_creacion ? Carbon::parse($paquete->fecha_creacion) : ($paquete->created_at ? Carbon::parse($paquete->created_at) : null);
+                $fechaAprobacionCarbon = $paquete->fecha_aprobacion ? Carbon::parse($paquete->fecha_aprobacion) : null;
+                $solicitud = optional($paquete->solicitud);
+                $solicitante = optional($solicitud->solicitante);
+                $destino = optional($solicitud->destino);
                 $conductor = optional($paquete->conductor);
+                $vehiculo = optional($paquete->vehiculo);
+                $estado = optional($paquete->estado);
+                $solicitanteNombre = trim(($solicitante->nombre ?? '').' '.($solicitante->apellido ?? '')) ?: 'Sin solicitante';
+                $conductorNombre = trim(($conductor->nombre ?? '').' '.($conductor->apellido ?? '')) ?: 'Sin conductor';
                 return [
                     'id' => $paquete->id_paquete,
                     'codigo' => $paquete->codigo ?? ('PKG-'.$paquete->id_paquete),
-                    'solicitante' => $solicitante ? trim(($solicitante->nombre ?? '').' '.($solicitante->apellido ?? '')) : 'Sin solicitante',
-                    'conductor' => $conductor ? trim(($conductor->nombre ?? '').' '.($conductor->apellido ?? '')) : 'Sin conductor',
-                    'fecha' => $fecha,
-                    'fecha_iso' => $fechaCarbon ? $fechaCarbon->toDateString() : null,
+                    'solicitud_codigo' => $solicitud->codigo_seguimiento ?? 'SIN-CODIGO',
+                    'estado' => $estado->nombre_estado ?? 'Sin estado',
+                    'descripcion' => $paquete->descripcion ?? 'Sin descripción',
+                    'cantidad_total' => $paquete->cantidad_total,
+                    'ubicacion_actual' => $paquete->ubicacion_actual ?? '-',
+                    'fecha_creacion' => $fechaCreacionCarbon ? $fechaCreacionCarbon->format('d/m/Y') : 'Sin fecha',
+                    'fecha_creacion_iso' => $fechaCreacionCarbon ? $fechaCreacionCarbon->toDateString() : null,
+                    'fecha_aprobacion' => $fechaAprobacionCarbon ? $fechaAprobacionCarbon->format('d/m/Y') : 'Sin fecha',
+                    'fecha_entrega' => $fechaEntrega,
+                    'fecha' => $fechaEntrega,
+                    'fecha_iso' => $fechaEntregaCarbon ? $fechaEntregaCarbon->toDateString() : null,
+                    'solicitante' => $solicitanteNombre,
+                    'solicitante_ci' => $solicitante->ci ?? '—',
+                    'solicitante_correo' => $solicitante->email ?? '—',
+                    'solicitante_telefono' => $solicitante->telefono ?? '—',
+                    'destino_comunidad' => $destino->comunidad ?? 'Sin comunidad',
+                    'destino_provincia' => $destino->provincia ?? '—',
+                    'destino_direccion' => $destino->direccion ?? '—',
+                    'conductor' => $conductorNombre,
+                    'conductor_ci' => $conductor->ci ?? '—',
+                    'conductor_telefono' => $conductor->celular ?? '—',
+                    'vehiculo' => $vehiculo ? ($vehiculo->marca ?? 'Sin marca') : 'Sin vehículo',
+                    'vehiculo_placa' => $vehiculo->placa ?? '—',
                 ];
             })
             ->values();
 
-        $paquetesEnCaminoListado = Paquete::with(['solicitud.destino','conductor','vehiculo'])
+        $paquetesEnCaminoListado = Paquete::with([
+                'solicitud.destino',
+                'solicitud.solicitante',
+                'conductor',
+                'vehiculo.marcaVehiculo',
+                'estado',
+                'encargado'
+            ])
             ->whereIn('estado_id', $idsEnCamino)
             ->orderByDesc(DB::raw('COALESCE(fecha_creacion, created_at)'))
             ->limit(50)
@@ -184,23 +224,56 @@ class DashboardController extends Controller
             ->map(function($paquete){
                 $fechaCarbon = $paquete->fecha_creacion ? Carbon::parse($paquete->fecha_creacion) : ($paquete->created_at ? Carbon::parse($paquete->created_at) : null);
                 $fecha = $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha';
-                $destino = optional(optional($paquete->solicitud)->destino);
+                $solicitud = optional($paquete->solicitud);
+                $destino = optional($solicitud->destino);
+                $solicitante = optional($solicitud->solicitante);
                 $conductor = optional($paquete->conductor);
                 $vehiculo = optional($paquete->vehiculo);
+                $vehiculoMarca = optional($vehiculo->marcaVehiculo);
+                $estado = optional($paquete->estado);
+                $encargado = optional($paquete->encargado);
+                $solicitanteNombre = trim(($solicitante->nombre ?? '').' '.($solicitante->apellido ?? '')) ?: 'Sin solicitante';
+                $conductorNombre = trim(($conductor->nombre ?? '').' '.($conductor->apellido ?? '')) ?: 'Sin conductor';
+                $encargadoNombre = trim(($encargado->nombre ?? '').' '.($encargado->apellido ?? '')) ?: '—';
+                $solicitudFechaCarbon = $solicitud && ($solicitud->fecha_creacion || $solicitud->created_at)
+                    ? Carbon::parse($solicitud->fecha_creacion ?? $solicitud->created_at)
+                    : null;
                 return [
                     'id' => $paquete->id_paquete,
                     'codigo' => $paquete->codigo ?? ('PKG-'.$paquete->id_paquete),
+                    'solicitud_codigo' => $solicitud->codigo_seguimiento ?? 'SIN-CODIGO',
                     'destino' => $destino ? ($destino->comunidad ?? 'Sin comunidad') : 'Sin comunidad',
                     'provincia' => $destino ? ($destino->provincia ?? null) : null,
-                    'conductor' => $conductor ? trim(($conductor->nombre ?? '').' '.($conductor->apellido ?? '')) : 'Sin conductor',
+                    'destino_comunidad' => $destino->comunidad ?? 'Sin comunidad',
+                    'destino_provincia' => $destino->provincia ?? '—',
+                    'destino_direccion' => $destino->direccion ?? '—',
+                    'tipo_emergencia' => $solicitud->tipo_emergencia ?? '—',
+                    'solicitante' => $solicitanteNombre,
+                    'solicitante_ci' => $solicitante->ci ?? '—',
+                    'solicitante_correo' => $solicitante->email ?? '—',
+                    'solicitante_telefono' => $solicitante->telefono ?? '—',
+                    'conductor' => $conductorNombre,
+                    'conductor_ci' => $conductor->ci ?? '—',
+                    'conductor_telefono' => $conductor->celular ?? '—',
                     'vehiculo' => $vehiculo ? ($vehiculo->placa ?? 'Sin placa') : 'Sin vehículo',
+                    'vehiculo_marca' => $vehiculoMarca->nombre_marca ?? $vehiculoMarca->nombre ?? 'Sin marca',
+                    'vehiculo_modelo' => $vehiculo->modelo ?? '—',
+                    'vehiculo_color' => $vehiculo->color ?? '—',
+                    'estado' => $estado->nombre_estado ?? 'Sin estado',
+                    'ubicacion_actual' => $paquete->ubicacion_actual ?? '—',
+                    'voluntario' => $encargadoNombre,
+                    'voluntario_ci' => $paquete->id_encargado ?? '—',
+                    'descripcion' => $paquete->descripcion ?? 'Sin descripción',
+                    'cantidad_total' => $paquete->cantidad_total,
+                    'fecha_solicitud_creacion' => $solicitudFechaCarbon ? $solicitudFechaCarbon->format('d/m/Y') : '—',
                     'fecha' => $fecha,
                     'fecha_iso' => $fechaCarbon ? $fechaCarbon->toDateString() : null,
+                    'fecha_creacion' => $fecha,
                 ];
             })
             ->values();
 
-        $solicitudesPorComunidad = Solicitud::with('destino')
+        $solicitudesPorComunidad = Solicitud::with(['destino','solicitante'])
             ->whereHas('destino', function($q){
                 $q->whereNotNull('comunidad')->where('comunidad', '!=', '');
             })
@@ -210,7 +283,10 @@ class DashboardController extends Controller
             ->map(function($solicitud){
                 $fechaCarbon = $solicitud->fecha_solicitud ? Carbon::parse($solicitud->fecha_solicitud) : null;
                 $fecha = $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha';
+                $fechaInicioCarbon = $solicitud->fecha_inicio ? Carbon::parse($solicitud->fecha_inicio) : null;
                 $destino = $solicitud->destino;
+                $solicitanteModel = optional($solicitud->solicitante);
+                $solicitanteNombre = trim(($solicitanteModel->nombre ?? '').' '.($solicitanteModel->apellido ?? '')) ?: 'Sin solicitante';
                 return [
                     'id' => $solicitud->id_solicitud,
                     'codigo' => $solicitud->codigo_seguimiento ?? 'SIN-CODIGO',
@@ -218,6 +294,14 @@ class DashboardController extends Controller
                     'provincia' => $destino->provincia ?? null,
                     'fecha' => $fecha,
                     'fecha_iso' => $fechaCarbon ? $fechaCarbon->toDateString() : null,
+                    'fecha_inicio' => $fechaInicioCarbon ? $fechaInicioCarbon->format('d/m/Y') : 'Sin fecha',
+                    'tipo_emergencia' => $solicitud->tipo_emergencia ?? 'Sin tipo',
+                    'solicitante' => $solicitanteNombre,
+                    'solicitante_ci' => $solicitanteModel->ci ?? '—',
+                    'solicitante_correo' => $solicitanteModel->email ?? '—',
+                    'solicitante_telefono' => $solicitanteModel->telefono ?? '—',
+                    'insumos' => $solicitud->insumos_necesarios ?? '',
+                    'direccion' => $destino->direccion ?? '—',
                 ];
             })
             ->values();
@@ -276,11 +360,13 @@ class DashboardController extends Controller
                         $solicitud = optional($paquete->solicitud);
                         $codigoSolicitud = $solicitud->codigo_seguimiento ?? 'SIN-CODIGO';
                         $fechaBase = $paquete->fecha_creacion ?? $paquete->created_at;
+                        $fechaCarbon = $fechaBase ? Carbon::parse($fechaBase) : null;
                         return [
                             'id' => $paquete->id_paquete,
                             'solicitud_codigo' => $codigoSolicitud,
                             'estado' => optional($paquete->estado)->nombre_estado ?? 'Sin estado',
-                            'fecha' => $fechaBase ? Carbon::parse($fechaBase)->format('d/m/Y') : 'Sin fecha',
+                            'fecha' => $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha',
+                            'fecha_iso' => $fechaCarbon ? $fechaCarbon->toDateString() : null,
                         ];
                     })->values();
                 })
