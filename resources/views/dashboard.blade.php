@@ -626,6 +626,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
     }
 
+    function buildFormalPdfLayout(report, listHtml, prettyDate) {
+        const accentColor = '#14325c';
+        const secondaryText = '#6b7280';
+        return `
+            <div style="font-family:'Helvetica Neue', Arial, sans-serif; color:#111827;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid ${accentColor}; padding-bottom:10px; margin-bottom:16px;">
+                    <div>
+                        <div style="font-size:20px; font-weight:700; color:${accentColor};">DAS · Alas Chiquitanas</div>
+                        <div style="font-size:13px; color:${secondaryText};">Panel de ${report.group}</div>
+                    </div>
+                    <div style="text-align:right; font-size:12px; color:${secondaryText};">
+                        <div><strong>Reporte:</strong> ${report.title}</div>
+                        <div><strong>Generado:</strong> ${prettyDate}</div>
+                    </div>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:12px; padding:12px; border:1px solid #e5e7eb; border-radius:10px; background:#f9fafb; font-size:0.92rem;">
+                    <div><strong>Filtro aplicado:</strong> ${report.subtitle}</div>
+                    <div><strong>Total de registros:</strong> ${report.count}</div>
+                </div>
+                <div style="margin-top:18px;">${listHtml}</div>
+                <div style="margin-top:20px; font-size:11px; color:${secondaryText}; text-align:right;">
+                    Documento generado automáticamente desde el dashboard.
+                </div>
+            </div>
+        `;
+    }
+
     function exportCurrentReport(report, filenamePrefix) {
         if (!report || report.count <= 0 || !report.content) {
             alert('No hay datos para generar el reporte.');
@@ -657,13 +684,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const todaySlug = `${now.getFullYear()}-${month}-${day}`;
 
         const wrapper = document.createElement('div');
-        wrapper.style.padding = '16px';
-        wrapper.style.fontFamily = 'Arial, sans-serif';
-        wrapper.innerHTML = `
-            <h2 style="margin-bottom:4px;">${report.title}</h2>
-            <p style="margin-bottom:12px;color:#555;">${report.subtitle} · Total: ${report.count} · Fecha: ${prettyDate}</p>
-            <ul style="list-style:none;padding:0;margin:0;">${listMarkup}</ul>
-        `;
+        wrapper.style.padding = '18px';
+        wrapper.innerHTML = buildFormalPdfLayout(report, `<ul style="list-style:none;padding:0;margin:0;">${listMarkup}</ul>`, prettyDate);
         const hasCustomLayout = (report.group === 'Solicitudes') || (report.group === 'Paquetes' && ['entregadas','en_camino'].includes(report.type));
         const shouldStyleItems = !hasCustomLayout;
         if (shouldStyleItems) {

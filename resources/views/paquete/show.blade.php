@@ -43,6 +43,30 @@
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 const btn = document.getElementById('btn-imprimir-reporte');
+                                const uploadUrl = "{{ route('paquete.reportes.pdf', $paquete->id_paquete) }}";
+                                const csrfMeta = document.head.querySelector('meta[name="csrf-token"]');
+                                const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+                                async function uploadPdfToServer(blob, filename) {
+                                    if (!csrfToken || !uploadUrl) return;
+                                    const formData = new FormData();
+                                    formData.append('_token', csrfToken);
+                                    formData.append('archivo', blob, filename);
+                                    formData.append('fecha_reporte', new Date().toISOString().slice(0, 10));
+                                    formData.append('gestion', new Date().getFullYear());
+                                    try {
+                                        await fetch(uploadUrl, {
+                                            method: 'POST',
+                                            body: formData,
+                                            headers: {
+                                                'X-Requested-With': 'XMLHttpRequest'
+                                            }
+                                        });
+                                    } catch (error) {
+                                        console.error('No se pudo guardar el PDF en el servidor', error);
+                                    }
+                                }
+
                                 if (btn) {
                                     btn.addEventListener('click', function() {
                                         const element = document.getElementById('reporte-pdf');
@@ -53,14 +77,26 @@
                                             html2canvas: { scale: 2 },
                                             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                                         };
-                                        
-                                        
+
                                         element.style.display = 'block';
-                                        
-                                        html2pdf().set(opt).from(element).save().then(() => {
-                                            
-                                            element.style.display = 'none';
-                                        });
+
+                                        html2pdf().set(opt).from(element).outputPdf('blob')
+                                            .then(blob => {
+                                                uploadPdfToServer(blob, opt.filename);
+
+                                                const url = URL.createObjectURL(blob);
+                                                const link = document.createElement('a');
+                                                link.href = url;
+                                                link.download = opt.filename;
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                                            })
+                                            .catch(error => console.error('Error generando PDF', error))
+                                            .finally(() => {
+                                                element.style.display = 'none';
+                                            });
                                     });
                                 }
                             });

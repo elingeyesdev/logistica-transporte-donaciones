@@ -69,6 +69,8 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::resource('solicitante', SolicitanteController::class)
         ->except(['destroy']);
     Route::resource('paquete', PaqueteController::class);
+    Route::post('paquete/{paquete}/reportes/pdf', [PaqueteController::class, 'storePdfReporte'])
+        ->name('paquete.reportes.pdf');
     Route::resource('destino', DestinoController::class)
         ->except(['destroy']);
     Route::resource('marca', MarcaController::class);

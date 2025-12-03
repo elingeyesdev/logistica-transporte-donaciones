@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
 
+use App\Models\Reporte;
+use Illuminate\Support\Str;
 use App\Http\Requests\PaqueteRequest;
 use App\Models\Paquete;
 use App\Models\Estado;
@@ -428,8 +430,38 @@ class PaqueteController extends Controller
                 'message' => 'Paquete eliminado correctamente'
             ]);
         }
+
         return Redirect::route('paquete.index')
             ->with('success', 'Paquete eliminado correctamente');
+    }
+
+    public function storePdfReporte(Request $request, Paquete $paquete)
+    {
+        $validated = $request->validate([
+            'archivo' => ['required', 'file', 'mimes:pdf', 'max:20480'],
+            'fecha_reporte' => ['nullable', 'date'],
+            'gestion' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $file = $request->file('archivo');
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeBase = Str::slug($originalName) ?: 'reporte-paquete-' . $paquete->id_paquete;
+        $filename = $safeBase . '_' . now()->format('Ymd_His') . '.pdf';
+        $storedPath = $file->storeAs('reportes', $filename, 'public');
+
+        $reporte = Reporte::create([
+            'id_paquete' => $paquete->id_paquete,
+            'nombre_pdf' => $filename,
+            'ruta_pdf' => $storedPath,
+            'fecha_reporte' => $validated['fecha_reporte'] ?? now()->toDateString(),
+            'gestion' => $validated['gestion'] ?? now()->format('Y'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'reporte_id' => $reporte->id_reporte,
+            'url' => asset('storage/' . $storedPath),
+        ]);
     }
 
     public function galeria()

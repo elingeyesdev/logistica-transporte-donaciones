@@ -17,7 +17,8 @@ class Reporte extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'direccion_archivo',
+        'nombre_pdf',
+        'ruta_pdf',
         'fecha_reporte',
         'gestion',
         'imagen_evidencia',

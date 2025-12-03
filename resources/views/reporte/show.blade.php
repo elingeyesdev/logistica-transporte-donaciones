@@ -20,12 +20,27 @@
 
                     <div class="card-body bg-white">
                         <div class="form-group mb-2 mb20">
-                            <strong>Direccion Archivo:</strong>
-                            {{ $reporte->direccion_archivo }}
+                            <strong>Nombre PDF:</strong>
+                            {{ $reporte->nombre_pdf ?? '—' }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Archivo:</strong>
+                            @php
+                                $pdfUrl = $reporte->ruta_pdf ? asset('storage/'.$reporte->ruta_pdf) : null;
+                            @endphp
+                            @if($pdfUrl)
+                                <a href="{{ $pdfUrl }}" target="_blank" rel="noopener">Descargar</a>
+                            @else
+                                <span class="text-muted">Sin archivo</span>
+                            @endif
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha Reporte:</strong>
-                            {{ \Carbon\Carbon::parse($reporte->fecha_reporte)->format('d/m/Y') }}
+                            @if($reporte->fecha_reporte)
+                                {{ \Carbon\Carbon::parse($reporte->fecha_reporte)->format('d/m/Y') }}
+                            @else
+                                —
+                            @endif
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Gestion:</strong>

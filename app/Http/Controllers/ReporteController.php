@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reporte;
-use App\Models\paquete;
+use App\Models\Paquete;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\ReporteRequest;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Illuminate\Http\UploadedFile;
 
 class ReporteController extends Controller
 {
@@ -31,7 +34,21 @@ class ReporteController extends Controller
 
     public function store(ReporteRequest $request): RedirectResponse
     {
-        Reporte::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('archivo_pdf')) {
+            [$nombrePdf, $rutaPdf] = $this->persistPdfFile($request->file('archivo_pdf'));
+            $data['nombre_pdf'] = $nombrePdf;
+            $data['ruta_pdf'] = $rutaPdf;
+        }
+
+        unset($data['archivo_pdf']);
+
+        if (empty($data['gestion'])) {
+            $data['gestion'] = now()->format('Y');
+        }
+
+        Reporte::create($data);
 
         return Redirect::route('reporte.index')
             ->with('success', 'Reporte creado exitosamente.');
@@ -54,7 +71,21 @@ class ReporteController extends Controller
 
     public function update(ReporteRequest $request, Reporte $reporte): RedirectResponse
     {
-        $reporte->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('archivo_pdf')) {
+            [$nombrePdf, $rutaPdf] = $this->persistPdfFile($request->file('archivo_pdf'), $reporte);
+            $data['nombre_pdf'] = $nombrePdf;
+            $data['ruta_pdf'] = $rutaPdf;
+        }
+
+        unset($data['archivo_pdf']);
+
+        if (empty($data['gestion'])) {
+            $data['gestion'] = now()->format('Y');
+        }
+
+        $reporte->update($data);
 
         return Redirect::route('reporte.index')
             ->with('success', 'Reporte actualizado correctamente');
@@ -62,9 +93,33 @@ class ReporteController extends Controller
 
     public function destroy($id): RedirectResponse
     {
-        Reporte::find($id)->delete();
+        $reporte = Reporte::findOrFail($id);
+
+        if ($reporte->ruta_pdf && Storage::disk('public')->exists($reporte->ruta_pdf)) {
+            Storage::disk('public')->delete($reporte->ruta_pdf);
+        }
+
+        $reporte->delete();
 
         return Redirect::route('reporte.index')
             ->with('success', 'Reporte eliminado');
+    }
+
+    private function persistPdfFile(?UploadedFile $file, ?Reporte $existing = null): array
+    {
+        if (!$file) {
+            return [$existing?->nombre_pdf, $existing?->ruta_pdf];
+        }
+
+        if ($existing && $existing->ruta_pdf && Storage::disk('public')->exists($existing->ruta_pdf)) {
+            Storage::disk('public')->delete($existing->ruta_pdf);
+        }
+
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $baseName = Str::slug($originalName) ?: 'reporte-paquete';
+        $filename = $baseName . '_' . now()->format('Ymd_His') . '.pdf';
+        $path = $file->storeAs('reportes', $filename, 'public');
+
+        return [$filename, $path];
     }
 }

@@ -34,20 +34,35 @@
                             <table class="table table-striped table-hover">
                                 <thead class="thead">
                                     <tr>
-									<th >Direccion Archivo</th>
-									<th >Fecha Reporte</th>
-									<th >Gestion</th>
-
+								<th>Nombre PDF</th>
+								<th>Fecha Reporte</th>
+								<th>Gestión</th>
+								<th>Archivo</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($reportes as $reporte)
                                         <tr>
-										<td >{{ $reporte->direccion_archivo }}</td>
-										<td>{{ \Carbon\Carbon::parse($reporte->fecha_reporte)->format('d/m/Y') }}</td>
-
-										<td >{{ $reporte->gestion }}</td>
+                                            <td>{{ $reporte->nombre_pdf ?? '—' }}</td>
+                                            <td>
+                                                @if($reporte->fecha_reporte)
+                                                    {{ \Carbon\Carbon::parse($reporte->fecha_reporte)->format('d/m/Y') }}
+                                                @else
+                                                    —
+                                                @endif
+                                            </td>
+                                            <td>{{ $reporte->gestion ?? '—' }}</td>
+                                            <td>
+                                                @php
+                                                    $pdfUrl = $reporte->ruta_pdf ? asset('storage/'.$reporte->ruta_pdf) : null;
+                                                @endphp
+                                                @if($pdfUrl)
+                                                    <a href="{{ $pdfUrl }}" target="_blank" rel="noopener" class="btn btn-link btn-sm p-0">Descargar</a>
+                                                @else
+                                                    <span class="text-muted">Sin archivo</span>
+                                                @endif
+                                            </td>
 
                                             <td>
                                                 <form action="{{ route('reporte.destroy', $reporte->id_reporte) }}" method="POST">
