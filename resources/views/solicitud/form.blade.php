@@ -233,12 +233,7 @@
                                 <div id="productos-list" class="list-group">
                                 </div>
                                 <nav aria-label="Page navigation" class="mt-3">
-                                    <ul class="pagination justify-content-center">
-                                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">4</a></li>
-                                    </ul>
+                                    <ul id="productos-pagination" class="pagination justify-content-center"></ul>
                                 </nav>
                             </div>
                             <div class="col-md-4">
@@ -473,6 +468,7 @@
         const productosList = document.getElementById('productos-list');
         const productosSeleccionados = document.getElementById('productos-seleccionados');
         const insumosInput = document.getElementById('insumos_necesarios');
+        const paginationContainer = document.getElementById('productos-pagination');
 
         const productos = [
             { id_producto: 1, nombre: 'Camisa', descripcion: 'Camisa', stock_total: 125 },
@@ -480,80 +476,138 @@
             { id_producto: 3, nombre: 'Pantalón', descripcion: 'Pantalón', stock_total: 67 },
             { id_producto: 4, nombre: 'Abrigo', descripcion: 'Abrigo', stock_total: 45 },
             { id_producto: 5, nombre: 'Arroz', descripcion: 'Arroz', stock_total: 200 },
+            { id_producto: 6, nombre: 'Fideo', descripcion: 'Fideo seco', stock_total: 180 },
+            { id_producto: 7, nombre: 'Azúcar', descripcion: 'Azúcar en bolsa', stock_total: 150 },
+            { id_producto: 8, nombre: 'Aceite', descripcion: 'Aceite vegetal', stock_total: 130 },
+            { id_producto: 11, nombre: 'Agua embotellada', descripcion: 'Botellas de agua', stock_total: 220 },
+            { id_producto: 12, nombre: 'Enlatados', descripcion: 'Atún, sardinas, verduras', stock_total: 160 },
+            { id_producto: 13, nombre: 'Galletas', descripcion: 'Galletas dulces/saladas', stock_total: 140 },
+            { id_producto: 14, nombre: 'Bebidas isotónicas', descripcion: 'Rehidratantes', stock_total: 80 },
+            { id_producto: 15, nombre: 'Mantas', descripcion: 'Mantas / frazadas', stock_total: 70 },
+            { id_producto: 16, nombre: 'Colchones', descripcion: 'Colchones o colchonetas', stock_total: 40 },
+            { id_producto: 17, nombre: 'Sábanas', descripcion: 'Juego de sábanas', stock_total: 60 },
+            { id_producto: 18, nombre: 'Botas', descripcion: 'Botas de goma / trabajo', stock_total: 55 },
+            { id_producto: 19, nombre: 'Guantes', descripcion: 'Guantes de trabajo', stock_total: 75 },
         ];
 
-        productos.forEach(producto => {
-            const item = document.createElement('div');
-            item.className = 'list-group-item';
-            item.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>${producto.nombre}</strong><br>
-                        <small>Sugerido: ${producto.stock_total}</small>
-                    </div>
-                    <div class="input-group" style="width: 150px;">
-                        <div class="input-group-prepend">
-                            <button type="button" class="btn btn-sm btn-outline-secondary decrement" data-id="${producto.id_producto}">-</button>
-                        </div>
-                        <input type="number" class="form-control cantidad" data-id="${producto.id_producto}" value="0" min="0">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-sm btn-outline-secondary increment" data-id="${producto.id_producto}">+</button>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-success aplicar" data-id="${producto.id_producto}" data-nombre="${producto.nombre}">Aplicar</button>
-                </div>
-            `;
+        const pageSize = 5;
+        let currentPage = 1;
 
-            productosList.appendChild(item);
+        function renderPagination() {
+            if (!paginationContainer) return;
 
-            item.querySelector('.increment').addEventListener('click', function(e) {
-                e.preventDefault();
-                const input = item.querySelector('.cantidad');
-                input.value = parseInt(input.value || 0) + 1;
-            });
+            const totalPages = Math.ceil(productos.length / pageSize);
+            paginationContainer.innerHTML = '';
 
-            item.querySelector('.decrement').addEventListener('click', function(e) {
-                e.preventDefault();
-                const input = item.querySelector('.cantidad');
-                input.value = Math.max(0, parseInt(input.value || 0) - 1);
-            });
+            if (totalPages <= 1) return;
 
-        item.querySelector('.aplicar').addEventListener('click', function(e) {
-            e.preventDefault();
+            for (let page = 1; page <= totalPages; page++) {
+                const li = document.createElement('li');
+                li.className = 'page-item' + (page === currentPage ? ' active' : '');
 
-            const id = this.getAttribute('data-id');
-            const nombre = this.getAttribute('data-nombre');
-            const cantidad = parseInt(item.querySelector('.cantidad').value);
+                const a = document.createElement('a');
+                a.href = '#';
+                a.className = 'page-link';
+                a.textContent = page;
 
-            if (cantidad > 0) {
-                const existente = productosSeleccionados.querySelector(`li[data-id="${id}"]`);
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (page === currentPage) return;
+                    currentPage = page;
+                    renderPage();
+                });
 
-                if (existente) {
-                    const cantidadSpan = existente.querySelector('.cantidad-span');
-                    const nuevaCantidad = parseInt(cantidadSpan.textContent) + cantidad;
-                    cantidadSpan.textContent = nuevaCantidad;
-                } else {
-                    const seleccionado = document.createElement('li');
-                    seleccionado.className = 'list-group-item d-flex justify-content-between align-items-center';
-                    seleccionado.setAttribute('data-id', id);
-                    seleccionado.innerHTML = `
-                        <span>${nombre} x<span class="cantidad-span">${cantidad}</span></span>
-                        <button type="button" class="btn btn-sm btn-danger" data-id="${id}">Quitar</button>
-                    `;
-                    productosSeleccionados.appendChild(seleccionado);
-
-                    seleccionado.querySelector('button').addEventListener('click', function(e) {
-                        e.preventDefault();
-                        this.parentElement.remove();
-                    });
-                }
+                li.appendChild(a);
+                paginationContainer.appendChild(li);
             }
-        });
+        }
 
-        });
+        function renderPage() {
+            productosList.innerHTML = '';
+
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageItems = productos.slice(start, end);
+
+            pageItems.forEach(producto => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item';
+                item.innerHTML = `
+                    <div class="d-flex col-md-12 align-items-center ">
+                        <div class="col-md-4">
+                            <strong>${producto.nombre}</strong><br>
+                            <small>Sugerido: ${producto.stock_total}</small>
+                        </div>
+                        <div class="input-group col-md-6">
+                            <div class="input-group-prepend">
+                                <button type="button" class="btn btn-sm btn-outline-secondary decrement" data-id="${producto.id_producto}">-</button>
+                            </div>
+                            <input type="number" class="form-control cantidad" data-id="${producto.id_producto}" value="0" min="0">
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-sm btn-outline-secondary increment" data-id="${producto.id_producto}">+</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-success aplicar col-md-2" data-id="${producto.id_producto}" data-nombre="${producto.nombre}">Aplicar</button>
+                    </div>
+                `;
+
+                productosList.appendChild(item);
+
+                const inputCantidad = item.querySelector('.cantidad');
+                const btnIncrement = item.querySelector('.increment');
+                const btnDecrement = item.querySelector('.decrement');
+                const btnAplicar   = item.querySelector('.aplicar');
+
+                btnIncrement.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    inputCantidad.value = parseInt(inputCantidad.value || 0) + 1;
+                });
+
+                btnDecrement.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    inputCantidad.value = Math.max(0, parseInt(inputCantidad.value || 0) - 1);
+                });
+
+                btnAplicar.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const id = this.getAttribute('data-id');
+                    const nombre = this.getAttribute('data-nombre');
+                    const cantidad = parseInt(inputCantidad.value);
+
+                    if (cantidad > 0) {
+                        const existente = productosSeleccionados.querySelector(`li[data-id="${id}"]`);
+
+                        if (existente) {
+                            const cantidadSpan = existente.querySelector('.cantidad-span');
+                            const nuevaCantidad = parseInt(cantidadSpan.textContent) + cantidad;
+                            cantidadSpan.textContent = nuevaCantidad;
+                        } else {
+                            const seleccionado = document.createElement('li');
+                            seleccionado.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            seleccionado.setAttribute('data-id', id);
+                            seleccionado.innerHTML = `
+                                <span>${nombre} x<span class="cantidad-span">${cantidad}</span></span>
+                                <button type="button" class="btn btn-sm btn-danger" data-id="${id}">Quitar</button>
+                            `;
+                            productosSeleccionados.appendChild(seleccionado);
+
+                            seleccionado.querySelector('button').addEventListener('click', function(e) {
+                                e.preventDefault();
+                                this.parentElement.remove();
+                            });
+                        }
+                        inputCantidad.value = 0;
+                    }
+                });
+            });
+
+            renderPagination();
+        }
+        renderPage();
 
         document.getElementById('guardarInsumos').addEventListener('click', function(e) {
-             e.preventDefault();
+            e.preventDefault();
             const seleccionados = [];
             productosSeleccionados.querySelectorAll('li').forEach(item => {
                 seleccionados.push(item.querySelector('span').textContent);

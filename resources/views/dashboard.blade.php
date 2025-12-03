@@ -71,7 +71,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-toggle-list">
                                         <i class="fas fa-eye-slash"></i> Ocultar lista
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" id="btn-generar-reporte">
+                                    <button type="button" class="btn btn-sm btn-success" id="btn-generar-reporte">
                                         <i class="fas fa-file-export"></i> Generar
                                     </button>
                                 </div>
@@ -102,7 +102,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-toggle-paquetes">
                                         <i class="fas fa-eye-slash"></i> Ocultar lista
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" id="btn-generar-paquetes">
+                                    <button type="button" class="btn btn-sm btn-success" id="btn-generar-paquetes">
                                         <i class="fas fa-file-export"></i> Generar
                                     </button>
                                 </div>
@@ -124,7 +124,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="apply-dashboard-filters">Aplicar</button>
             </div>
         </div>
     </div>
@@ -329,10 +328,10 @@
                         @forelse($paquetes as $paq)
                             <tr>
                                 <td><a href="{{ route('paquete.show', $paq->id_paquete) }}">#{{ $paq->id_paquete }}</a></td>
-                                <td>{{ $paq->fecha_creacion }}</td>
+                                <td>{{ \Carbon\Carbon::parse($paq->fecha_creacion)->format('d/m/Y') }}</td>
                                 <td>{{ \Carbon\Carbon::parse($paq->fecha_entrega)->format('d/m/Y') }}</td>
                                 <td class="text-right">
-                                    <span class="badge badge-{{ $paq->dias_entrega > 7 ? 'danger' : ($paq->dias_entrega > 3 ? 'warning' : 'success') }}">
+                                    <span class="badge badge-{{ $paq->dias_entrega > 7 ? 'danger' : ($paq->dias_entrega > 3 ? 'warning' : 'success') }}" style="font-size: small;">
                                         {{ round($paq->dias_entrega, 1) }} días
                                     </span>
                                 </td>

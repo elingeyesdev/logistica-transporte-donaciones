@@ -181,7 +181,7 @@
             </div>
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-4" hidden>
             <div class="form-group mb-2 mb20">
               <label for="latitud" class="form-label">Latitud</label>
               <input type="number" step="any" name="latitud" id="latitud" readonly
@@ -192,7 +192,7 @@
             </div>
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-4" hidden>
             <div class="form-group mb-2 mb20">
               <label for="longitud" class="form-label">Longitud</label>
               <input type="number" step="any" name="longitud" id="longitud" readonly
@@ -220,7 +220,7 @@
       <div class="col-md-6">
         <div class="form-group mb-2 mb20">
           <label class="form-label">Código</label>
-          <input type="text" class="form-control" value="{{ $paquete->codigo ?? 'Se generará al guardar' }}" disabled>
+          <input type="text" class="form-control" value="{{ $paquete->solicitud->codigo_seguimiento ?? 'Se generará al guardar' }}" disabled>
         </div>
       </div>
     </div>

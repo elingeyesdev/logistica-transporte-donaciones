@@ -174,14 +174,7 @@
                           </a>
                       @endif
 
-                      <form action="{{ route('paquete.destroy', $paquete->id_paquete) }}"
-                            method="POST" class="d-inline">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger"
-                                onclick="return confirm('¿Estás seguro de eliminar este paquete?')">
-                          <i class="fas fa-trash-alt"></i>
-                        </button>
-                      </form>
+                      
                     </div>
 
                     <div>

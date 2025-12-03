@@ -32,7 +32,7 @@ Route::get('/health', function () {
 Route::post('login', [LoginController::class, 'apiLogin']);
 
 //PARA DONACIONES (renato y helder)
-Route::post('solicitud-publica', [SolicitudController::class, 'store']);
+Route::post('solicitud-publica', action: [SolicitudController::class, 'store']);
 
 
 Route::middleware(['auth:sanctum', 'activo'])->group(function () {
