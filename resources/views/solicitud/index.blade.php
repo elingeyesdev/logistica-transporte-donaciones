@@ -27,17 +27,17 @@
                     Todas
                 </button>
                 <button type="button"
-                        class="btn btn-outline-success btn-filtro-estado"
+                        class="btn btn-outline-secondary btn-filtro-estado"
                         data-value="aprobada">
                     Aprobadas
                 </button>
                 <button type="button"
-                        class="btn btn-outline-danger btn-filtro-estado"
+                        class="btn btn-outline-secondary btn-filtro-estado"
                         data-value="negada">
                     Negadas
                 </button>
                 <button type="button"
-                        class="btn btn-outline-warning btn-filtro-estado"
+                        class="btn btn-outline-secondary btn-filtro-estado"
                         data-value="pendiente">
                     Pendientes
                 </button>
@@ -76,7 +76,7 @@
               flex-direction:column; 
               width:100%;
               border-radius: 12px;
-              border-top: 5px solid #6c757d;
+              border-top: 5px solid transparent;
               transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
               position: relative;
               overflow: hidden;
@@ -99,9 +99,9 @@
               transform: translateY(-6px) scale(1.02);
               box-shadow: 0 12px 28px rgba(0,0,0,0.18);
             }
-            .solicitud-uniform-row .card.badge-success {border-top-color: #28a745;}
-            .solicitud-uniform-row .card.badge-danger {border-top-color: #dc3545;}
-            .solicitud-uniform-row .card.badge-warning {border-top-color: #ffc107;}
+            .solicitud-uniform-row .card.badge-success:hover {border-top-color: #28a745;}
+            .solicitud-uniform-row .card.badge-danger:hover {border-top-color: #dc3545;}
+            .solicitud-uniform-row .card.badge-warning:hover {border-top-color: #ffc107;}
             .solicitud-uniform-row .card-header {
               border-radius: 12px 12px 0 0;
               background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%);

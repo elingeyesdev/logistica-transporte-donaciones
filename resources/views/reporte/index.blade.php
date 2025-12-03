@@ -16,11 +16,11 @@
                                 {{ __('Reporte') }}
                             </span>
 
-                             <div class="float-right">
+                             {{-- <div class="float-right">
                                 <a href="{{ route('reporte.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Crear Nuevo') }}
                                 </a>
-                              </div>
+                              </div> --}} 
                         </div>
                     </div>
                     @if ($message = Session::get('success'))

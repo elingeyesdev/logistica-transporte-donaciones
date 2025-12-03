@@ -26,7 +26,7 @@
               flex-direction:column; 
               width:100%;
               border-radius: 12px;
-              border-top: 5px solid #6c757d;
+              border-top: 5px solid transparent;
               transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
               position: relative;
               overflow: hidden;
@@ -49,10 +49,10 @@
               transform: translateY(-6px) scale(1.02);
               box-shadow: 0 12px 28px rgba(0,0,0,0.18);
             }
-            .paquete-uniform-row .card.badge-warning {border-top-color: #ffc107;}
-            .paquete-uniform-row .card.badge-info {border-top-color: #17a2b8;}
-            .paquete-uniform-row .card.badge-success {border-top-color: #28a745;}
-            .paquete-uniform-row .card.badge-secondary {border-top-color: #6c757d;}
+            .paquete-uniform-row .card.badge-warning:hover {border-top-color: #ffc107;}
+            .paquete-uniform-row .card.badge-info:hover {border-top-color: #17a2b8;}
+            .paquete-uniform-row .card.badge-success:hover {border-top-color: #28a745;}
+            .paquete-uniform-row .card.badge-secondary:hover {border-top-color: #6c757d;}
             .paquete-uniform-row .card-header {
               border-radius: 12px 12px 0 0;
               background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%);
