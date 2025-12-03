@@ -7,15 +7,18 @@
 @endsection
 
 @section('content')
-<div class="card shadow-sm">
-  <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span style="color: #fff; font-weight: 600; font-size: 1.1rem;">
-        <i class="fas fa-hands-helping mr-2"></i>{{ __('Voluntarios Registrados') }}
-      </span>
-    </div>
-  </div>
-  <div class="card-body bg-white">
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card shadow-sm">
+        <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #fff; font-weight: 600; font-size: 1.1rem;">
+              <i class="fas fa-hands-helping mr-2"></i>{{ __('Voluntarios Registrados') }}
+            </span>
+          </div>
+        </div>
+        <div class="card-body bg-white">
     <style>
       .table thead th {
         background-color: #f8f9fa;
@@ -98,7 +101,10 @@
         @endforeach
       </tbody>
     </table>
+    </div>
   </div>
+      </div>
+    </div>
   </div>
 </div>
 @endsection

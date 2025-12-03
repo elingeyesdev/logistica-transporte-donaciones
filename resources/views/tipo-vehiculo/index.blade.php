@@ -16,11 +16,11 @@
                                 <i class="fas fa-car-side mr-2"></i>{{ __('Tipos de Vehiculos') }}
                             </span>
 
-                             <div class="float-right">
-                                <a href="{{ route('tipo-vehiculo.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Crear Nuevo') }}
-                                </a>
-                              </div>
+                                                         <div class="float-right">
+                                                                <a href="{{ route('tipo-vehiculo.create') }}" class="btn btn-light btn-sm float-right" data-placement="left">
+                                                                    <i class="fa fa-plus mr-1"></i>{{ __('Crear Nuevo') }}
+                                                                </a>
+                                                            </div>
                         </div>
                     </div>
                     @if ($message = Session::get('success'))

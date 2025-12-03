@@ -16,11 +16,11 @@
                                 <i class="fas fa-tags mr-2"></i>{{ __('Marcas') }}
                             </span>
 
-                             <div class="float-right">
-                                <a href="{{ route('marca.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Crear Nuevo') }}
-                                </a>
-                              </div>
+                                                         <div class="float-right">
+                                                                <a href="{{ route('marca.create') }}" class="btn btn-light btn-sm float-right" data-placement="left">
+                                                                    <i class="fa fa-plus mr-1"></i>{{ __('Crear Nuevo') }}
+                                                                </a>
+                                                            </div>
                         </div>
                     </div>
                     @if ($message = Session::get('success'))
