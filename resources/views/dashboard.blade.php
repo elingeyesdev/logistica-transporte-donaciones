@@ -380,6 +380,8 @@ const paquetesLabelMap = {
     en_camino: 'En camino',
     vehiculos: 'Vehículos'
 };
+const dashboardReportStoreUrl = @json(route('dashboard.reportes.store'));
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof Chart === 'undefined') {
@@ -451,6 +453,64 @@ document.addEventListener('DOMContentLoaded', function() {
             items: options.items || [],
             slug: `${group.toLowerCase()}_${(type || 'listado')}`.replace(/[^a-z0-9_]+/gi, '_').toLowerCase()
         };
+    }
+
+    function downloadBlob(blob, filename) {
+        try {
+            if (!(blob instanceof Blob)) {
+                blob = new Blob([blob], { type: 'application/pdf' });
+            }
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            requestAnimationFrame(() => {
+                URL.revokeObjectURL(url);
+                link.remove();
+            });
+        } catch (error) {
+            console.error('No se pudo iniciar la descarga del PDF.', error);
+        }
+    }
+
+    async function uploadDashboardReport(blob, filename, meta = {}) {
+        if (!dashboardReportStoreUrl) {
+            return;
+        }
+
+        try {
+            let effectiveBlob = blob;
+            if (!(effectiveBlob instanceof Blob)) {
+                effectiveBlob = new Blob([effectiveBlob], { type: 'application/pdf' });
+            }
+
+            const file = new File([effectiveBlob], filename, { type: 'application/pdf' });
+            const formData = new FormData();
+            formData.append('archivo', file);
+
+            const fechaIso = meta.fechaIso || new Date().toISOString().slice(0, 10);
+            const gestion = meta.gestion || String(new Date().getFullYear());
+
+            formData.append('fecha_reporte', fechaIso);
+            formData.append('gestion', gestion);
+
+            const response = await fetch(dashboardReportStoreUrl, {
+                method: 'POST',
+                headers: csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {},
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Error HTTP ${response.status}`);
+            }
+        } catch (error) {
+            console.error('No se pudo guardar el reporte generado en el historial.', error);
+        }
     }
 
     function buildSolicitudPdfCards(items) {
@@ -697,13 +757,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         document.body.appendChild(wrapper);
         const filename = `${filenamePrefix}_${report.slug}_${todaySlug}.pdf`;
-        html2pdf().set({
+        const todayIso = now.toISOString().slice(0, 10);
+        const gestionYear = String(now.getFullYear());
+        const pdfOptions = {
             margin: 10,
             filename,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(wrapper).save().then(() => wrapper.remove());
+        };
+
+        const worker = html2pdf().set(pdfOptions).from(wrapper);
+
+        worker.outputPdf('blob')
+            .then(blob => {
+                downloadBlob(blob, filename);
+                uploadDashboardReport(blob, filename, {
+                    group: report.group,
+                    type: report.type,
+                    subtitle: report.subtitle,
+                    count: report.count,
+                    fechaIso: todayIso,
+                    gestion: gestionYear
+                });
+            })
+            .catch(error => {
+                console.error('Error generando el PDF del dashboard.', error);
+                alert('No se pudo generar el PDF del reporte.');
+            })
+            .finally(() => {
+                wrapper.remove();
+            });
     }
 
     function passesDateFilter(item) {

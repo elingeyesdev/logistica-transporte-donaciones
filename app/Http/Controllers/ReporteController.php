@@ -91,6 +91,34 @@ class ReporteController extends Controller
             ->with('success', 'Reporte actualizado correctamente');
     }
 
+    public function storeDashboardReport(Request $request)
+    {
+        $validated = $request->validate([
+            'archivo' => ['required', 'file', 'mimes:pdf', 'max:20480'],
+            'fecha_reporte' => ['nullable', 'date'],
+            'gestion' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        [$nombrePdf, $rutaPdf] = $this->persistPdfFile($request->file('archivo'));
+
+        $fechaReporte = $validated['fecha_reporte'] ?? now()->toDateString();
+        $gestion = $validated['gestion'] ?? now()->format('Y');
+
+        $reporte = Reporte::create([
+            'nombre_pdf' => $nombrePdf,
+            'ruta_pdf' => $rutaPdf,
+            'fecha_reporte' => $fechaReporte,
+            'gestion' => $gestion,
+            'id_paquete' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'reporte_id' => $reporte->id_reporte,
+            'url' => asset('storage/' . $rutaPdf),
+        ]);
+    }
+
     public function destroy($id): RedirectResponse
     {
         $reporte = Reporte::findOrFail($id);

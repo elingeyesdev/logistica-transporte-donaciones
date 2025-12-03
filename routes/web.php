@@ -96,6 +96,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('dashboard');
     Route::resource('estado', EstadoController::class);
     Route::resource('reporte', ReporteController::class);
+    Route::post('/dashboard/reportes', [ReporteController::class, 'storeDashboardReport'])
+        ->name('dashboard.reportes.store');
     Route::resource('tipo-licencia', TipoLicenciaController::class);
     Route::resource('tipo-emergencia', TipoEmergenciaController::class);
     Route::resource('rol', RolController::class);
