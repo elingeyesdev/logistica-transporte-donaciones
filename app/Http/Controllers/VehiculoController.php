@@ -51,16 +51,34 @@ class VehiculoController extends Controller
     }
     public function show(Request $request, $id)
     {
-        $vehiculo = Vehiculo::with(['marcaVehiculo', 'tipoVehiculo'])->findOrFail($id);
+        $vehiculo = Vehiculo::with([
+            'marcaVehiculo',
+            'tipoVehiculo',
+            'paquetes.solicitud.destino',
+            'paquetes.estado',
+            'paquetes.conductor',
+        ])->findOrFail($id);
+
+        $paquetesEnCamino = $vehiculo->paquetes->filter(function ($p) {
+            return optional($p->estado)->nombre_estado === 'En Camino';
+        })->sortByDesc('fecha_aprobacion');
+
+        $paquetesOtros = $vehiculo->paquetes->reject(function ($p) {
+            return optional($p->estado)->nombre_estado === 'En Camino';
+        })->sortByDesc('fecha_aprobacion');
+
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'data' => $vehiculo
+                'data' => $vehiculo,
+                //ESTOS SON POR SI QUEREMOS QUE ESTEN EN MOVIL
+              //  'paquetes_en_camino' => $paquetesEnCamino->values(),
+              //  'paquetes_otros'     => $paquetesOtros->values(),
             ]);
         }
 
-        return view('vehiculo.show', compact('vehiculo'));
+        return view('vehiculo.show', compact('vehiculo', 'paquetesEnCamino', 'paquetesOtros'));
     }
     public function edit($id): View
     {

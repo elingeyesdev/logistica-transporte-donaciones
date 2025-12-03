@@ -40,9 +40,14 @@ class Vehiculo extends Model
     public function tipoVehiculo()
     {
         return $this->belongsTo(\App\Models\TipoVehiculo::class, 'id_tipovehiculo', 'id_tipovehiculo');
-    }
+    } 
         public function marcaVehiculo()
     {
         return $this->belongsTo(\App\Models\Marca::class, 'id_marca', 'id_marca');
+    }
+    
+    public function paquetes()
+    {
+        return $this->hasMany(\App\Models\Paquete::class, 'id_vehiculo', 'id_vehiculo');
     }
 }

@@ -18,7 +18,7 @@
     <div id="gratitude-gallery" class="gallery-section">
         <div class="row">
             @forelse ($paquetes as $paquete)
-                <div class="col-md-4 mb-4">
+                <div class="col-md-3 mb-4">
                     <div class="card">
                         @php
                             $imageUrl = $paquete->imagen
@@ -26,7 +26,7 @@
                                 : null;
                         @endphp
                         @if($imageUrl)
-                            <img src="{{ $imageUrl }}" class="card-img-top" alt="Foto de entrega">
+                            <img src="{{ $imageUrl }}" class="card-img-top" style="max-width: 100%; height:200px; object-fit: cover; " alt="Foto de entrega">
                         @else
                             <img src="{{ asset('images/default-placeholder.png') }}" class="card-img-top" alt="Imagen no disponible">
                         @endif
