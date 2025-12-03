@@ -86,45 +86,41 @@
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label for="provincia">Provincia</label>
-            <input required type="text" name="provincia" id="provincia"
-                   class="form-control @error('provincia') is-invalid @enderror"
-                   value="{{ old('provincia', $dest->provincia) }}"
-                   placeholder="Ingrese la provincia">
-            @error('provincia') <div class="invalid-feedback">{{ $message }}</div> @enderror
-        </div>
-    </div>
-
     <div class="col-md-12">
         <div class="form-group mb-3">
             <label for="mapa-ubicacion">Seleccione la Ubicación en el Mapa</label>
-        <div id="mapa-ubicacion"
-            data-lat="{{ $defaultLat }}"
-            data-lng="{{ $defaultLng }}"
-            data-zoom="{{ $defaultZoom }}"
-            style="height: 400px; width: 100%; border: 1px solid #ddd; border-radius: 4px;">
-        </div>
-            <small class="form-text text-muted">Haga clic en el mapa para seleccionar la ubicación. La provincia, latitud y longitud se llenarán automáticamente.</small>
+
+            <div class="input-group mb-2 col-md-6">
+                <input type="text"
+                    id="search-ubicacion"
+                    class="form-control bg-light"
+                    placeholder="Buscar comunidad, barrio o dirección (ej. Univalle, 4to anillo)...">
+                <div class="input-group-append">
+                    <button type="button"
+                            class="btn btn-info"
+                            id="btnBuscarUbicacion">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+            <div id="mapa-ubicacion"
+                data-lat="{{ $defaultLat }}"
+                data-lng="{{ $defaultLng }}"
+                data-zoom="{{ $defaultZoom }}"
+                style="height: 400px; width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+
+            <small class="form-text text-muted">
+                Puede buscar una dirección o hacer clic en el mapa para seleccionar la ubicación.
+                La provincia, latitud y longitud se llenarán automáticamente.
+            </small>
+
             @error('ubicacion') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
             @error('latitud') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
             @error('longitud') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
         </div>
     </div>
-
-    <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label for="ubicacion">Ubicación (dirección/zona)</label>
-            <input required type="text" name="ubicacion" id="ubicacion" readonly
-                   class="form-control @error('ubicacion') is-invalid @enderror"
-                   value="{{ old('ubicacion', $dest->direccion) }}"
-                   placeholder="Se seleccionará automáticamente del mapa">
-            @error('ubicacion') <div class="invalid-feedback">{{ $message }}</div> @enderror
-        </div>
-    </div>
-
-    <div class="col-md-3">
+        <div class="col-md-2" hidden>
         <div class="form-group mb-3">
             <label for="latitud">Latitud</label>
             <input required type="number" step="any" name="latitud" id="latitud" readonly
@@ -134,13 +130,36 @@
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-2" hidden>
         <div class="form-group mb-3">
             <label for="longitud">Longitud</label>
             <input required type="number" step="any" name="longitud" id="longitud" readonly
                    class="form-control @error('longitud') is-invalid @enderror"
                    value="{{ old('longitud', $dest->longitud) }}" placeholder="-63.18">
             @error('longitud') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+    </div>
+        <div class="col-md-8">
+
+    </div>
+    <div class="col-md-6">
+        <div class="form-group mb-3">
+            <label for="provincia">Comunidad/Provincia</label>
+            <input required type="text" name="provincia" id="provincia"
+                   class="form-control @error('provincia') is-invalid @enderror"
+                   value="{{ old('provincia', $dest->provincia) }}"
+                   placeholder="Ej. Limoncito">
+            @error('provincia') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group mb-3">
+            <label for="ubicacion">Ubicación (dirección/zona)</label>
+            <input required type="text" name="ubicacion" id="ubicacion" readonly
+                   class="form-control @error('ubicacion') is-invalid @enderror"
+                   value="{{ old('ubicacion', $dest->direccion) }}"
+                   placeholder="Se seleccionará automáticamente del mapa">
+            @error('ubicacion') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
     </div>
 
@@ -153,6 +172,7 @@
             @error('cantidad_personas') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
     </div>
+
 
     <div class="col-md-4">
         <div class="form-group mb-3">
@@ -184,14 +204,14 @@
     </div>
 
 
-    <div class="col-md-12">
+    <div class="col-md-6">
         <div class="form-group mb-3">
             <label for="insumos_necesarios">Insumos Necesarios</label><br>
             <div class="d-flex">
-                <button type="button" class="btn btn-primary mb-3 mr-3" style="min-width: fit-content;" data-toggle="modal" data-target="#insumosModal">
+                <button type="button" class="btn btn-info mb-3 mr-3" style="min-width: fit-content;" data-toggle="modal" data-target="#insumosModal">
                     Seleccionar Insumos
                 </button>
-                <input readonly class="form-control" name="insumos_necesarios" id="insumos_necesarios" value="{{ old('insumos_necesarios', $solicitud->insumos_necesarios) }}">
+                <input type="text-area" readonly class="form-control" name="insumos_necesarios" id="insumos_necesarios" value="{{ old('insumos_necesarios', $solicitud->insumos_necesarios) }}">
                 @error('insumos_necesarios') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
         </div>
@@ -246,6 +266,7 @@
         }
     @endphp
 
+</div>
     <div class="col-md-6">
         <div class="form-group mb-3">
             <label for="codigo_seguimiento">Código de Seguimiento</label>
@@ -262,9 +283,7 @@
         </div>
     </div>
 
-</div>
-
-<div class="d-flex text-right mt-3 ml-2">
+<div class="col-md-12 justify-content-between d-flex text-right mt-3 ml-2">
     <div class="mr-3">
         @auth
             <a href="{{ route('solicitud.index') }}" class="btn btn-secondary">
@@ -273,7 +292,7 @@
         @endauth
     </div>
    <div class="align-items-right">
-    <button type="submit" class="btn btn-success">
+    <button type="submit" class="btn btn-info">
         <i class="fas fa-save"></i> Enviar Solicitud
     </button>
    </div>
@@ -295,10 +314,13 @@
     let defaultLng = parseFloat(mapContainer.dataset.lng || "-63.15615466");
     let defaultZoom = parseInt(mapContainer.dataset.zoom || "6", 10);
 
-    const latInput = document.getElementById('latitud');
-    const lngInput = document.getElementById('longitud');
+    const latInput       = document.getElementById('latitud');
+    const lngInput       = document.getElementById('longitud');
     const ubicacionInput = document.getElementById('ubicacion');
     const provinciaInput = document.getElementById('provincia');
+
+    const searchInput = document.getElementById('search-ubicacion');
+    const searchBtn   = document.getElementById('btnBuscarUbicacion');
 
     const map = L.map('mapa-ubicacion').setView([defaultLat, defaultLng], defaultZoom);
 
@@ -332,11 +354,11 @@
           if (data?.address) {
             const a = data.address;
 
-            let dir = a.road ?? ' ';
-            if (a.house_number) dir += ' ' + a.house_number + ', ';
-            if (a.neighbourhood) dir += a.neighbourhood +', ';
-            if (a.suburb) dir +=a.suburb + ', ';
-            if (a.city || a.town) dir += (a.city || a.town);
+            let dir = a.road ?? '';
+            if (a.house_number)  dir += (dir ? ' ' : '') + a.house_number;
+            if (a.neighbourhood) dir += (dir ? ', ' : '') + a.neighbourhood;
+            if (a.suburb)        dir += (dir ? ', ' : '') + a.suburb;
+            if (a.city || a.town) dir += (dir ? ', ' : '') + (a.city || a.town);
 
             ubicacionInput.value = dir || data.display_name || `${lat}, ${lng}`;
 
@@ -347,6 +369,7 @@
               '';
           } else {
             ubicacionInput.value = `${lat}, ${lng}`;
+            provinciaInput.value = '';
           }
         })
         .catch(() => {
@@ -355,18 +378,75 @@
         });
     }
 
+    // 🔎 BUSCAR POR DIRECCIÓN EN NOMINATIM
+    function buscarUbicacion() {
+      if (!searchInput) return;
+
+      const query = searchInput.value.trim();
+      if (!query) return;
+
+      // Opcional: limitamos a Bolivia con countrycodes=bo
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1&countrycodes=bo`;
+
+      searchBtn && (searchBtn.disabled = true);
+      searchBtn && (searchBtn.innerText = 'Buscando...');
+
+      fetch(url)
+        .then(r => r.json())
+        .then(results => {
+          if (!results || !results.length) {
+            return;
+          }
+
+          const r0 = results[0];
+          const lat = parseFloat(r0.lat);
+          const lng = parseFloat(r0.lon);
+
+          map.setView([lat, lng], 17);
+          setMarkerAndReverseGeocode(lat, lng);
+        })
+        .catch(err => {
+          console.error('Error al buscar ubicación:', err);
+          alert('Hubo un problema al buscar la ubicación. Intente nuevamente.');
+        })
+        .finally(() => {
+          if (searchBtn) {
+            searchBtn.disabled = false;
+            searchBtn.innerText = 'Buscar';
+          }
+        });
+    }
+
+    // Click en el mapa
     map.on('click', function(e) {
       setMarkerAndReverseGeocode(e.latlng.lat, e.latlng.lng);
     });
 
+    // Eventos del buscador
+    if (searchBtn && searchInput) {
+      searchBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        buscarUbicacion();
+      });
+
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          buscarUbicacion();
+        }
+      });
+    }
+
+    // Si ya había lat/lng, centramos ahí
     if (latInput.value && lngInput.value) {
       const lat = parseFloat(latInput.value);
       const lng = parseFloat(lngInput.value);
       map.setView([lat, lng], 13);
       setMarkerAndReverseGeocode(lat, lng);
-      return; 
+      return;
     }
 
+    // Si no, intentamos geolocalización
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         function(pos) {
@@ -391,6 +471,7 @@
   }
 })();
 </script>
+
 
 @section('js')
 <script>
