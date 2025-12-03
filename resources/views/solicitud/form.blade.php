@@ -378,14 +378,12 @@
         });
     }
 
-    // 🔎 BUSCAR POR DIRECCIÓN EN NOMINATIM
     function buscarUbicacion() {
       if (!searchInput) return;
 
       const query = searchInput.value.trim();
       if (!query) return;
 
-      // Opcional: limitamos a Bolivia con countrycodes=bo
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1&countrycodes=bo`;
 
       searchBtn && (searchBtn.disabled = true);
@@ -417,12 +415,10 @@
         });
     }
 
-    // Click en el mapa
     map.on('click', function(e) {
       setMarkerAndReverseGeocode(e.latlng.lat, e.latlng.lng);
     });
 
-    // Eventos del buscador
     if (searchBtn && searchInput) {
       searchBtn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -437,7 +433,6 @@
       });
     }
 
-    // Si ya había lat/lng, centramos ahí
     if (latInput.value && lngInput.value) {
       const lat = parseFloat(latInput.value);
       const lng = parseFloat(lngInput.value);
@@ -446,7 +441,6 @@
       return;
     }
 
-    // Si no, intentamos geolocalización
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         function(pos) {
