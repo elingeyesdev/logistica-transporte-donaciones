@@ -8,12 +8,12 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-12">
-                <div class="card">
-                    <div class="card-header">
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border: none;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
-                            <span id="card_title">
-                                {{ __('Tipo Licencia') }}
+                            <span id="card_title" style="color: #fff; font-weight: 600; font-size: 1.1rem;">
+                                <i class="fas fa-id-card-alt mr-2"></i>{{ __('Tipo Licencia') }}
                             </span>
 
                              <div class="float-right">
@@ -30,9 +30,34 @@
                     @endif
 
                     <div class="card-body bg-white">
+                        <style>
+                            .table thead th {
+                                background-color: #f8f9fa;
+                                color: #495057;
+                                font-weight: 600;
+                                border-bottom: 2px solid #17a2b8;
+                                padding: 12px;
+                                font-size: 0.9rem;
+                            }
+
+                            .table tbody tr {
+                                transition: all 0.2s ease;
+                            }
+
+                            .table tbody tr:hover {
+                                background-color: #f1f9fa;
+                                transform: scale(1.01);
+                                box-shadow: 0 2px 4px rgba(23, 162, 184, 0.1);
+                            }
+
+                            .table tbody td {
+                                vertical-align: middle;
+                                padding: 12px;
+                            }
+                        </style>
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="thead">
+                            <table class="table table-hover">
+                                <thead>
                                     <tr>                                        
 									<th>Id Licencia</th>
 									<th>Licencia</th>

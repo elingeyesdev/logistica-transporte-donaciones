@@ -7,13 +7,47 @@
 @endsection
 
 @section('content')
-<div class="card">
-  <div class="card-header">
-    <h3 class="card-title">Listado de Voluntarios</h3>
+<div class="card shadow-sm">
+  <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span style="color: #fff; font-weight: 600; font-size: 1.1rem;">
+        <i class="fas fa-hands-helping mr-2"></i>{{ __('Voluntarios Registrados') }}
+      </span>
+    </div>
   </div>
-  <div class="card-body table-responsive">
-    <table class="table table-bordered table-striped">
-      <thead class="table-light">
+  <div class="card-body bg-white">
+    <style>
+      .table thead th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #17a2b8;
+        padding: 12px;
+        font-size: 0.9rem;
+      }
+
+      .table tbody tr {
+        transition: all 0.2s ease;
+      }
+
+      .table tbody tr:hover {
+        background-color: #f1f9fa;
+        transform: scale(1.01);
+        box-shadow: 0 2px 4px rgba(23, 162, 184, 0.1);
+      }
+
+      .table tbody td {
+        vertical-align: middle;
+        padding: 12px;
+      }
+
+      .role-select {
+        border-radius: 0.35rem;
+      }
+    </style>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
         <tr>
           <th>ID</th>
           <th>Nombre</th>
@@ -64,6 +98,7 @@
         @endforeach
       </tbody>
     </table>
+  </div>
   </div>
 </div>
 @endsection

@@ -9,11 +9,11 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
-                            <span id="card_title">
-                                {{ __('Ubicacion') }}
+                            <span id="card_title" style="font-size: 1.4rem; font-weight: 600;">
+                                <i class="fas fa-map-marker-alt mr-2"></i>{{ __('Ubicaciones') }}
                             </span>
 
                         </div>
@@ -61,7 +61,7 @@
                                                                 <button type="submit"
                                                                         class="btn btn-danger btn-sm"
                                                                         onclick="event.preventDefault(); confirm('¿Seguro que quieres eliminiar este registro?') ? this.closest('form').submit() : false;">
-                                                                    <i class="fa fa-fw fa-trash"></i>
+                                                                    <i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}
                                                                 </button>
                                                             </form>
                                                         @endif
@@ -78,3 +78,32 @@
         </div>
     </div>
 @endsection
+
+<style>
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    
+    .table thead {
+        border-bottom: 2px solid #17a2b8;
+    }
+    
+    .table thead th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        color: #495057;
+    }
+    
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f1f9fa !important;
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(23, 162, 184, 0.15);
+    }
+</style>

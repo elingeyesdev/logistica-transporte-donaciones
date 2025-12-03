@@ -8,12 +8,12 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-12">
-                <div class="card">
-                    <div class="card-header">
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border:none;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
-                            <span id="card_title">
-                                {{ __('Solicitantes') }}
+                            <span id="card_title" style="color: #fff; font-weight: 600; font-size: 1.1rem;">
+                                <i class="fas fa-users mr-2"></i>{{ __('Solicitantes') }}
                             </span>
 
                              
@@ -26,17 +26,39 @@
                     @endif
 
                     <div class="card-body bg-white">
+                        <style>
+                            .table thead th {
+                                background-color: #f8f9fa;
+                                color: #495057;
+                                font-weight: 600;
+                                border-bottom: 2px solid #17a2b8;
+                                padding: 12px;
+                                font-size: 0.9rem;
+                            }
+                            .table tbody tr {
+                                transition: all 0.2s;
+                            }
+                            .table tbody tr:hover {
+                                background-color: #f1f9fa;
+                                transform: scale(1.01);
+                                box-shadow: 0 2px 4px rgba(23,162,184,0.1);
+                            }
+                            .table tbody td {
+                                vertical-align: middle;
+                                padding: 12px;
+                            }
+                        </style>
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="thead">
+                            <table class="table table-hover">
+                                <thead>
                                     <tr>                                        
-									<th >Nombre</th>
-									<th >Apellido</th>
-									<th >Ci</th>
-									<th >Email</th>
-									<th >Telefono</th>
+									<th>Nombre</th>
+									<th>Apellido</th>
+									<th>CI</th>
+									<th>Email</th>
+									<th>Teléfono</th>
 
-                                        <th></th>
+                                        <th class="text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -49,7 +71,7 @@
 										<td >{{ $solicitante->email }}</td>
 										<td >{{ $solicitante->telefono }}</td>
 
-                                            <td>
+                                            <td class="text-right">
                                                     <a class="btn btn-sm btn-primary " href="{{ route('solicitante.show', $solicitante->id_solicitante) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
                                               {{--  <a class="btn btn-sm btn-success" href="{{ route('solicitante.edit', $solicitante->id_solicitante) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>--}}
                                                    @auth
