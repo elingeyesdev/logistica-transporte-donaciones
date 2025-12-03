@@ -36,9 +36,9 @@
                                     <tr>
                                         <th>No</th>
                                         
-									<th >Id Estado</th>
-									<th >Nombre Estado</th>
-                                        <th></th>
+									<th>Id Estado</th>
+									<th>Nombre Estado</th>
+                                        <th class="text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -46,12 +46,12 @@
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
-										<td >{{ $estado->id_estado }}</td>
-										<td >{{ $estado->nombre_estado }}</td>
+										<td>{{ $estado->id_estado }}</td>
+										<td>{{ $estado->nombre_estado }}</td>
 						
 
-                                            <td>
-                                                <form action="{{ route('estado.destroy', $estado->id_estado) }}" method="POST">
+                                            <td class="text-right">
+                                                <form action="{{ route('estado.destroy', $estado->id_estado) }}" method="POST" class="d-inline">
                                                     <a class="btn btn-sm btn-primary " href="{{ route('estado.show', $estado->id_estado) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
                                                     <a class="btn btn-sm btn-success" href="{{ route('estado.edit', $estado->id_estado) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf

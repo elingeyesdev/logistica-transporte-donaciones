@@ -34,20 +34,19 @@
                             <table class="table table-striped table-hover">
                                 <thead class="thead">
                                     <tr>                                        
-									<th >Id Marca</th>
-									<th >Nombre</th>
-
-                                        <th></th>
+									<th>Id Marca</th>
+									<th>Nombre</th>
+                                        <th class="text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($marcas as $marca)
                                         <tr>                                            
-										<td >{{ $marca->id_marca }}</td>
-										<td >{{ $marca->nombre_marca }}</td>
+									<td>{{ $marca->id_marca }}</td>
+									<td>{{ $marca->nombre_marca }}</td>
 
-                                            <td>
-                                                <form action="{{ route('marca.destroy', $marca->id_marca) }}" method="POST">
+                                            <td class="text-right">
+                                                <form action="{{ route('marca.destroy', $marca->id_marca) }}" method="POST" class="d-inline">
                                                     <a class="btn btn-sm btn-primary " href="{{ route('marca.show', $marca->id_marca) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
                                                     <a class="btn btn-sm btn-success" href="{{ route('marca.edit', $marca->id_marca) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Actualizar') }}</a>
                                                     @csrf

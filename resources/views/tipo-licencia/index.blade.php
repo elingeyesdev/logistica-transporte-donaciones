@@ -34,21 +34,20 @@
                             <table class="table table-striped table-hover">
                                 <thead class="thead">
                                     <tr>                                        
-									<th >Id Licencia</th>
-									<th >Licencia</th>
-
-                                        <th></th>
+									<th>Id Licencia</th>
+									<th>Licencia</th>
+                                        <th class="text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($tipoLicencia as $tipoLicencia)
                                         <tr>
                                             
-										<td >{{ $tipoLicencia->id_licencia }}</td>
-										<td >{{ $tipoLicencia->licencia }}</td>
+										<td>{{ $tipoLicencia->id_licencia }}</td>
+										<td>{{ $tipoLicencia->licencia }}</td>
 
-                                            <td>
-                                                <form action="{{ route('tipo-licencia.destroy', $tipoLicencia->id_licencia) }}" method="POST">
+                                            <td class="text-right">
+                                                <form action="{{ route('tipo-licencia.destroy', $tipoLicencia->id_licencia) }}" method="POST" class="d-inline">
                                                     <a class="btn btn-sm btn-primary " href="{{ route('tipo-licencia.show', $tipoLicencia->id_licencia) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
                                                     <a class="btn btn-sm btn-success" href="{{ route('tipo-licencia.edit', $tipoLicencia->id_licencia) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf

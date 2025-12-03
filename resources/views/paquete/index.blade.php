@@ -21,9 +21,25 @@
         <div class="card-body bg-white">
           <style>
             .paquete-uniform-row .col-md-3 {display:flex;}
-            .paquete-uniform-row .card {display:flex; flex-direction:column; width:100%;}
+            .paquete-uniform-row .card {
+              display:flex; 
+              flex-direction:column; 
+              width:100%;
+              border-radius: 12px;
+              transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .paquete-uniform-row .card:hover {
+              transform: translateY(-4px);
+              box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            }
+            .paquete-uniform-row .card-header {
+              border-radius: 12px 12px 0 0;
+            }
+            .paquete-uniform-row .card-footer {
+              margin-top:auto;
+              border-radius: 0 0 12px 12px;
+            }
             .paquete-uniform-row .card-body {flex:1; display:flex; flex-direction:column; min-height:320px;}
-            .paquete-uniform-row .card-footer {margin-top:auto;}
           </style>
           <div class="row paquete-uniform-row">
 

@@ -71,9 +71,25 @@
         <div class="card-body bg-white">
           <style>
             .solicitud-uniform-row .col-md-3 {display:flex;}
-            .solicitud-uniform-row .card {display:flex; flex-direction:column; width:100%;}
+            .solicitud-uniform-row .card {
+              display:flex; 
+              flex-direction:column; 
+              width:100%;
+              border-radius: 12px;
+              transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .solicitud-uniform-row .card:hover {
+              transform: translateY(-4px);
+              box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            }
+            .solicitud-uniform-row .card-header {
+              border-radius: 12px 12px 0 0;
+            }
+            .solicitud-uniform-row .card-footer {
+              margin-top:auto;
+              border-radius: 0 0 12px 12px;
+            }
             .solicitud-uniform-row .card-body {flex:1; min-height:340px; display:flex; flex-direction:column;}
-            .solicitud-uniform-row .card-footer {margin-top:auto;}
             .solicitud-uniform-row .card-body .mt-auto p {margin-bottom:4px;}
           </style>
           <div class="row solicitud-uniform-row">

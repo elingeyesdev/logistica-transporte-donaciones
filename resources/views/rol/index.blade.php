@@ -35,20 +35,19 @@
                                 <thead class="thead">
                                     <tr>
                                        
-									<th >Id Rol</th>
-									<th >Titulo Rol</th>
-
-                                        <th></th>
+									<th>Id Rol</th>
+									<th>Titulo Rol</th>
+                                        <th class="text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($rol as $rol)
                                         <tr>                                            
-										<td >{{ $rol->id_rol }}</td>
-										<td >{{ $rol->titulo_rol }}</td>
+									<td>{{ $rol->id_rol }}</td>
+									<td>{{ $rol->titulo_rol }}</td>
 
-                                            <td>
-                                                <form action="{{ route('rol.destroy', $rol->id_rol) }}" method="POST">
+                                            <td class="text-right">
+                                                <form action="{{ route('rol.destroy', $rol->id_rol) }}" method="POST" class="d-inline">
                                                     <a class="btn btn-sm btn-primary " href="{{ route('rol.show', $rol->id_rol) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
                                                     <a class="btn btn-sm btn-success" href="{{ route('rol.edit', $rol->id_rol) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Actualizar') }}</a>
                                                     @csrf

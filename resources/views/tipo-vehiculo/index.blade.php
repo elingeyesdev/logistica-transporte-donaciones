@@ -35,20 +35,19 @@
                                 <thead class="thead">
                                     <tr>
                                     
-									<th >Id Tipovehiculo</th>
-									<th >Nombre Tipo Vehiculo</th>
-
-                                        <th></th>
+									<th>Id Tipovehiculo</th>
+									<th>Nombre Tipo Vehiculo</th>
+                                        <th class="text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($tipoVehiculos as $tipoVehiculo)
                                         <tr>                                            
-										<td >{{ $tipoVehiculo->id_tipovehiculo }}</td>
-										<td >{{ $tipoVehiculo->nombre_tipo_vehiculo }}</td>
+										<td>{{ $tipoVehiculo->id_tipovehiculo }}</td>
+										<td>{{ $tipoVehiculo->nombre_tipo_vehiculo }}</td>
 
-                                            <td>
-                                                <form action="{{ route('tipo-vehiculo.destroy', $tipoVehiculo->id_tipovehiculo) }}" method="POST">
+                                            <td class="text-right">
+                                                <form action="{{ route('tipo-vehiculo.destroy', $tipoVehiculo->id_tipovehiculo) }}" method="POST" class="d-inline">
                                                     <a class="btn btn-sm btn-primary " href="{{ route('tipo-vehiculo.show', $tipoVehiculo->id_tipovehiculo) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
                                                     <a class="btn btn-sm btn-success" href="{{ route('tipo-vehiculo.edit', $tipoVehiculo->id_tipovehiculo) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf

@@ -34,23 +34,22 @@
                             <table class="table table-striped table-hover">
                                 <thead class="thead">
                                     <tr>                                    
-									<th >Id Emergencia</th>
-									<th >Emergencia</th>
-									<th >Prioridad</th>
-
-                                        <th></th>
+									<th>Id Emergencia</th>
+									<th>Emergencia</th>
+									<th>Prioridad</th>
+                                        <th class="text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($tipoEmergencia as $tipoEmergencia)
                                         <tr>                                            
-										<td >{{ $tipoEmergencia->id_emergencia }}</td>
-										<td >{{ $tipoEmergencia->emergencia }}</td>
-										<td >{{ $tipoEmergencia->prioridad }}</td>
+										<td>{{ $tipoEmergencia->id_emergencia }}</td>
+										<td>{{ $tipoEmergencia->emergencia }}</td>
+										<td>{{ $tipoEmergencia->prioridad }}</td>
 
-                                            <td>
-                                                <form action="{{ route('tipo-emergencia.destroy', $tipoEmergencia->id_emergencia) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('tipo-emergencia.show', $tipoEmergencia->id_emergencia) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
+                                            <td class="text-right">
+                                                <form action="{{ route('tipo-emergencia.destroy', $tipoEmergencia->id_emergencia) }}" method="POST" class="d-inline">
+                                                    <a class="btn btn-sm btn-primary" href="{{ route('tipo-emergencia.show', $tipoEmergencia->id_emergencia) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
                                                     <a class="btn btn-sm btn-success" href="{{ route('tipo-emergencia.edit', $tipoEmergencia->id_emergencia) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf
                                                     @method('DELETE')
