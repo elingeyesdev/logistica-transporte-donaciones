@@ -226,7 +226,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge bg-info" style="font-size: medium;">
+                                    <span class="badge bg-success" style="font-size: medium;">
                                         {{ $estadoNombre }}
                                     </span>
                                 </td>
@@ -270,7 +270,7 @@
                                         </div>
                                         <div class="row">
                                         <div class="col-md-4 mb-2">
-                                                <h6 class="mb-1" style="font-weight: 700;">Evidencia Reciente</h6>
+                                                <h6 class="mb-1" style="font-weight: 700;">Evidencia de Entrega</h6>
                                                  @php
                                                     $imageUrl = $paquete->imagen
                                                         ? route('paquete.imagen', $paquete->id_paquete)

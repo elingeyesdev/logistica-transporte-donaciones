@@ -193,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok || data.success === false) {
-        alert(data.message || 'Error al guardar el rol / conductor.');
         console.error('Error cambiar-rol:', data);
         return;
       }
@@ -229,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const lic   = document.getElementById('conductor_id_licencia').value;
 
     if (!fecha || !lic) {
-      alert('Debe completar la fecha de nacimiento y el tipo de licencia.');
       return;
     }
 

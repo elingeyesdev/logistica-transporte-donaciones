@@ -39,6 +39,9 @@ class SolicitudRequest extends FormRequest
         // SOLICITUD 
         'cantidad_personas'  => ['required','integer','min:0'],
         'fecha_inicio'       => ['required','date'],
+        'fecha_necesidad' => ['nullable', 'date'],
+        'nombre_referencia'=>['nullable','string'],
+        'celular_referencia'=>['nullable', 'integer', 'min:0'],
         'insumos_necesarios' => ['required','string'],
         'codigo_seguimiento' => ['required','string','max:255'],
         'estado'             => ['nullable','string','max:255'],

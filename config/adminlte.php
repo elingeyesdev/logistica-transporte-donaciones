@@ -308,7 +308,7 @@ return [
 
         // Sidebar items:
         [
-            'text' => 'Dashboard',
+            'text' => 'Estadísticas',
             'route' => 'dashboard',
             'icon' => 'fas fa-tachometer-alt',
             'can'   => 'admin',

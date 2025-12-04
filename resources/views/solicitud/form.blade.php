@@ -9,7 +9,6 @@
     $defaultLat = $latValue ?: -17.8146;
     $defaultLng = $lngValue ?: -63.1561;
     $defaultZoom = $latValue ? 13 : 6;
-
     $tipoEmergencia = $tipoEmergencia ?? collect();
 @endphp
 
@@ -73,10 +72,41 @@
             @error('nro_celular') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
     </div>
-
-    {{-- DESTINO (ubicación) --}}
-    <div class="col-md-6">
-        <div class="form-group mb-3">
+    <div class="rounded-3 col-md-12 gap-1" style="background-color: aliceblue; border-radius: 7px;">
+        <p style="font-size: large; font-weight: 600;">Contacto de Referencia (Opcional)</p>
+        <div class="d-flex">
+            <div class="col-md-6">
+                <div class="form-group ">
+                    <label for="nombre_referencia">Nombre Completo</label>
+                    <input type="text" name="nombre_referencia" id="nombre_referencia"
+                        class="form-control @error('nombre_referencia') is-invalid @enderror"
+                        value="{{ old('nombre_referencia', $solicitud->nombre_referencia) }}"
+                        placeholder="Nombre y Apellidos"
+                        title="Ingresa el nombre completo">
+                    @error('nombre_referencia') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <small>Asegurate de que esta persona pueda recibir el paquete en el destino.</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="celular_referencia">Número de Celular</label>
+                    <input type="text" name="celular_referencia" id="celular_referencia"
+                        class="form-control @error('celular_referencia') is-invalid @enderror"
+                        value="{{ old('celular_referencia', $solicitud->celular_referencia) }}"
+                        placeholder="Ej. 70000000"
+                        pattern="[0-9]+"
+                        title="Solo se permiten números"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    @error('nombre_referencia') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+            </div>
+        </div>
+            
+    </div>
+    
+    <div class="col-md-12 mt-2 mb-2 pt-2 pb-2" style="background-color:azure; border-radius: 7px;">
+        <p style="font-size: large; font-weight: 600;">Ubicación para la Entrega</p>
+        <div class="form-group mb-3 col-md-6">
             <label for="comunidad_solicitante">Comunidad Solicitante</label>
             <input required type="text" name="comunidad_solicitante" id="comunidad_solicitante"
                    class="form-control @error('comunidad_solicitante') is-invalid @enderror"
@@ -84,88 +114,94 @@
                    placeholder="Nombre de la comunidad o institución">
             @error('comunidad_solicitante') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
-    </div>
+    
+        <div class="">
+            <div class="form-group mb-3">
+                <label for="mapa-ubicacion">Seleccione la Ubicación en el Mapa - <small> Aqui se entregaran los insumos</small></label>
+                <div class="position-relative">
+                    <div class="input-group mb-2 col-md-6 p-0">
+                        <input type="text"
+                            id="search-ubicacion"
+                            class="form-control bg-light"
+                            placeholder="Buscar comunidad, barrio o dirección (ej. Univalle, 4to anillo)...">
+                        <div class="input-group-append">
+                            <button type="button"
+                                    class="btn btn-info"
+                                    id="btnBuscarUbicacion">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                    <div id="search-suggestions"
+                        class="list-group position-absolute"
+                        style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 100%; display:none;">
+                    </div>
+                </div>
 
-    <div class="col-md-12">
-        <div class="form-group mb-3">
-            <label for="mapa-ubicacion">Seleccione la Ubicación en el Mapa</label>
+                <div id="mapa-ubicacion"
+                    data-lat="{{ $defaultLat }}"
+                    data-lng="{{ $defaultLng }}"
+                    data-zoom="{{ $defaultZoom }}"
+                    style="height: 400px; width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
 
-            <div class="input-group mb-2 col-md-6">
-                <input type="text"
-                    id="search-ubicacion"
-                    class="form-control bg-light"
-                    placeholder="Buscar comunidad, barrio o dirección (ej. Univalle, 4to anillo)...">
-                <div class="input-group-append">
-                    <button type="button"
-                            class="btn btn-info"
-                            id="btnBuscarUbicacion">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
+                <small class="form-text text-muted">
+                    Puede buscar una dirección o hacer clic en el mapa para seleccionar la ubicación.
+                    La dirección se rellenará automáticamente.
+                </small>
+
+                @error('ubicacion') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                @error('latitud') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                @error('longitud') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+            </div>
+        </div>
+        <div class="col-md-2" hidden>
+            <div class="form-group mb-3">
+                <label for="latitud">Latitud</label>
+                <input required type="number" step="any" name="latitud" id="latitud" readonly
+                    class="form-control @error('latitud') is-invalid @enderror"
+                    value="{{ old('latitud', $dest->latitud) }}" placeholder="-17.78">
+                @error('latitud') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+        </div>
+        
+        <div class="col-md-2" hidden>
+            <div class="form-group mb-3">
+                <label for="longitud">Longitud</label>
+                <input required type="number" step="any" name="longitud" id="longitud" readonly
+                    class="form-control @error('longitud') is-invalid @enderror"
+                    value="{{ old('longitud', $dest->longitud) }}" placeholder="-63.18">
+                @error('longitud') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+        </div>
+        <div class="col-md-12 d-flex">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="provincia">Provincia</label>
+                    <input required type="text" name="provincia" id="provincia"
+                        class="form-control @error('provincia') is-invalid @enderror"
+                        value="{{ old('provincia', $dest->provincia) }}"
+                        placeholder="Ej. Limoncito" readonly>
+                    @error('provincia') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
             </div>
-            <div id="mapa-ubicacion"
-                data-lat="{{ $defaultLat }}"
-                data-lng="{{ $defaultLng }}"
-                data-zoom="{{ $defaultZoom }}"
-                style="height: 400px; width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="ubicacion">Ubicación (dirección/zona)</label>
+                    <input required type="text" name="ubicacion" id="ubicacion" readonly
+                        class="form-control @error('ubicacion') is-invalid @enderror"
+                        value="{{ old('ubicacion', $dest->direccion) }}"
+                        placeholder="Se seleccionará automáticamente del mapa">
+                    @error('ubicacion') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
             </div>
-
-            <small class="form-text text-muted">
-                Puede buscar una dirección o hacer clic en el mapa para seleccionar la ubicación.
-                La provincia, latitud y longitud se llenarán automáticamente.
-            </small>
-
-            @error('ubicacion') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-            @error('latitud') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-            @error('longitud') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
         </div>
-    </div>
-        <div class="col-md-2" hidden>
-        <div class="form-group mb-3">
-            <label for="latitud">Latitud</label>
-            <input required type="number" step="any" name="latitud" id="latitud" readonly
-                   class="form-control @error('latitud') is-invalid @enderror"
-                   value="{{ old('latitud', $dest->latitud) }}" placeholder="-17.78">
-            @error('latitud') <div class="invalid-feedback">{{ $message }}</div> @enderror
-        </div>
+        
     </div>
 
-    <div class="col-md-2" hidden>
+    <div class="col-md-3">
         <div class="form-group mb-3">
-            <label for="longitud">Longitud</label>
-            <input required type="number" step="any" name="longitud" id="longitud" readonly
-                   class="form-control @error('longitud') is-invalid @enderror"
-                   value="{{ old('longitud', $dest->longitud) }}" placeholder="-63.18">
-            @error('longitud') <div class="invalid-feedback">{{ $message }}</div> @enderror
-        </div>
-    </div>
-        <div class="col-md-8">
-
-    </div>
-    <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label for="provincia">Comunidad/Provincia</label>
-            <input required type="text" name="provincia" id="provincia"
-                   class="form-control @error('provincia') is-invalid @enderror"
-                   value="{{ old('provincia', $dest->provincia) }}"
-                   placeholder="Ej. Limoncito">
-            @error('provincia') <div class="invalid-feedback">{{ $message }}</div> @enderror
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label for="ubicacion">Ubicación (dirección/zona)</label>
-            <input required type="text" name="ubicacion" id="ubicacion" readonly
-                   class="form-control @error('ubicacion') is-invalid @enderror"
-                   value="{{ old('ubicacion', $dest->direccion) }}"
-                   placeholder="Se seleccionará automáticamente del mapa">
-            @error('ubicacion') <div class="invalid-feedback">{{ $message }}</div> @enderror
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="form-group mb-3">
-            <label for="cantidad_personas">Cantidad de Personas</label>
+            <label for="cantidad_personas">Cantidad de Personas Afectadas</label>
             <input required type="number" min="1" name="cantidad_personas" id="cantidad_personas"
                    class="form-control @error('cantidad_personas') is-invalid @enderror"
                    value="{{ old('cantidad_personas', $solicitud->cantidad_personas) }}">
@@ -173,18 +209,46 @@
         </div>
     </div>
 
+    @php
+        $fechaInicioValue = old('fecha_inicio');
+        if (!$fechaInicioValue) {
+            if ($solicitud->fecha_inicio) {
+                $fechaInicioValue = $solicitud->fecha_inicio->format('Y-m-d');
+            } else {
+                $fechaInicioValue = now()->format('Y-m-d');
+            }
+        }
+        $fechaNecesidadValue = old('fecha_necesidad');
+        if (!$fechaNecesidadValue) {
+            if ($solicitud->fecha_necesidad) {
+                $fechaNecesidadValue = $solicitud->fecha_necesidad->format('Y-m-d');
+            } else {
+                $fechaNecesidadValue = now()->addDays(3)->format('Y-m-d');
+            }
+        }
+    @endphp
 
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="form-group mb-3">
             <label for="fecha_inicio">Fecha de Inicio</label>
             <input required type="date" name="fecha_inicio" id="fecha_inicio"
                    class="form-control @error('fecha_inicio') is-invalid @enderror"
-                   value="{{ old('fecha_inicio', optional($solicitud->fecha_inicio)->format('Y-m-d') ?? $solicitud->fecha_inicio) }}">
+                   value="{{ $fechaInicioValue }}">
             @error('fecha_inicio') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            <label for="fecha_necesidad">Fecha de Necesidad</label>
+            <input required type="date" name="fecha_necesidad" id="fecha_necesidad"
+                class="form-control @error('fecha_necesidad') is-invalid @enderror"
+                 value="{{ $fechaNecesidadValue }}">
+            <small>Indica la fecha limite para recibir los insumos.</small>
+            @error('fecha_necesidad') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+    </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="form-group mb-3">
             <label for="id_tipoemergencia">Tipo de Emergencia</label><br>
             <select required name="id_tipoemergencia" id="id_tipoemergencia"
@@ -287,7 +351,7 @@
         @endauth
     </div>
    <div class="align-items-right">
-    <button type="submit" class="btn btn-info">
+    <button type="submit" class="btn btn-info" id="btn-submit-solicitud">
         <i class="fas fa-save"></i> Enviar Solicitud
     </button>
    </div>
@@ -305,8 +369,8 @@
     const mapContainer = document.getElementById('mapa-ubicacion');
     if (!mapContainer) return;
 
-    let defaultLat = parseFloat(mapContainer.dataset.lat || "-17.81463325");
-    let defaultLng = parseFloat(mapContainer.dataset.lng || "-63.15615466");
+    let defaultLat  = parseFloat(mapContainer.dataset.lat || "-17.81463325");
+    let defaultLng  = parseFloat(mapContainer.dataset.lng || "-63.15615466");
     let defaultZoom = parseInt(mapContainer.dataset.zoom || "6", 10);
 
     const latInput       = document.getElementById('latitud');
@@ -314,8 +378,9 @@
     const ubicacionInput = document.getElementById('ubicacion');
     const provinciaInput = document.getElementById('provincia');
 
-    const searchInput = document.getElementById('search-ubicacion');
-    const searchBtn   = document.getElementById('btnBuscarUbicacion');
+    const searchInput        = document.getElementById('search-ubicacion');
+    const searchBtn          = document.getElementById('btnBuscarUbicacion');
+    const suggestionsContainer = document.getElementById('search-suggestions');
 
     const map = L.map('mapa-ubicacion').setView([defaultLat, defaultLng], defaultZoom);
 
@@ -326,7 +391,7 @@
 
     let marker = null;
 
-    function setMarkerAndReverseGeocode(lat, lng) {
+    function setMarker(lat, lng) {
       latInput.value = lat;
       lngInput.value = lng;
 
@@ -335,8 +400,126 @@
       } else {
         marker = L.marker([lat, lng]).addTo(map);
       }
+      map.setView([lat, lng], 17);
+    }
 
-      reverseGeocode(lat, lng);
+    function fillFromSearchResult(place) {
+        const lat = parseFloat(place.lat);
+        const lng = parseFloat(place.lon);
+
+        if (isNaN(lat) || isNaN(lng)) {
+            console.warn('Coordenadas inválidas en resultado de búsqueda:', place);
+            return;
+        }
+
+        setMarker(lat, lng);
+        reverseGeocode(lat, lng);
+        if (mapContainer && mapContainer.scrollIntoView) {
+            mapContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+
+    function clearSuggestions() {
+      if (!suggestionsContainer) return;
+      suggestionsContainer.innerHTML = '';
+      suggestionsContainer.style.display = 'none';
+    }
+
+    function renderSuggestions(results) {
+      if (!suggestionsContainer) return;
+
+      suggestionsContainer.innerHTML = '';
+
+      if (!results || !results.length) {
+        const emptyItem = document.createElement('div');
+        emptyItem.className = 'list-group-item text-muted';
+        emptyItem.textContent = 'No se encontraron lugares en Bolivia.';
+        suggestionsContainer.appendChild(emptyItem);
+        suggestionsContainer.style.display = 'block';
+        return;
+      }
+
+      results.forEach(place => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'list-group-item list-group-item-action';
+
+        const a = place.address || {};
+        const mainName =
+          a.university ||
+          a.school ||
+          a.hospital ||
+          a.public_building ||
+          a.amenity ||
+          a.road ||
+          a.neighbourhood ||
+          a.suburb ||
+          a.village ||
+          a.town ||
+          a.city ||
+          place.display_name;
+
+        const locParts = [];
+        if (a.suburb)        locParts.push(a.suburb);
+        if (a.neighbourhood) locParts.push(a.neighbourhood);
+        if (a.city || a.town) locParts.push(a.city || a.town);
+        if (a.state)         locParts.push(a.state);
+
+        item.innerHTML = `
+          <strong>${mainName}</strong><br>
+          <small>${locParts.join(' · ')}</small>
+        `;
+
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          fillFromSearchResult(place);
+          clearSuggestions();
+        });
+
+        suggestionsContainer.appendChild(item);
+      });
+
+      suggestionsContainer.style.display = 'block';
+    }
+
+    function buscarUbicacion() {
+      if (!searchInput) return;
+
+      const query = searchInput.value.trim();
+      if (!query || query.length < 3) {
+        clearSuggestions();
+        return;
+      }
+
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=8&countrycodes=bo`;
+
+      if (searchBtn) {
+        searchBtn.disabled = true;
+        searchBtn.innerText = 'Buscando...';
+      }
+
+      fetch(url)
+        .then(r => r.json())
+        .then(results => {
+          renderSuggestions(results);
+        })
+        .catch(err => {
+          console.error('Error al buscar ubicación:', err);
+          clearSuggestions();
+        })
+        .finally(() => {
+          if (searchBtn) {
+            searchBtn.disabled = false;
+            searchBtn.innerHTML = '<i class="fas fa-search"></i> Buscar';
+          }
+        });
+    }
+
+    let searchTimeout = null;
+    function debouncedBuscarUbicacion() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(buscarUbicacion, 400);
     }
 
     function reverseGeocode(lat, lng) {
@@ -358,6 +541,10 @@
             ubicacionInput.value = dir || data.display_name || `${lat}, ${lng}`;
 
             provinciaInput.value =
+              a.village ??
+              a.town ??
+              a.city ??
+              a.municipality ??
               a.state ??
               a.region ??
               a.county ??
@@ -373,45 +560,10 @@
         });
     }
 
-    function buscarUbicacion() {
-      if (!searchInput) return;
-
-      const query = searchInput.value.trim();
-      if (!query) return;
-
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1&countrycodes=bo`;
-
-      searchBtn && (searchBtn.disabled = true);
-      searchBtn && (searchBtn.innerText = 'Buscando...');
-
-      fetch(url)
-        .then(r => r.json())
-        .then(results => {
-          if (!results || !results.length) {
-            return;
-          }
-
-          const r0 = results[0];
-          const lat = parseFloat(r0.lat);
-          const lng = parseFloat(r0.lon);
-
-          map.setView([lat, lng], 17);
-          setMarkerAndReverseGeocode(lat, lng);
-        })
-        .catch(err => {
-          console.error('Error al buscar ubicación:', err);
-          alert('Hubo un problema al buscar la ubicación. Intente nuevamente.');
-        })
-        .finally(() => {
-          if (searchBtn) {
-            searchBtn.disabled = false;
-            searchBtn.innerText = 'Buscar';
-          }
-        });
-    }
-
     map.on('click', function(e) {
-      setMarkerAndReverseGeocode(e.latlng.lat, e.latlng.lng);
+      clearSuggestions();
+      setMarker(e.latlng.lat, e.latlng.lng);
+      reverseGeocode(e.latlng.lat, e.latlng.lng);
     });
 
     if (searchBtn && searchInput) {
@@ -426,14 +578,24 @@
           buscarUbicacion();
         }
       });
+
+      searchInput.addEventListener('input', function() {
+        debouncedBuscarUbicacion();
+      });
+
+      searchInput.addEventListener('blur', function() {
+        setTimeout(clearSuggestions, 200);
+      });
     }
 
     if (latInput.value && lngInput.value) {
       const lat = parseFloat(latInput.value);
       const lng = parseFloat(lngInput.value);
-      map.setView([lat, lng], 13);
-      setMarkerAndReverseGeocode(lat, lng);
-      return;
+      if (!isNaN(lat) && !isNaN(lng)) {
+        setMarker(lat, lng);
+        reverseGeocode(lat, lng);
+        return;
+      }
     }
 
     if (navigator.geolocation) {
@@ -441,9 +603,8 @@
         function(pos) {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
-
-          map.setView([lat, lng], 18);
-          setMarkerAndReverseGeocode(lat, lng);
+          setMarker(lat, lng);
+          reverseGeocode(lat, lng);
         },
         function(err) {
           console.warn("Geolocalización rechazada o falló:", err);
@@ -459,6 +620,24 @@
     initMap();
   }
 })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const submitBtn = document.getElementById('btn-submit-solicitud');
+    if (!submitBtn) return;
+
+    const form = submitBtn.closest('form');
+    if (!form) return;
+
+    form.addEventListener('submit', function () {
+        if (submitBtn.disabled) {
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    });
+});
 </script>
 
 
@@ -615,6 +794,7 @@
             insumosInput.value = seleccionados.join(', ');
             $('#insumosModal').modal('hide');
         });
+        
     });
 </script>
 @endsection

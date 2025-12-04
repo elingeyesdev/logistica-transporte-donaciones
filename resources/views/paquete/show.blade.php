@@ -137,7 +137,7 @@
                                         <td>{{ $solicitante->ci ?? '—' }}</td>
                                     </tr>
                                     <tr>
-                                        <td>Solicitante Nombre</td>
+                                        <td>Nombre del Solicitante</td>
                                         <td>{{ trim(($solicitante->nombre ?? '').' '.($solicitante->apellido ?? '')) ?: '—' }}</td>
                                     </tr>
                                     <tr>

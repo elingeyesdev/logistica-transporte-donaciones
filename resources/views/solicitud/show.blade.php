@@ -74,6 +74,17 @@
       <strong>Celular:</strong>
       {{ $pers->telefono ?? '—' }}
     </div>
+    <hr>
+
+    <h5 class="mb-3"><i class="fas fa-user mr-2"></i>Contacto de Referencia Adicional</h5>
+    <div class="form-group mb-3">
+      <strong>Nombre Completo:</strong>
+      {{ trim(($solicitud->nombre_referencia) ?: '—') }}
+    </div>
+    <div class="form-group mb-3">
+      <strong>Celular:</strong>
+      {{ $solicitud->celular_referencia ?? '—' }}
+    </div>
 
     <hr>
 
@@ -89,14 +100,6 @@
     <div class="form-group mb-3">
       <strong>Ubicación:</strong>
       {{ $dest->direccion ?? '—' }}
-    </div>
-    <div class="form-group mb-3">
-      <strong>Coordenadas:</strong>
-      @if(!is_null($dest->latitud) && !is_null($dest->longitud))
-        {{ $dest->latitud }}, {{ $dest->longitud }}
-      @else
-        —
-      @endif
     </div>
 
     <hr>

@@ -20,7 +20,7 @@
           @php
             $soli = optional($s->solicitante);
             $dest = optional($s->destino);
-            $label = sprintf('#%d · %s %s · %s · %s',
+            $label = sprintf('Nº%d · %s %s · %s · %s',
               $s->id_solicitud,
               $soli->nombre ?? '—',
               $soli->apellido ?? '',
@@ -108,13 +108,10 @@
 
 
     <div class="form-group mb-2 mb20">
-        <label for="imagen" class="form-label">Imagen del paquete</label>
+        <label for="imagen" class="form-label">Imagen de Evidencia</label>
         <input type="file" name="imagen" id="imagen"
               accept="image/*"
               class="form-control @error('imagen') is-invalid @enderror">
-
-        {!! $errors->first('imagen', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
-
         <div class="mt-3" id="preview-container">
             @if($paquete->imagen)
                 <img id="preview-imagen" src="{{ asset('storage/' . $paquete->imagen) }}"
@@ -162,7 +159,7 @@
             <div class="form-group mb-2 mb20">
               <label for="mapa-ubicacion-paquete">Seleccione la Ubicación en el Mapa</label>
               <div id="mapa-ubicacion-paquete" style="height: 400px; width: 100%; border: 1px solid #ddd; border-radius: 4px;"></div>
-              <small class="form-text text-muted">Haga clic en el mapa para seleccionar la ubicación. La latitud y longitud se llenarán automáticamente.</small>
+              <p class="form-text text-muted">Su ubicación se detecta automáticamente, no es posible editar este punto por seguridad.</p>
               {!! $errors->first('latitud', '<div class="invalid-feedback d-block"><strong>:message</strong></div>') !!}
               {!! $errors->first('longitud', '<div class="invalid-feedback d-block"><strong>:message</strong></div>') !!}
             </div>
@@ -172,11 +169,11 @@
         <div class="row">
           <div class="col-md-4">
             <div class="form-group mb-2 mb20">
-              <label for="zona" class="form-label">Zona o Comunidad</label>
+              <label for="zona" class="form-label">Punto de Referencia</label>
               <input type="text" name="zona" id="zona"
                     class="form-control @error('zona') is-invalid @enderror"
                     value="{{ old('zona') }}"
-                    placeholder="Ej. Zona Sur, Centro, Norte...">
+                    placeholder="Ej. Garaje rojo, porton amarillo...">
               {!! $errors->first('zona', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
             </div>
           </div>
@@ -338,7 +335,6 @@
     }
 
     map.on("click", function() {
-      alert("No puedes modificar la ubicación manualmente. Se usa tu ubicación real por seguridad.");
     });
 
   }

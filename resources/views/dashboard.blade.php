@@ -1,10 +1,10 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
+@section('title', 'Estadisticas')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1>Dashboard <small>Control panel</small></h1>
+        <h1>Estadísticas <small>Panel de Control</small></h1>
         <div class="btn-group">
             <button class="btn btn-outline-primary" data-toggle="modal" data-target="#dashboardFiltersModal">
                 <i class="fas fa-filter"></i> Filtros
@@ -22,7 +22,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="dashboardFiltersLabel">Filtros del Dashboard</h5>
+                <h5 class="modal-title" id="dashboardFiltersLabel">Filtros de las Estadísticas</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -711,11 +711,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function exportCurrentReport(report, filenamePrefix) {
         if (!report || report.count <= 0 || !report.content) {
-            alert('No hay datos para generar el reporte.');
             return;
         }
         if (typeof html2pdf === 'undefined') {
-            alert('La librería de exportación no está disponible.');
             return;
         }
         let listMarkup = report.content;
@@ -782,7 +780,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error generando el PDF del dashboard.', error);
-                alert('No se pudo generar el PDF del reporte.');
+                alert('No se pudo generar el PDF del reporte.'); //NOTIFICACION ADMIN LTE
             })
             .finally(() => {
                 wrapper.remove();
@@ -1260,7 +1258,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error refreshing dashboard:', error);
-            alert('Error al actualizar el dashboard');
             icon.classList.remove('fa-spin');
             btn.disabled = false;
         });

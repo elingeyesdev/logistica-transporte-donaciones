@@ -100,7 +100,7 @@
       var dob = document.getElementById('conductor_modal_fecha_nacimiento').value;
       var lic = document.getElementById('conductor_modal_id_licencia').value;
 
-      if (!dob || !lic) { alert('Completa fecha y licencia'); return; }
+      if (!dob || !lic) { return; }
 
       document.getElementById('conductor_fecha_nacimiento').value = dob;
       document.getElementById('conductor_id_licencia').value = lic;

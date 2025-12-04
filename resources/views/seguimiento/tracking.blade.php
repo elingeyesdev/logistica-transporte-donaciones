@@ -32,7 +32,7 @@
 
                 <strong>Código:</strong> {{ $paquete->solicitud->codigo_seguimiento }}<br>
                 <strong>Estado:</strong> {{ optional($paquete->estado)->nombre_estado }}<br>
-                <strong>Fecha creación:</strong> {{ $paquete->fecha_creacion }}<br>
+                <strong>Fecha creación:</strong> {{ \Carbon\Carbon::parse($paquete->fecha_creacion)->format('d/m/Y') }}<br>
             </div>
 
             <div class="col-md-4">

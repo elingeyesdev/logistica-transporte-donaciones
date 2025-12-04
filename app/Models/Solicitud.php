@@ -17,6 +17,9 @@ class Solicitud extends Model
         'id_destino',
         'cantidad_personas',
         'fecha_inicio',
+        'fecha_necesidad',
+        'nombre_referencia',
+        'celular_referencia',
         'tipo_emergencia',
         'id_tipoemergencia',
         'insumos_necesarios',
@@ -31,6 +34,7 @@ class Solicitud extends Model
 
     protected $casts = [
         'fecha_inicio' => 'date',
+        'fecha_necesidad' => 'date',
     ];
     public function solicitante()
     {
