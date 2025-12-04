@@ -151,7 +151,14 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                        <div class="col-md-4 mb-2">
+                                            @php
+                                                $solicitantePersona = optional($sol?->solicitante);
+                                                $nombreSolicitante = trim(($solicitantePersona->nombre ?? '').' '.($solicitantePersona->apellido ?? '')) ?: '—';
+                                                $ciSolicitante = $solicitantePersona->ci ?? '—';
+                                                $telefonoSolicitante = $solicitantePersona->telefono ?? '—';
+                                                $tieneReferencia = filled($sol->nombre_referencia) || filled($sol->celular_referencia);
+                                            @endphp
+                                            <div class="col-md-4 mb-2">
                                                 <h6 class="mb-1" style="font-weight: 700;">Evidencia Reciente</h6>
                                                  @php
                                                     $imageUrl = $paquete->imagen
@@ -161,9 +168,22 @@
                                                 @if($imageUrl)
                                                     <img src="{{ $imageUrl }}" class="card-img-top" alt="Foto de entrega" style="max-width: 200px; max-height: 200px; object-fit:cover;">
                                                 @else
-                                                    <img src="{{ asset('images/default-placeholder.png') }}" class="card-img-top" alt="Imagen no disponible">
+                                                    <div class="text-muted">Imagen no disponible</div>
                                                 @endif
                                             </div>
+                                            <div class="col-md-4 mb-2">
+                                                <h6 class="mb-1" style="font-weight: 700;">Solicitante</h6>
+                                                <p class="mb-1"><strong>Nombre:</strong> {{ $nombreSolicitante }}</p>
+                                                <p class="mb-1"><strong>CI:</strong> {{ $ciSolicitante }}</p>
+                                                <p class="mb-0"><strong>Contacto:</strong> {{ $telefonoSolicitante }}</p>
+                                            </div>
+                                            @if($tieneReferencia)
+                                                <div class="col-md-4 mb-2">
+                                                    <h6 class="mb-1" style="font-weight: 700;">Contacto de referencia</h6>
+                                                    <p class="mb-1"><strong>Nombre:</strong> {{ $sol->nombre_referencia ?? '—' }}</p>
+                                                    <p class="mb-0"><strong>Contacto:</strong> {{ $sol->celular_referencia ?? '—' }}</p>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
@@ -269,7 +289,14 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                        <div class="col-md-4 mb-2">
+                                            @php
+                                                $solicitantePersona = optional($sol?->solicitante);
+                                                $nombreSolicitante = trim(($solicitantePersona->nombre ?? '').' '.($solicitantePersona->apellido ?? '')) ?: '—';
+                                                $ciSolicitante = $solicitantePersona->ci ?? '—';
+                                                $telefonoSolicitante = $solicitantePersona->telefono ?? '—';
+                                                $tieneReferencia = filled($sol->nombre_referencia) || filled($sol->celular_referencia);
+                                            @endphp
+                                            <div class="col-md-4 mb-2">
                                                 <h6 class="mb-1" style="font-weight: 700;">Evidencia de Entrega</h6>
                                                  @php
                                                     $imageUrl = $paquete->imagen
@@ -279,9 +306,22 @@
                                                 @if($imageUrl)
                                                     <img src="{{ $imageUrl }}" class="card-img-top" alt="Foto de entrega" style="max-width: 200px; max-height: 200px; object-fit:cover;">
                                                 @else
-                                                    <img src="{{ asset('images/default-placeholder.png') }}" class="card-img-top" alt="Imagen no disponible">
+                                                    <div class="text-muted">Imagen no disponible</div>
                                                 @endif
                                             </div>
+                                            <div class="col-md-4 mb-2">
+                                                <h6 class="mb-1" style="font-weight: 700;">Solicitante</h6>
+                                                <p class="mb-1"><strong>Nombre:</strong> {{ $nombreSolicitante }}</p>
+                                                <p class="mb-1"><strong>CI:</strong> {{ $ciSolicitante }}</p>
+                                                <p class="mb-0"><strong>Contacto:</strong> {{ $telefonoSolicitante }}</p>
+                                            </div>
+                                            @if($tieneReferencia)
+                                                <div class="col-md-4 mb-2">
+                                                    <h6 class="mb-1" style="font-weight: 700;">Contacto de referencia</h6>
+                                                    <p class="mb-1"><strong>Nombre:</strong> {{ $sol->nombre_referencia ?? '—' }}</p>
+                                                    <p class="mb-0"><strong>Contacto:</strong> {{ $sol->celular_referencia ?? '—' }}</p>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
