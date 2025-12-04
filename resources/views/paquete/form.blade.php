@@ -59,12 +59,6 @@
       {!! $errors->first('estado_id', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
     </div>
 
-    @php
-      $destinoSolicitud = optional(optional($paquete->solicitud)->destino);
-      $provinciaSolicitud = $destinoSolicitud->provincia ?? '—';
-      $direccionSolicitud = $destinoSolicitud->direccion ?? '—';
-    @endphp
-
     <div class="card mt-3 mb-3">
       <div class="card-header">
         <strong>Datos de Transporte</strong>
@@ -128,7 +122,7 @@
         <div class="mt-3" id="preview-container">
             @if($paquete->imagen)
                 <img id="preview-imagen" src="{{ asset('storage/' . $paquete->imagen) }}"
-                    alt="Imagen paquete"
+                    alt="Imagen no seleccionada"
                     class="img-thumbnail"
                     style="max-height:200px; border-radius:8px;">
             @else
@@ -180,28 +174,24 @@
         </div>
 
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-md-6">
             <div class="form-group mb-2 mb20">
-              <label for="zona" class="form-label">Punto de Referencia</label>
+              <label for="zona" class="form-label">Dirección / Zona (detectada automáticamente)</label>
               <input type="text" name="zona" id="zona"
                     class="form-control @error('zona') is-invalid @enderror"
-                    value="{{ old('zona') }}"
-                    placeholder="Ej. Garaje rojo, porton amarillo...">
+                    value="{{ old('zona', $paquete->zona) }}"
+                    placeholder="Se completará automáticamente desde su ubicación"
+                    readonly>
               {!! $errors->first('zona', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
             </div>
           </div>
-
-          <div class="col-md-4">
+          <div class="col-md-6">
             <div class="form-group mb-2 mb20">
-              <label class="form-label">Provincia (solicitud)</label>
-              <input type="text" class="form-control" value="{{ $provinciaSolicitud }}" readonly>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="form-group mb-2 mb20">
-              <label class="form-label">Dirección/Zona (solicitud)</label>
-              <input type="text" class="form-control" value="{{ $direccionSolicitud }}" readonly>
+              <label for="provincia_actual" class="form-label">Provincia (detectada automáticamente)</label>
+              <input type="text" id="provincia_actual"
+                    class="form-control"
+                    value=""
+                    readonly>
             </div>
           </div>
 
@@ -325,6 +315,48 @@
       }
 
       map.setView([lat, lng], 15);
+      reverseGeocode(lat, lng);
+    }
+        const direccionInput = document.getElementById('zona');
+    const provinciaInput = document.getElementById('provincia_actual');
+
+    function reverseGeocode(lat, lng) {
+      if (!direccionInput && !provinciaInput) return;
+
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+        .then(r => r.json())
+        .then(data => {
+          const addr = data && data.address ? data.address : {};
+
+          let dir = addr.road || '';
+          if (addr.house_number)  dir += (dir ? ' ' : '') + addr.house_number;
+          if (addr.neighbourhood) dir += (dir ? ', ' : '') + addr.neighbourhood;
+          if (addr.suburb)        dir += (dir ? ', ' : '') + addr.suburb;
+          if (addr.city || addr.town) {
+            dir += (dir ? ', ' : '') + (addr.city || addr.town);
+          }
+
+          if (direccionInput) {
+            direccionInput.value =
+              dir || (data && data.display_name) || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+          }
+
+          const prov =
+            addr.state ||
+            addr.region ||
+            addr.county ||
+            '';
+
+          if (provinciaInput) {
+            provinciaInput.value = prov;
+          }
+        })
+        .catch(err => {
+          console.warn('Error en reverse geocoding:', err);
+          if (direccionInput) {
+            direccionInput.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+          }
+        });
     }
 
     if (latInput.value && lngInput.value) {

@@ -37,6 +37,26 @@ if ($estado === 'pendiente') {
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
                 integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
                 crossorigin=""></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var btn = document.getElementById('btn-editar-solicitud');
+                var section = document.getElementById('editar-solicitud-section');
+
+                if (btn && section) {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        section.classList.remove('d-none');
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                }
+
+                if ($errors)
+                    if (section) {
+                        section.classList.remove('d-none');
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        </script>
     @endpush
 @endif
 
@@ -47,10 +67,18 @@ if ($estado === 'pendiente') {
 </style>
 
 <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">
+    <div class="card-header justify-content-between d-flex">
+        <h3 class="card-title col-md-8">
             Solicitud {{ $solicitud->codigo_seguimiento }}
         </h3>
+         @if($editable)
+            <button id="btn-editar-solicitud" class="btn btn-primary btn-sm">
+                <i class="fas fa-edit mr-1"></i> Editar mi solicitud
+            </button>
+        @endif
+        <a href="{{ route('solicitud.public.create') }}" class="btn btn-secondary btn-sm">
+            Volver
+        </a>
     </div>
 
     <div class="card-body">
@@ -145,9 +173,9 @@ if ($estado === 'pendiente') {
 </div>
 
 @if($editable)
-    <div class="card mt-4">
+    <div id="editar-solicitud-section" class="card mt-4 {{ $errors->any() ? '' : 'd-none' }}" style="background-color: gainsboro;">
         <div class="card-header">
-            <h3 class="card-title">Actualizar mi solicitud</h3>
+            <h3 class="card-title" style="font-weight: 700;">Actualizar mi solicitud</h3>
         </div>
         <div class="card-body bg-white">
             <form method="POST"
@@ -162,8 +190,4 @@ if ($estado === 'pendiente') {
         </div>
     </div>
 @endif
-
-<a href="{{ route('solicitud.public.create') }}" class="btn btn-secondary mt-3 mb-5">
-    Volver
-</a>
 @endsection

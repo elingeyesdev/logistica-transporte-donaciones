@@ -218,7 +218,7 @@
 
                         <div class="form-group mb-2 mb20">
                             <strong>Ubicacion Actual:</strong>
-                            {{ $paquete->ubicacion_actual ?? '—'}}
+                            {{ $paquete->ubicacion_actual ?? 'La ubicación se ingresa cuando inicia la ruta'}}
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha de Creacion:</strong>
@@ -227,7 +227,7 @@
                         @php
                             $estadoNombreDetalle = optional($paquete->estado)->nombre_estado;
                             $isEntregadoDetalle = $estadoNombreDetalle
-                                ? \Illuminate\Support\Str::contains(strtolower($estadoNombreDetalle), 'entreg')
+                                ? \Illuminate\Support\Str::contains(strtolower($estadoNombreDetalle), 'entreg   ')
                                 : false;
                             $fechaEntregaSource = $paquete->fecha_entrega ?: ($isEntregadoDetalle ? $paquete->updated_at : null);
                             $fechaEntregaDetalle = $fechaEntregaSource
@@ -236,14 +236,20 @@
                                     : \Carbon\Carbon::parse($fechaEntregaSource)->format('d/m/Y'))
                                 : null;
                         @endphp
+                        @if($fechaEntregaDetalle)
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha Entrega:</strong>
                             {{ $fechaEntregaDetalle ?? '—' }}
                         </div>
-
+                        @endif
                         @php
                             $conductor = optional($paquete->conductor);
+                            $vehiculo = optional($paquete->vehiculo);
+                            $marca    = optional($vehiculo->marcaVehiculo);
+                        
                         @endphp
+
+                        @if($conductor->conductor_id || $vehiculo->id_vehiculo)
                         <div class="form-group mb-2 mb20">
                             <strong>Conductor:</strong>
                             @if($conductor->conductor_id)
@@ -255,10 +261,7 @@
                                 —
                             @endif
                         </div>
-                        @php
-                            $vehiculo = optional($paquete->vehiculo);
-                            $marca    = optional($vehiculo->marcaVehiculo);
-                        @endphp
+
                         <div class="form-group mb-2 mb20">
                             <strong>Vehículo:</strong>
                             @if($vehiculo->id_vehiculo)
@@ -272,10 +275,12 @@
                                 —
                             @endif
                         </div>
+                        @endif
+
                         <div class="form-group mb-2 mb20">
                             <strong>Voluntario Encargado: </strong>
                             @php $encargado = $paquete->encargado; @endphp
-                            {{ $encargado ? $encargado->nombre . ' ' . $encargado->apellido : '—' }}
+                            {{ $encargado ? $encargado->nombre . ' ' . $encargado->apellido : 'El voluntario se asigna al iniciar la ruta' }}
                             @if($paquete->id_encargado) - CI {{ $paquete->id_encargado }}@endif
                         </div>
                     </div>

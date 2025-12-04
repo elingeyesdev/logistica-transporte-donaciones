@@ -27,7 +27,7 @@
                 <div class="card-header">
                     <div style="display: flex; justify-content: space-between; width: 100%;">
                         <span class="card-title">{{ __('Crear') }} Solicitud</span>
-                        <button class="btn btn-outline-info btn-sm"
+                        <button class="btn btn-info btn-md"
                                 type="button"
                                 data-toggle="collapse"
                                 data-target="#buscarSolicitudCollapse"
@@ -127,11 +127,12 @@
 @endsection
 
 @push('js')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    if ({{ session('solicitud_public_success') ? 'true' : 'false' }}) {
-        $('#solicitudEnviadaModal').modal('show');
-    }
-});
-</script>
+    @if(session('solicitud_public_success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                $('#solicitudEnviadaModal').modal('show');
+            });
+        </script>
+    @endif
 @endpush
+

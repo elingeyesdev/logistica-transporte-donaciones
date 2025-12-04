@@ -72,6 +72,9 @@
             @error('nro_celular') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
     </div>
+    <div class="col-md-6 text-center rounded-3 mt-2 mb-2 pt-2" style="background-color:#ffe89c; border-radius:8px; font-size:14px;">
+        <p style="color:black;">Los datos que ingreso es esta seccion deben corresponder a la persona que recibira el paquete en el lugar.  En caso de no poder asistir, llena la seccion de contacto de referencia.</p>
+    </div>
     <div class="rounded-3 col-md-12 gap-1" style="background-color: aliceblue; border-radius: 7px;">
         <p style="font-size: large; font-weight: 600;">Contacto de Referencia (Opcional)</p>
         <div class="d-flex">
@@ -102,6 +105,7 @@
                     @error('nombre_referencia') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
             </div>
+
         </div>
             
     </div>
