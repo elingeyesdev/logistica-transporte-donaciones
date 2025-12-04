@@ -32,7 +32,13 @@ class PaqueteController extends Controller
 {
     public function index(Request $request)
     {
-        $paquetes = Paquete::with(['estado','solicitud.solicitante','solicitud.destino'])->paginate();
+        $paquetesQuery = Paquete::with(['estado','solicitud.solicitante','solicitud.destino'])
+            ->orderByRaw(
+                "CASE WHEN LOWER((SELECT nombre_estado FROM estado WHERE estado.id_estado = paquete.estado_id)) = 'en camino' THEN 0 ELSE 1 END"
+            )
+            ->orderByDesc('updated_at');
+
+        $paquetes = $paquetesQuery->paginate();
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,

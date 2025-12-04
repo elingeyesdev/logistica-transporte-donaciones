@@ -18,6 +18,50 @@
           <div class="alert alert-success m-4"><p>{{ $message }}</p></div>
         @endif
 
+        <div class="row mb-3 mt-2 px-4">
+          <div class="col-md-4 mb-2 mb-md-0">
+            <label class="form-label mb-1 d-block">Estado</label>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Filtro por estado">
+              <button type="button"
+                      class="btn btn-outline-secondary btn-paquete-estado active"
+                      data-value="todos">
+                Todos
+              </button>
+              <button type="button"
+                      class="btn btn-outline-secondary btn-paquete-estado"
+                      data-value="en_camino">
+                En camino
+              </button>
+              <button type="button"
+                      class="btn btn-outline-secondary btn-paquete-estado"
+                      data-value="entregado">
+                Entregados
+              </button>
+              <button type="button"
+                      class="btn btn-outline-secondary btn-paquete-estado"
+                      data-value="pendiente">
+                Pendientes
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label mb-1 d-block">Orden</label>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Orden de paquetes">
+              <button type="button"
+                      class="btn btn-outline-secondary btn-paquete-orden active"
+                      data-value="recientes">
+                Recientes primero
+              </button>
+              <button type="button"
+                      class="btn btn-outline-secondary btn-paquete-orden"
+                      data-value="antiguas">
+                Antiguas primero
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="card-body bg-white">
           <style>
             .paquete-uniform-row .col-md-3 {display:flex;}
@@ -115,7 +159,21 @@
                 };
               @endphp
 
-              <div class="col-md-3">
+              @php
+                $estadoFiltro = 'pendiente';
+                if ($estadoLower && \Illuminate\Support\Str::contains($estadoLower, 'camino')) {
+                    $estadoFiltro = 'en_camino';
+                } elseif ($estadoLower && \Illuminate\Support\Str::contains($estadoLower, 'entreg')) {
+                    $estadoFiltro = 'entregado';
+                }
+
+                $fechaReferencia = $paquete->updated_at ?? $paquete->created_at;
+                $fechaTimestamp  = optional($fechaReferencia)->timestamp ?? '';
+              @endphp
+
+              <div class="col-md-3 paquete-card"
+                   data-estado="{{ $estadoFiltro }}"
+                   data-fecha-ts="{{ $fechaTimestamp }}">
                 <div class="card mb-3 shadow-sm bg-white {{ $badgeClass }}">
 
                   <div class="card-header d-flex justify-content-between align-items-center">
@@ -201,4 +259,62 @@
     </div>
   </div>
 </div>
+
+@push('js')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const estadoButtons = document.querySelectorAll('.btn-paquete-estado');
+  const ordenButtons  = document.querySelectorAll('.btn-paquete-orden');
+  const container     = document.querySelector('.paquete-uniform-row');
+
+  if (!container) return;
+
+  const cards = Array.from(container.querySelectorAll('.paquete-card'));
+
+  let estadoFiltro = 'todos';
+  let ordenFiltro  = 'recientes';
+
+  function aplicarFiltros() {
+    let visibles = cards.slice();
+
+    if (estadoFiltro !== 'todos') {
+      visibles = visibles.filter(card => card.dataset.estado === estadoFiltro);
+    }
+
+    visibles.sort((a, b) => {
+      const ta = parseInt(a.dataset.fechaTs || '0', 10);
+      const tb = parseInt(b.dataset.fechaTs || '0', 10);
+      return ordenFiltro === 'recientes' ? (tb - ta) : (ta - tb);
+    });
+
+    cards.forEach(card => card.style.display = 'none');
+
+    visibles.forEach(card => {
+      card.style.display = '';
+      container.appendChild(card);
+    });
+  }
+
+  estadoButtons.forEach(btn => {
+    btn.addEventListener('click', function () {
+      estadoButtons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      estadoFiltro = this.dataset.value;
+      aplicarFiltros();
+    });
+  });
+
+  ordenButtons.forEach(btn => {
+    btn.addEventListener('click', function () {
+      ordenButtons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      ordenFiltro = this.dataset.value;
+      aplicarFiltros();
+    });
+  });
+
+  aplicarFiltros();
+});
+</script>
+@endpush
 @endsection

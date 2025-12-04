@@ -8,6 +8,10 @@
     </div>
 @endif
 
+@php
+    $paqueteEnEdicion = isset($paquete) && $paquete->exists;
+@endphp
+
 <div class="row padding-1 p-1">
   <div class="col-md-12">
 
@@ -43,6 +47,9 @@
               class="form-control @error('estado_id') is-invalid @enderror" required>
         <option value="">-- Seleccione --</option>
         @foreach($estados as $id => $nombre)
+          @if($paqueteEnEdicion && strcasecmp($nombre, 'Pendiente') === 0)
+            @continue
+          @endif
           <option value="{{ $id }}"
             {{ (string)old('estado_id', $paquete->estado_id ?? '') === (string)$id ? 'selected' : '' }}>
             {{ $nombre }}

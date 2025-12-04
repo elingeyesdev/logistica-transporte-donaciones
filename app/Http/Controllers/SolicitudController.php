@@ -117,6 +117,14 @@ class SolicitudController extends Controller
                 'message' => 'Solicitud creada correctamente.',
             ], 201);
         }
+
+        if (!Auth::check()) {
+            return redirect()
+                ->route('solicitud.public.create')
+                ->with('solicitud_public_success', true)
+                ->with('codigo_solicitud', $solicitud->codigo_seguimiento);
+        }
+
         return redirect()
             ->route('solicitud.show', $solicitud->id_solicitud)
             ->with('success', 'Solicitud creada correctamente.');
@@ -349,7 +357,13 @@ class SolicitudController extends Controller
             $solicitud = Solicitud::with(['solicitante', 'destino', 'tipoEmergencia'])
                 ->where('codigo_seguimiento', $codigo)
                 ->firstOrFail();
-            return view('solicitud.public-show', compact('solicitud'));
+            $tipoEmergencia = collect();
+
+            if ($solicitud->estado === 'pendiente' || $solicitud->estado === null) {
+                $tipoEmergencia = \App\Models\TipoEmergencia::orderBy('prioridad', 'desc')->get();
+            }
+
+            return view('solicitud.public-show', compact('solicitud', 'tipoEmergencia'));
         }
 
         public function publicEdit(string $codigo)

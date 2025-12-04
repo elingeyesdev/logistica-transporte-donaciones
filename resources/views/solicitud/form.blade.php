@@ -268,7 +268,7 @@
     </div>
 
 
-    <div class="col-md-6">
+    <div class="col-md-12" >
         <div class="form-group mb-3">
             <label for="insumos_necesarios">Insumos Necesarios</label><br>
             <div class="d-flex">
@@ -326,21 +326,10 @@
     @endphp
 
 </div>
-    <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label for="codigo_seguimiento">Código de Seguimiento</label>
-            <input type="text"
-                  name="codigo_seguimiento"
-                  id="codigo_seguimiento"
-                  class="form-control @error('codigo_seguimiento') is-invalid @enderror"
-                  value="{{ $codigoSeguimiento }}"
-                  placeholder="Ej. SOL-001"
-                  readonly>
-            @error('codigo_seguimiento')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-    </div>
+    <input type="hidden"
+          name="codigo_seguimiento"
+          id="codigo_seguimiento"
+          value="{{ $codigoSeguimiento }}">
 
 <div class="col-md-12 justify-content-between d-flex text-right mt-3 ml-2">
     <div class="mr-3">

@@ -89,18 +89,70 @@
     <hr>
 
     <h5 class="mb-3"><i class="fas fa-map-marker-alt mr-2"></i>Destino</h5>
-    <div class="form-group mb-3">
-      <strong>Comunidad:</strong>
-      {{ $dest->comunidad ?? '—' }}
+    <div class="row">
+      <div class="col-md-6 d-flex flex-column justify-content-center" style="min-height: 240px;">
+        <div class="form-group mb-3">
+          <strong>Comunidad:</strong>
+          {{ $dest->comunidad ?? '—' }}
+        </div>
+        <div class="form-group mb-3">
+          <strong>Provincia:</strong>
+          {{ $dest->provincia ?? '—' }}
+        </div>
+        <div class="form-group mb-3">
+          <strong>Ubicación:</strong>
+          {{ $dest->direccion ?? '—' }}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div id="solicitud-destino-map"
+             style="height: 240px; border-radius: 8px; border: 1px solid #ced4da;"
+             data-lat="{{ $dest->latitud ?? '' }}"
+             data-lng="{{ $dest->longitud ?? '' }}">
+        </div>
+      </div>
     </div>
-    <div class="form-group mb-3">
-      <strong>Provincia:</strong>
-      {{ $dest->provincia ?? '—' }}
-    </div>
-    <div class="form-group mb-3">
-      <strong>Ubicación:</strong>
-      {{ $dest->direccion ?? '—' }}
-    </div>
+
+    @pushonce('css')
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""/>
+    @endpushonce
+
+    @pushonce('js')
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+              integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+              crossorigin=""></script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const mapContainer = document.getElementById('solicitud-destino-map');
+          if (!mapContainer) return;
+
+          const lat = parseFloat(mapContainer.dataset.lat);
+          const lng = parseFloat(mapContainer.dataset.lng);
+
+          if (Number.isNaN(lat) || Number.isNaN(lng)) {
+            mapContainer.innerHTML = '<div class="text-muted text-center" style="padding: 2.5rem 1rem;">Sin coordenadas disponibles</div>';
+            return;
+          }
+
+          function initMap() {
+            if (typeof L === 'undefined') {
+              return setTimeout(initMap, 80);
+            }
+
+            const map = L.map(mapContainer).setView([lat, lng], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            L.marker([lat, lng]).addTo(map);
+          }
+
+          initMap();
+        });
+      </script>
+    @endpushonce
 
     <hr>
 

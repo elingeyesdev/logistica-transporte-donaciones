@@ -79,14 +79,11 @@
                                     <a href="{{ route('solicitud.public.show', $solicitudEncontrada->codigo_seguimiento) }}" class="btn btn-info btn-sm">
                                         Ver detalle
                                     </a>
-                                    @if($editable)
-                                        <a href="{{ route('solicitud.public.edit', $solicitudEncontrada->codigo_seguimiento) }}"
-                                        class="btn btn-dark btn-sm ml-2">
-                                            Editar solicitud
-                                        </a>
-                                    @endif
 
                                 </div>
+                                @if($editable)
+                                    <p class="text-muted mt-2 mb-0">Dentro del detalle podrás actualizar tu solicitud mientras esté pendiente.</p>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -102,4 +99,39 @@
             </div>
         </div>
     </section>
+
+    <div class="modal fade" id="solicitudEnviadaModal" tabindex="-1" role="dialog" aria-labelledby="solicitudEnviadaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="solicitudEnviadaLabel">Solicitud enviada</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">¡Gracias por tu solicitud! La recibimos correctamente.</p>
+                   
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <a href="{{ route('solicitud.public.create') }}" class="btn btn-outline-primary">
+                        Enviar otra solicitud
+                    </a>
+                    <a href="{{ route('galeria.index') }}" class="btn btn-primary">
+                        Ver galería de agradecimiento
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('js')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if ({{ session('solicitud_public_success') ? 'true' : 'false' }}) {
+        $('#solicitudEnviadaModal').modal('show');
+    }
+});
+</script>
+@endpush

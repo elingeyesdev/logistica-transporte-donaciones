@@ -113,6 +113,7 @@
                                 $solicitud = optional($paquete->solicitud);
                                 $solicitante = optional($solicitud->solicitante);
                                 $destino = optional($solicitud->destino);
+                                $estadoSolicitud = $solicitud->estado ?? ($solicitud->aprobada === true ? 'aprobada' : ($solicitud->aprobada === false ? 'negada' : null));
                             @endphp
 
                             <div class="section-title">Solicitud</div>
@@ -127,6 +128,12 @@
                                     <tr>
                                         <td>ID Solicitud</td>
                                         <td>{{ $solicitud->codigo_seguimiento ?? '—' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Estado Solicitud</td>
+                                            <td>{{ 
+                                                \Illuminate\Support\Str::headline($estadoSolicitud ?? 'pendiente') 
+                                            }}</td>
                                     </tr>
                                     <tr>
                                         <td>Tipo Emergencia</td>
