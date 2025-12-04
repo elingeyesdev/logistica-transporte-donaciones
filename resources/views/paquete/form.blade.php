@@ -59,6 +59,12 @@
       {!! $errors->first('estado_id', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
     </div>
 
+    @php
+      $destinoSolicitud = optional(optional($paquete->solicitud)->destino);
+      $provinciaSolicitud = $destinoSolicitud->provincia ?? '—';
+      $direccionSolicitud = $destinoSolicitud->direccion ?? '—';
+    @endphp
+
     <div class="card mt-3 mb-3">
       <div class="card-header">
         <strong>Datos de Transporte</strong>
@@ -182,6 +188,20 @@
                     value="{{ old('zona') }}"
                     placeholder="Ej. Garaje rojo, porton amarillo...">
               {!! $errors->first('zona', '<div class="invalid-feedback"><strong>:message</strong></div>') !!}
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="form-group mb-2 mb20">
+              <label class="form-label">Provincia (solicitud)</label>
+              <input type="text" class="form-control" value="{{ $provinciaSolicitud }}" readonly>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="form-group mb-2 mb20">
+              <label class="form-label">Dirección/Zona (solicitud)</label>
+              <input type="text" class="form-control" value="{{ $direccionSolicitud }}" readonly>
             </div>
           </div>
 

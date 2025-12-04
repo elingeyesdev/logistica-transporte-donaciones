@@ -82,7 +82,9 @@
                         class="form-control @error('nombre_referencia') is-invalid @enderror"
                         value="{{ old('nombre_referencia', $solicitud->nombre_referencia) }}"
                         placeholder="Nombre y Apellidos"
-                        title="Ingresa el nombre completo">
+                        pattern="[A-Za-z\s]+"
+                        title="Solo se permiten letras y espacios"
+                        oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')">
                     @error('nombre_referencia') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     <small>Asegurate de que esta persona pueda recibir el paquete en el destino.</small>
                 </div>
@@ -268,7 +270,7 @@
     </div>
 
 
-    <div class="col-md-12" >
+    <div class="col-md-6">
         <div class="form-group mb-3">
             <label for="insumos_necesarios">Insumos Necesarios</label><br>
             <div class="d-flex">

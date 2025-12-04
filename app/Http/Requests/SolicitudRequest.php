@@ -40,7 +40,7 @@ class SolicitudRequest extends FormRequest
         'cantidad_personas'  => ['required','integer','min:0'],
         'fecha_inicio'       => ['required','date'],
         'fecha_necesidad' => ['nullable', 'date'],
-        'nombre_referencia'=>['nullable','string'],
+        'nombre_referencia'=>['nullable','string', 'regex:/^[a-zA-Z\s]+$/'],
         'celular_referencia'=>['nullable', 'integer', 'min:0'],
         'insumos_necesarios' => ['required','string'],
         'codigo_seguimiento' => ['required','string','max:255'],
