@@ -240,9 +240,12 @@
     </div>
 
     <div class="text-right mt-2">
-      <button type="submit" class="btn btn-primary">Guardar</button>
+      <button type="submit" class="btn btn-primary" id="btn-submit-paquete">
+          Guardar
+      </button>
       <a href="{{ route('paquete.index') }}" class="btn btn-secondary">Volver</a>
     </div>
+
   </div>
 </div>
 

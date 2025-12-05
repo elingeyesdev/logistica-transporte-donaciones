@@ -206,7 +206,9 @@
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                              <button type="submit" class="btn btn-primary">Validar código</button>
+                              <button type="submit" class="btn btn-primary" id="btn-validar-codigo">
+                                  Validar código
+                              </button>
                             </div>
                           </form>
                         </div>
@@ -337,6 +339,45 @@
   const codigoForm     = document.getElementById('formCodigoEntrega');
   const codigoInput    = document.getElementById('codigo_entrega_input');
   const codigoErrorEl  = document.getElementById('codigo_entrega_error');
+
+  const submitBtnPaquete = document.getElementById('btn-submit-paquete');
+  const validarBtn       = document.getElementById('btn-validar-codigo');
+
+  function setSubmitState(isSubmitting) {
+    if (!submitBtnPaquete) return;
+
+    if (isSubmitting) {
+      if (submitBtnPaquete.disabled) return;
+      submitBtnPaquete.dataset.originalText = submitBtnPaquete.dataset.originalText || submitBtnPaquete.innerHTML;
+      submitBtnPaquete.disabled = true;
+      submitBtnPaquete.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    } else {
+      submitBtnPaquete.disabled = false;
+      if (submitBtnPaquete.dataset.originalText) {
+        submitBtnPaquete.innerHTML = submitBtnPaquete.dataset.originalText;
+      }
+    }
+  }
+
+  function setValidarState(isSubmitting) {
+    if (!validarBtn) return;
+
+    if (isSubmitting) {
+      if (validarBtn.disabled) return;
+      validarBtn.dataset.originalText = validarBtn.dataset.originalText || validarBtn.innerHTML;
+      validarBtn.disabled = true;
+      validarBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+    } else {
+      validarBtn.disabled = false;
+      if (validarBtn.dataset.originalText) {
+        validarBtn.innerHTML = validarBtn.dataset.originalText;
+      } else {
+        validarBtn.innerHTML = 'Validar código';
+      }
+    }
+  }
+
+
   if (!formPaquete || !estadoSelect || !codigoForm) {
     return;
   }
@@ -360,10 +401,12 @@
 
    formPaquete.addEventListener('submit', function(e) {
     if (!estadoSeleccionadoEsEntregado()) {
+      setSubmitState(true);
       return;
     }
 
     if (entregaVerified) {
+      setSubmitState(true);
       return;
     }
 
@@ -416,6 +459,8 @@
     codigoErrorEl.classList.add('d-none');
     codigoErrorEl.textContent = '';
 
+    setValidarState(true);
+
     if (!/^\d{4}$/.test(codigo)) {
       codigoErrorEl.textContent = 'El código debe tener 4 dígitos numéricos.';
       codigoErrorEl.classList.remove('d-none');
@@ -440,16 +485,19 @@
         entregaVerified = true;
         $('#modalCodigoEntrega').modal('hide');
         formPaquete.submit();
+         setSubmitState(true);
       } else {
         const msg = (json && json.message) ? json.message : 'Error en el código. El paquete no fue entregado.';
         codigoErrorEl.textContent = msg;
         codigoErrorEl.classList.remove('d-none');
+        setValidarState(false);
       }
     })
     .catch(err => {
       console.error('Error validando código de entrega:', err);
       codigoErrorEl.textContent = 'Error de red al validar el código. Intenta nuevamente.';
       codigoErrorEl.classList.remove('d-none');
+      setValidarState(false);
     });
   });
 

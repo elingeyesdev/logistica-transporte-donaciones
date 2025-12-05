@@ -6,7 +6,9 @@ use App\Models\Paquete;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-class CodigoEntregaPaquete extends Mailable
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class CodigoEntregaPaquete extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

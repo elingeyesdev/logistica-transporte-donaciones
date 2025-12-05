@@ -630,7 +630,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         submitBtn.disabled = true;
+        submitBtn.dataset.originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
     });
 });
 </script>

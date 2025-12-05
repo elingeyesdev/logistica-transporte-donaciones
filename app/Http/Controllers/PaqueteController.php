@@ -400,7 +400,7 @@ class PaqueteController extends Controller
                 'paquete_id' => $paquete->id_paquete,
                 'email' => optional($paquete->solicitud)->codigo_seguimiento,
             ]);
-            Mail::to($destinatario)->send(
+            Mail::to($destinatario)->queue(
                 new PaqueteActualizado($paquete)
             );
 
@@ -414,7 +414,7 @@ class PaqueteController extends Controller
                 'paquete_id' => $paquete->id_paquete,
                 'email' => optional($paquete->solicitud)->codigo_seguimiento,
                 ]);
-                Mail::to($destinatario)->send(
+                Mail::to($destinatario)->queue(
                     new PaqueteEntregado($paquete)
                 );
             }
@@ -555,7 +555,7 @@ class PaqueteController extends Controller
         Cache::put($cacheKeyCode, $codigo, now()->addMinutes(15));
         Cache::forget($cacheKeyVerified); 
 
-        Mail::to($destinatario)->send(new CodigoEntregaPaquete($paquete, $codigo));
+        Mail::to($destinatario)->queue(new CodigoEntregaPaquete($paquete, $codigo));
 
         return response()->json([
             'success' => true,
