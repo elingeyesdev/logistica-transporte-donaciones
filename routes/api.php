@@ -59,9 +59,13 @@ Route::middleware(['auth:sanctum', 'activo'])->group(function () {
     Route::post('solicitud/{id}/aprobar', [SolicitudController::class, 'aprobar']);
     Route::post('solicitud/{id}/negar', [SolicitudController::class, 'negar']);
 
+    Route::post('paquete/{paquete}/entrega/send-code', [PaqueteController::class, 'sendEntregaCode'])
+        ->name('api.paquete.entrega.send-code');
 
+    Route::post('paquete/{paquete}/entrega/verify-code', [PaqueteController::class, 'verifyEntregaCode'])
+        ->name('api.paquete.entrega.verify-code');
+    
 });
-
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('usuario', [UserAdminController::class, 'index']);
     Route::post('usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAdmin']);

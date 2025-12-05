@@ -394,30 +394,25 @@ class PaqueteController extends Controller
         ]);
 
         $destinatario = optional(optional($paquete->solicitud)->solicitante)->email;
-
         if ($destinatario) {
-            Log::info('Enviando correo de paquete actualizado', [
-                'paquete_id' => $paquete->id_paquete,
-                'email' => optional($paquete->solicitud)->codigo_seguimiento,
-            ]);
-            Mail::to($destinatario)->queue(
-                new PaqueteActualizado($paquete)
-            );
-
             $estadoNombre = optional($paquete->estado)->nombre_estado;
 
-            if ($estadoNombre &&
-                (strcasecmp($estadoNombre, 'Entregado') === 0 ||
-                strcasecmp($estadoNombre, 'Entregada') === 0)) {
-
-                Log::info('Enviando correo de paquete Entregado', [
+            Log::info('Programando correos de paquete', [
                 'paquete_id' => $paquete->id_paquete,
-                'email' => optional($paquete->solicitud)->codigo_seguimiento,
-                ]);
-                Mail::to($destinatario)->queue(
-                    new PaqueteEntregado($paquete)
-                );
+                'email'      => $destinatario,
+                'estado'     => $estadoNombre,
+            ]);
+            $this->enviarMailPaquete($destinatario, new PaqueteActualizado($paquete));
+            if ($estadoNombre && $this->esEstadoEntregadoPorNombre($estadoNombre)) {
+                $this->enviarMailPaquete($destinatario, new PaqueteEntregado($paquete));
             }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data'    => $paquete,
+            ]);
         }
 
         if ($request->wantsJson()) {
@@ -555,13 +550,20 @@ class PaqueteController extends Controller
         Cache::put($cacheKeyCode, $codigo, now()->addMinutes(15));
         Cache::forget($cacheKeyVerified); 
 
-        Mail::to($destinatario)->queue(new CodigoEntregaPaquete($paquete, $codigo));
+        Log::info('Programando correo de código de entrega', [
+            'paquete_id' => $paquete->id_paquete,
+            'email'      => $destinatario,
+            'codigo'     => $codigo,
+        ]);
+
+        $this->enviarMailPaquete($destinatario, new CodigoEntregaPaquete($paquete, $codigo));
 
         return response()->json([
             'success' => true,
             'message' => 'Se ha enviado un código de verificación al solicitante.'
         ]);
     }
+
 
     public function verifyEntregaCode(Request $request, Paquete $paquete)
     {
@@ -592,6 +594,23 @@ class PaqueteController extends Controller
         ]);
     }
 
+    private function enviarMailPaquete(string $destinatario, $mailable): void
+    {
+        try {
+            $connection = config('queue.default');
+            if ($connection && $connection !== 'sync') {
+                Mail::to($destinatario)->queue($mailable);
+            } else {
+                Mail::to($destinatario)->send($mailable);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error enviando correo de paquete', [
+                'email'    => $destinatario,
+                'mailable' => get_class($mailable),
+                'error'    => $e->getMessage(),
+            ]);
+        }
+    }
 
 
 }
