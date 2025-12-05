@@ -13,7 +13,7 @@
                 $isAprobada = strtolower($solicitud->estado ?? '') === 'aprobada';
                 $gradient = $isAprobada ? 'linear-gradient(120deg,#22c55e,#15803d)' : ($isNegada ? 'linear-gradient(120deg,#ef4444,#b91c1c)' : 'linear-gradient(120deg,#f59e0b,#c2410c)');
             @endphp
-            <div style="background:{{ $gradient }};padding:22px 28px;color:#ffffff;">
+            <div style="background:{{ $gradient }}; padding:22px 28px;color:#ffffff;">
                 <h2 style="margin:0;font-size:20px;font-weight:700;">Actualizamos tu solicitud</h2>
                 <p style="margin:6px 0 0;font-size:14px;opacity:0.9;">Código: <strong style="color:#ffffff;">{{ $solicitud->codigo_seguimiento ?? '—' }}</strong></p>
             </div>
@@ -34,7 +34,7 @@
                         </tr>
                         <tr>
                             <td style="padding:8px 0;color:#64748b;">Fecha de actualización</td>
-                            <td style="padding:8px 0;font-weight:600;color:#0f172a;">{{ optional($solicitud->updated_at)->format('d/m/Y H:i') ?? now()->format('d/m/Y H:i') }}</td>
+                            <td style="padding:8px 0;font-weight:600;color:#0f172a;">{{ optional($solicitud->updated_at)->format('d/m/Y') ?? now()->format('d/m/Y') }}</td>
                         </tr>
                     </table>
                 </div>

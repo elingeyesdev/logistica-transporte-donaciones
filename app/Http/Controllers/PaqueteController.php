@@ -27,6 +27,8 @@ use App\Models\Vehiculo;
 use App\Models\TipoLicencia;
 use App\Models\Marca;
 use App\Models\TipoVehiculo;
+use Illuminate\Support\Facades\Cache;
+use App\Mail\CodigoEntregaPaquete;
 
 class PaqueteController extends Controller
 {
@@ -232,6 +234,29 @@ class PaqueteController extends Controller
 
         $oldNombre = optional($oldEstado)->nombre_estado;
         $newNombre = optional($newEstado)->nombre_estado;
+
+        if ($this->esEstadoEntregadoPorNombre($newNombre)) {
+            $cacheKeyVerified = "paquete_entrega_verified_{$paquete->id_paquete}";
+            $verified = Cache::get($cacheKeyVerified, false);
+
+            if (!$verified) {
+                DB::rollBack();
+
+                $mensaje = 'Debes validar el código de entrega antes de marcar el paquete como "Entregado".';
+
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors'  => ['codigo_entrega' => [$mensaje]],
+                    ], 422);
+                }
+
+                return back()
+                    ->withErrors(['codigo_entrega' => $mensaje])
+                    ->withInput();
+            }
+            Cache::forget($cacheKeyVerified);
+        }
 
         if ($oldNombre && $newNombre) {
             $oldIsPendiente = strcasecmp($oldNombre, 'Pendiente') === 0;
@@ -488,4 +513,85 @@ class PaqueteController extends Controller
         }
         return view('galeria.index', compact('paquetes'));
     }
+
+    private function esEstadoEntregadoPorNombre(?string $nombre): bool
+    {
+        if (!$nombre) {
+            return false;
+        }
+
+        $nombre = trim(mb_strtolower($nombre));
+        return $nombre === 'entregado' || $nombre === 'entregada';
+    }
+
+    public function sendEntregaCode(Request $request, Paquete $paquete)
+    {
+        $estadoId = (int) $request->input('estado_id');
+        $estado   = Estado::find($estadoId);
+        $nombre   = optional($estado)->nombre_estado;
+
+        if (!$this->esEstadoEntregadoPorNombre($nombre)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El estado seleccionado no es "Entregado/Entregada".'
+            ], 422);
+        }
+
+        $solicitante = optional($paquete->solicitud)->solicitante;
+        $destinatario = optional($solicitante)->email;
+
+        if (!$destinatario) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La solicitud asociada no tiene correo de contacto.'
+            ], 422);
+        }
+
+        $codigo = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+
+        $cacheKeyCode     = "paquete_entrega_code_{$paquete->id_paquete}";
+        $cacheKeyVerified = "paquete_entrega_verified_{$paquete->id_paquete}";
+
+        Cache::put($cacheKeyCode, $codigo, now()->addMinutes(15));
+        Cache::forget($cacheKeyVerified); 
+
+        Mail::to($destinatario)->send(new CodigoEntregaPaquete($paquete, $codigo));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Se ha enviado un código de verificación al solicitante.'
+        ]);
+    }
+
+    public function verifyEntregaCode(Request $request, Paquete $paquete)
+    {
+        $request->validate([
+            'codigo' => ['required','string','size:4'],
+        ]);
+
+        $inputCode = $request->input('codigo');
+
+        $cacheKeyCode     = "paquete_entrega_code_{$paquete->id_paquete}";
+        $cacheKeyVerified = "paquete_entrega_verified_{$paquete->id_paquete}";
+
+        $storedCode = Cache::get($cacheKeyCode);
+
+        if (!$storedCode || $storedCode !== $inputCode) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Código incorrecto o vencido. El paquete no fue entregado.'
+            ], 422);
+        }
+
+        Cache::put($cacheKeyVerified, true, now()->addMinutes(30));
+        Cache::forget($cacheKeyCode);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Código validado. Ahora puedes confirmar la entrega del paquete.'
+        ]);
+    }
+
+
+
 }

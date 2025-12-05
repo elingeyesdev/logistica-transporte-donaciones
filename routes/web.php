@@ -85,9 +85,15 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::resource('ubicacion', UbicacionController::class)->except(['destroy']);
 
     Route::middleware(['auth'])->group(function () {
-        Route::view('/perfil/pendiente', 'users.pendiente')
-        ->name('perfil.pendiente');
-});
+            Route::view('/perfil/pendiente', 'users.pendiente')
+            ->name('perfil.pendiente');
+    });
+
+    Route::post('/paquete/{paquete}/entrega/send-code', [PaqueteController::class, 'sendEntregaCode'])
+    ->name('paquete.entrega.send-code');
+
+    Route::post('/paquete/{paquete}/entrega/verify-code', [PaqueteController::class, 'verifyEntregaCode'])
+        ->name('paquete.entrega.verify-code');
 
 });
 

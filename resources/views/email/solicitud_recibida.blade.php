@@ -51,7 +51,7 @@
                     <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%;border-collapse:collapse;font-size:14px;">
                         <tr>
                             <td style="padding:8px 0;color:#64748b;width:45%;">Nombre completo</td>
-                            <td style="padding:8px 0;font-weight:600;color:#0f172a;">{{ trim(($solicitud->nombre ?? '').' '.($solicitud->apellido ?? '')) ?: '—' }}</td>
+                            <td style="padding:8px 0;font-weight:600;color:#0f172a;">{{ trim(($solicitante->nombre ?? '').' '.($solicitante->apellido ?? '')) ?: '—' }}</td>
                         </tr>
                         <tr>
                             <td style="padding:8px 0;color:#64748b;">Correo electrónico</td>

@@ -34,7 +34,7 @@
                         </tr>
                         <tr>
                             <td style="padding:8px 0;color:#64748b;">Última actualización</td>
-                            <td style="padding:8px 0;font-weight:600;color:#0f172a;">{{ optional($paquete->updated_at)->format('d/m/Y H:i') ?? now()->format('d/m/Y H:i') }}</td>
+                            <td style="padding:8px 0;font-weight:600;color:#0f172a;">{{ optional($paquete->updated_at)->format('d/m/Y') ?? now()->format('d/m/Y') }}</td>
                         </tr>
                     </table>
                 </div>

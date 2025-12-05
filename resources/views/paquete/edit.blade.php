@@ -23,17 +23,21 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card shadow-sm">
-                <div class="card-header">
+              <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-edit"></i> Actualizar Paquete</h5>
-                </div>
+              </div>
 
-                <div class="card-body bg-white">
-                    <form method="POST" action="{{ route('paquete.update', $paquete->id_paquete) }}" enctype="multipart/form-data">
+                  <div class="card-body bg-white">
+                    <form method="POST" id="formPaqueteUpdate"
+                      action="{{ route('paquete.update', $paquete->id_paquete) }}"
+                      enctype="multipart/form-data"
+                      data-entrega-send-url="{{ route('paquete.entrega.send-code', $paquete->id_paquete) }}"
+                      data-entrega-verify-url="{{ route('paquete.entrega.verify-code', $paquete->id_paquete) }}">
                         @csrf
                         @method('PUT')
 
                         @include('paquete.form')
-
+                    <meta name="csrf-token" content="{{ csrf_token() }}">
                         
                     </form>
                     <div class="modal fade" id="modalConductor" tabindex="-1" aria-labelledby="modalConductorLabel" aria-hidden="true">
@@ -100,78 +104,117 @@
                     </div>
                     </div>
 
-                    {{-- Modal Crear Vehículo --}}
                     <div class="modal fade" id="modalVehiculo" tabindex="-1" aria-labelledby="modalVehiculoLabel" aria-hidden="true">
-                    <div class="modal-dialog">
+                      <div class="modal-dialog">
                         <div class="modal-content">
-                        <form id="formVehiculoModal" data-action="{{ route('vehiculo.store') }}">
+                          <form id="formVehiculoModal" data-action="{{ route('vehiculo.store') }}">
+                              @csrf
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="modalVehiculoLabel">Crear nuevo vehículo</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                              </div>
+                              <div class="modal-body">
+
+                              <div class="mb-3">
+                                  <label class="form-label">Placa</label>
+                                  <input type="text" name="placa" class="form-control" placeholder="Ej. 8547DFG">
+                                  <div class="text-danger small" data-error="placa"></div>
+                              </div>
+
+                              <div class="mb-3">
+                                  <label class="form-label">Capacidad aproximada</label>
+                                  <input type="text" name="capacidad_aproximada" class="form-control">
+                                  <div class="text-danger small" data-error="capacidad_aproximada"></div>
+                              </div>
+
+                              <div class="mb-3">
+                                  <label class="form-label">Modelo (nombre)</label>
+                                  <input type="text" name="modelo" class="form-control">
+                                  <div class="text-danger small" data-error="modelo"></div>
+                              </div>
+
+                              <div class="mb-3">
+                                  <label class="form-label">Año modelo</label>
+                                  <input type="number" name="modelo_anio" class="form-control" min="1975">
+                                  <div class="text-danger small" data-error="modelo_anio"></div>
+                              </div>
+
+                              <div class="mb-3">
+                                  <label class="form-label">Tipo de vehículo</label>
+                                  <select name="id_tipovehiculo" class="form-control">
+                                  <option value="">-- Seleccione --</option>
+                                  @foreach($tiposVehiculo as $t)
+                                      <option value="{{ $t->id_tipovehiculo }}">{{ $t->nombre_tipo_vehiculo }}</option>
+                                  @endforeach
+                                  </select>
+                                  <div class="text-danger small" data-error="id_tipovehiculo"></div>
+                              </div>
+
+                              <div class="mb-3">
+                                  <label class="form-label">Marca</label>
+                                  <select name="id_marca" class="form-control">
+                                  <option value="">-- Sin marca / Seleccione --</option>
+                                  @foreach($marcas as $m)
+                                      <option value="{{ $m->id_marca }}">{{ $m->nombre_marca }}</option>
+                                  @endforeach
+                                  </select>
+                                  <div class="text-danger small" data-error="id_marca"></div>
+                              </div>
+
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar vehículo</button>
+                              </div>
+                          </form>
+                          </div>
+                        </div>
+                      </div>
+                    <div class="modal fade" id="modalCodigoEntrega" tabindex="-1" aria-labelledby="modalCodigoEntregaLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <form id="formCodigoEntrega">
                             @csrf
                             <div class="modal-header">
-                            <h5 class="modal-title" id="modalVehiculoLabel">Crear nuevo vehículo</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                              <h5 class="modal-title" id="modalCodigoEntregaLabel">Confirmar entrega de paquete</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                                 <span aria-hidden="true">&times;</span>
-                            </button>
+                              </button>
                             </div>
                             <div class="modal-body">
+                              <p class="mb-2">
+                                Se envió un código numérico de 4 dígitos al correo del solicitante.
+                              </p>
+                              <p class="mb-3">
+                                Pide al solicitante (o a su contacto de referencia) este código y escríbelo para confirmar la entrega.
+                              </p>
 
-                            <div class="mb-3">
-                                <label class="form-label">Placa</label>
-                                <input type="text" name="placa" class="form-control" placeholder="Ej. 8547DFG">
-                                <div class="text-danger small" data-error="placa"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Capacidad aproximada</label>
-                                <input type="text" name="capacidad_aproximada" class="form-control">
-                                <div class="text-danger small" data-error="capacidad_aproximada"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Modelo (nombre)</label>
-                                <input type="text" name="modelo" class="form-control">
-                                <div class="text-danger small" data-error="modelo"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Año modelo</label>
-                                <input type="number" name="modelo_anio" class="form-control" min="1975">
-                                <div class="text-danger small" data-error="modelo_anio"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Tipo de vehículo</label>
-                                <select name="id_tipovehiculo" class="form-control">
-                                <option value="">-- Seleccione --</option>
-                                @foreach($tiposVehiculo as $t)
-                                    <option value="{{ $t->id_tipovehiculo }}">{{ $t->nombre_tipo_vehiculo }}</option>
-                                @endforeach
-                                </select>
-                                <div class="text-danger small" data-error="id_tipovehiculo"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Marca</label>
-                                <select name="id_marca" class="form-control">
-                                <option value="">-- Sin marca / Seleccione --</option>
-                                @foreach($marcas as $m)
-                                    <option value="{{ $m->id_marca }}">{{ $m->nombre_marca }}</option>
-                                @endforeach
-                                </select>
-                                <div class="text-danger small" data-error="id_marca"></div>
-                            </div>
-
+                              <div class="form-group">
+                                <label for="codigo_entrega_input">Código de verificación</label>
+                                <input type="text"
+                                      maxlength="4"
+                                      pattern="\d{4}"
+                                      inputmode="numeric"
+                                      class="form-control"
+                                      id="codigo_entrega_input"
+                                      autocomplete="one-time-code"
+                                      placeholder="Ej. 1234">
+                                <small id="codigo_entrega_error" class="text-danger d-none"></small>
+                              </div>
                             </div>
                             <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Guardar vehículo</button>
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                              <button type="submit" class="btn btn-primary">Validar código</button>
                             </div>
-                        </form>
+                          </form>
                         </div>
+                      </div>
                     </div>
-                    </div>
-                    
+
                 </div>
-            </div>
+              </div>
         </div>
     </div>
 </section>
@@ -288,6 +331,129 @@
       });
     });
   }
+
+  const formPaquete    = document.getElementById('formPaqueteUpdate');
+  const estadoSelect   = document.getElementById('estado_id');
+  const codigoForm     = document.getElementById('formCodigoEntrega');
+  const codigoInput    = document.getElementById('codigo_entrega_input');
+  const codigoErrorEl  = document.getElementById('codigo_entrega_error');
+  if (!formPaquete || !estadoSelect || !codigoForm) {
+    return;
+  }
+
+  const sendCodeUrl   = formPaquete.getAttribute('data-entrega-send-url');
+  const verifyCodeUrl = formPaquete.getAttribute('data-entrega-verify-url');
+  let entregaVerified = false;
+  let codeSent        = false;
+
+  function esEstadoEntregadoTexto(text) {
+    if (!text) return false;
+    const t = text.trim().toLowerCase();
+    return t === 'entregado' || t === 'entregada';
+  }
+
+  function estadoSeleccionadoEsEntregado() {
+    const opt = estadoSelect.options[estadoSelect.selectedIndex];
+    if (!opt) return false;
+    return esEstadoEntregadoTexto(opt.text);
+  }
+
+   formPaquete.addEventListener('submit', function(e) {
+    if (!estadoSeleccionadoEsEntregado()) {
+      return;
+    }
+
+    if (entregaVerified) {
+      return;
+    }
+
+    e.preventDefault();
+
+    if (!sendCodeUrl) {
+      alert('No se pudo preparar la validación de entrega (URL no definida).');
+      return;
+    }
+
+    if (!codeSent) {
+      const formData = new FormData();
+      formData.append('estado_id', estadoSelect.value);
+
+      fetch(sendCodeUrl, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json'
+        },
+        body: formData
+      })
+      .then(async response => {
+        const json = await response.json().catch(() => ({}));
+
+        if (response.ok && json.success) {
+          codeSent = true;
+          $('#modalCodigoEntrega').modal('show');
+        } else {
+          const msg = (json && json.message) ? json.message : 'No se pudo enviar el código al solicitante.';
+          alert(msg);
+        }
+      })
+      .catch(err => {
+        console.error('Error enviando código de entrega:', err);
+        alert('Error de red al enviar código de entrega.');
+      });
+
+    } else {
+      $('#modalCodigoEntrega').modal('show');
+    }
+  });
+
+  codigoForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (!verifyCodeUrl) return;
+
+    const codigo = (codigoInput.value || '').trim();
+
+    codigoErrorEl.classList.add('d-none');
+    codigoErrorEl.textContent = '';
+
+    if (!/^\d{4}$/.test(codigo)) {
+      codigoErrorEl.textContent = 'El código debe tener 4 dígitos numéricos.';
+      codigoErrorEl.classList.remove('d-none');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('codigo', codigo);
+
+    fetch(verifyCodeUrl, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+      },
+      body: formData
+    })
+    .then(async response => {
+      const json = await response.json().catch(() => ({}));
+
+      if (response.ok && json.success) {
+        entregaVerified = true;
+        $('#modalCodigoEntrega').modal('hide');
+        formPaquete.submit();
+      } else {
+        const msg = (json && json.message) ? json.message : 'Error en el código. El paquete no fue entregado.';
+        codigoErrorEl.textContent = msg;
+        codigoErrorEl.classList.remove('d-none');
+      }
+    })
+    .catch(err => {
+      console.error('Error validando código de entrega:', err);
+      codigoErrorEl.textContent = 'Error de red al validar el código. Intenta nuevamente.';
+      codigoErrorEl.classList.remove('d-none');
+    });
+  });
+
+
 })();
 </script>
 
