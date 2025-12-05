@@ -11,7 +11,7 @@
     <div class="row mb-3">
         <div class="col-12 text-center">
             <button class="btn btn-primary" id="filter-gratitude">Galería de Agradecimiento</button>
-            <button class="btn btn-secondary" id="filter-animals">Galería de Animales</button>
+        {{--  <button class="btn btn-secondary" id="filter-animals">Galería de Animales</button> --}}
             @guest
                 <a href="{{ route('solicitud.public.create') }}" class="btn btn-outline-primary ml-2">
                     Enviar nueva solicitud
