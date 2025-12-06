@@ -146,7 +146,14 @@ document.addEventListener("DOMContentLoaded", () => {
             truckTimer = null;
         }
 
-        truckMarker = L.marker(normalized[0], { title: 'Camión en ruta' }).addTo(mapInstance);
+        const truckIcon = L.divIcon({
+            className: 'bg-transparent',
+            html: '<div style="background-color: #007bff; border: 2px solid white; border-radius: 50%; width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; box-shadow: 0 3px 6px rgba(0,0,0,0.3);"><i class="fas fa-truck" style="color: white; font-size: 18px;"></i></div>',
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
+        });
+
+        truckMarker = L.marker(normalized[0], { icon: truckIcon, title: 'Camión en ruta' }).addTo(mapInstance);
 
         let index = 0;
         const delayMs = 2500;
