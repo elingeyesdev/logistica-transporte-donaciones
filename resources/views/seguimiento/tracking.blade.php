@@ -13,7 +13,7 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1>Tracking del Paquete: {{ $paquete->solicitud->codigo_seguimiento }}</h1>
-        <a href="{{ route('seguimiento.index') }}" class="btn btn-primary">
+        <a href="{{ route('paquete.index') }}" class="btn btn-primary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
     </div>
