@@ -210,6 +210,23 @@
                             <strong>Código de Solicitud:</strong>
                             {{ $paquete->solicitud->codigo_seguimiento ?? '—' }}
                         </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Nombre del Solicitante:</strong>
+                            {{ optional($paquete->solicitud->solicitante)->nombre }} {{ optional($paquete->solicitud->solicitante)->apellido }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>CI:</strong>
+                            {{ optional($paquete->solicitud->solicitante)->ci }}
+                        </div>
+                        @if($paquete->solicitud->nombre_referencia)
+                        <div class="form-group mb-2 mb20">
+                            <strong>Contacto de Referencia:</strong>
+                            {{ $paquete->solicitud->nombre_referencia }} 
+                            @if($paquete->solicitud->celular_referencia)
+                                - {{ $paquete->solicitud->celular_referencia }}
+                            @endif
+                        </div>
+                        @endif
                         
                         <div class="form-group mb-2 mb20">
                             <strong>Estado:</strong>
