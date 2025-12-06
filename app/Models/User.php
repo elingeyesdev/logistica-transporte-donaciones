@@ -7,11 +7,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-
+use Spatie\Permission\Traits\HasRoles; 
+/**
+ * @method $this assignRole(...$roles)
+ * @method bool hasRole(string|array|\Spatie\Permission\Models\Role $roles, string $guard = null)
+ * @method \Spatie\Permission\Models\Role[] getRoleNames()
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles;
+    protected string $guard_name = 'web';
 
     /**
      * The attributes that are mass assignable.

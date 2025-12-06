@@ -86,11 +86,10 @@
                 @endforeach
             </select>
           </td>
-
           <td>
             <input type="checkbox" class="toggle-admin"
-                   data-id="{{ $user->id }}"
-                   {{ $user->administrador ? 'checked' : '' }}>
+                  data-id="{{ $user->id }}"
+                  {{ ($user->hasRole('admin') || $user->administrador) ? 'checked' : '' }}>
           </td>
           <td>
             <input type="checkbox" class="toggle-activo"

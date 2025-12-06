@@ -28,11 +28,25 @@ class UserAdminController extends Controller
     public function toggleAdmin($id)
     {
         $user = User::findOrFail($id);
+
         $user->administrador = !$user->administrador;
         $user->save();
+        if ($user->administrador) {
+            if (!$user->hasRole('admin')) {
+                $user->assignRole('admin');
+            }
+        } else {
+            if ($user->hasRole('admin')) {
+                $user->removeRole('admin');
+            }
+        }
 
-        return response()->json(['success' => true, 'administrador' => $user->administrador]);
+        return response()->json([
+            'success'       => true,
+            'administrador' => $user->administrador,
+        ]);
     }
+
 
     public function toggleActivo($id)
     {
@@ -44,9 +58,9 @@ class UserAdminController extends Controller
     }
 
    public function cambiarRol($id, Request $request)
-{
+    {
     $user = User::findOrFail($id);
-
+    $createdConductor = false;  
     $validated = $request->validate([
         'id_rol' => ['required', 'integer', 'exists:rol,id_rol'],
     ]);

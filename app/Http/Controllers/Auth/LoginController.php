@@ -74,7 +74,8 @@ class LoginController extends Controller
                 'nombre'        => $user->nombre,
                 'apellido'      => $user->apellido,
                 'correo'        => $user->correo_electronico,
-                'administrador' => (bool)$user->administrador,
+                'administrador' => $user->hasRole('admin') || (bool)$user->administrador,
+
             ],
             'token' => $token
         ]);
