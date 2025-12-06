@@ -20,6 +20,11 @@ use App\Mail\SolicitudEstadoActualizado;
 
 class SolicitudController extends Controller
 {
+    public function landing(): View
+    {
+        return view('landing');
+    }
+
     public function index(Request $request)
     {
         $query = Solicitud::with(['solicitante', 'destino'])

@@ -24,7 +24,7 @@ use App\Models\Paquete;
 Auth::routes();
 Route::get('solicitud/buscar', [SolicitudController::class, 'buscarPorCodigo'])
         ->name('solicitud.buscar');
-Route::get('/', [SolicitudController::class, 'create'])->name('solicitud.public.create');
+Route::get('/', [SolicitudController::class, 'landing'])->name('solicitud.public.create');
 
 Route::get('solicitud/create', [SolicitudController::class, 'create'])
     ->name('solicitud.create');
