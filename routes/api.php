@@ -64,10 +64,11 @@ Route::middleware(['auth:sanctum', 'activo'])->group(function () {
 
     Route::post('paquete/{paquete}/entrega/verify-code', [PaqueteController::class, 'verifyEntregaCode'])
         ->name('api.paquete.entrega.verify-code');
+    Route::get('usuario', [UserAdminController::class, 'index']);
+
     
 });
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::get('usuario', [UserAdminController::class, 'index']);
     Route::post('usuario/{id}/toggle-admin', [UserAdminController::class, 'toggleAdmin']);
     Route::post('usuario/{id}/toggle-activo', [UserAdminController::class, 'toggleActivo']);
     Route::post('usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRol']);
