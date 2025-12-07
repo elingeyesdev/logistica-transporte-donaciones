@@ -105,7 +105,7 @@
                         <div id="reporte-pdf">
                             <div class="header">
                                 <div class="brand">DAS - Alas Chiquitanas</div>
-                                <div class="subtle">Generado: {{ now()->format('d/m/Y H:i') }}</div>
+                                <div class="subtle">Generado: {{ now()->format('d/m/Y') }}</div>
                             </div>
                             <div class="title">Reporte de Paquete N°{{ $paquete->id_paquete }}</div>
 
@@ -159,6 +159,25 @@
                             </table>
 
                             <div class="section-title">Seguimiento</div>
+                            @php
+                                $estadoSeguimiento = optional($paquete->estado)->nombre_estado;
+                                $estadoSeguimientoLower = $estadoSeguimiento ? strtolower($estadoSeguimiento) : null;
+                                $fechaEntregaPdfSource = $paquete->fecha_entrega;
+
+                                if (!$fechaEntregaPdfSource && $estadoSeguimientoLower && \Illuminate\Support\Str::contains($estadoSeguimientoLower, 'entreg')) {
+                                    $fechaEntregaPdfSource = $paquete->updated_at;
+                                }
+
+                                $fechaEntregaPdf = $fechaEntregaPdfSource
+                                    ? ($fechaEntregaPdfSource instanceof \Carbon\Carbon
+                                        ? $fechaEntregaPdfSource->format('d/m/Y')
+                                        : \Carbon\Carbon::parse($fechaEntregaPdfSource)->format('d/m/Y'))
+                                    : null;
+
+                                if ($fechaEntregaPdf && $estadoSeguimientoLower && \Illuminate\Support\Str::contains($estadoSeguimientoLower, 'entreg')) {
+                                    $estadoSeguimiento = trim(($estadoSeguimiento ?? 'Entregado') . ' - ' . $fechaEntregaPdf);
+                                }
+                            @endphp
                             <table style="margin-bottom:12px;">
                                 <thead>
                                     <tr>
@@ -169,7 +188,7 @@
                                 <tbody>
                                     <tr>
                                         <td>Estado</td>
-                                        <td>{{ $paquete->estado->nombre_estado ?? '—' }}</td>
+                                        <td>{{ $estadoSeguimiento ?? '—' }}</td>
                                     </tr>
                                     <tr>
                                         <td>Vehículo</td>
@@ -192,7 +211,7 @@
                                     </tr>
                                     <tr>
                                         <td>Fecha de reporte</td>
-                                        <td>{{ now()->format('d/m/Y H:i') }}</td>
+                                        <td>{{ now()->format('d/m/Y') }}</td>
                                     </tr>
                                     <tr>
                                     <td>Voluntario Encargado</td>

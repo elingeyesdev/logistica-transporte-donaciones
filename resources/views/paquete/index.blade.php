@@ -208,9 +208,11 @@
                         {{ $fechaCreacionFormatted }}
                       </p>
 
+                      @if($estadoLower && \Illuminate\Support\Str::contains($estadoLower, 'entreg') && $fechaEntregaFormatted)
                       <p class="mb-3"><strong>Fecha Entrega:</strong> 
-                        {{ $fechaEntregaFormatted ?? '—' }}
+                        {{ $fechaEntregaFormatted }}
                       </p>
+                      @endif
 
                     </div>
 
