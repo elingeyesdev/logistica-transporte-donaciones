@@ -29,7 +29,13 @@ const solicitudesIniciales = [
     solicitante: 'María González López',
     email: 'maria.gonzalez@email.com',
     ci: '12345678',
+    telefono: '700-12345',
     direccion: 'Comunidad San José, Chiquitos',
+    comunidad: 'San José',
+    provincia: 'Chiquitos',
+    tipoEmergencia: 'Incendio forestal',
+    personasAfectadas: 25,
+    fechaInicio: '2025-01-08',
     fechaTexto: '10 de Enero, 2025',
     productos: ['Agua potable', 'Alimentos', 'Frazadas'],
   },
@@ -89,6 +95,25 @@ export default function ListadoSolicitudScreen() {
         const direccionDestino = destinoObj && (destinoObj.direccion || destinoObj.ubicacion || destinoObj.zona);
         const comunidadDestino = destinoObj && (destinoObj.comunidad || destinoObj.barrio);
         const provinciaDestino = destinoObj && destinoObj.provincia;
+        const telefonoContacto =
+          item.telefono ||
+          item.celular ||
+          item.telefono_contacto ||
+          item.telefonoContacto ||
+          (item.solicitante && (item.solicitante.telefono || item.solicitante.celular));
+        const tipoEmergenciaValor =
+          (item.tipo_emergencia && (item.tipo_emergencia.nombre || item.tipo_emergencia.descripcion)) ||
+          (item.tipoEmergencia && (item.tipoEmergencia.nombre || item.tipoEmergencia.descripcion)) ||
+          item.tipo_emergencia ||
+          item.tipoEmergencia ||
+          'N/D';
+        const personasAfectadasValor =
+          item.personas_afectadas ||
+          item.afectados ||
+          item.numero_afectados ||
+          item.cantidad_personas ||
+          null;
+        const fechaInicioValor = item.fecha_inicio || item.fechaInicio || item.fecha_emergencia || item.fecha;
 
         return {
           id: id || Math.random(),
@@ -99,9 +124,13 @@ export default function ListadoSolicitudScreen() {
           solicitante: solicitanteValor,
           email: item.email || item.correo || (item.solicitante && item.solicitante.email) || 'N/D',
           ci: item.ci || item.documento || (item.solicitante && item.solicitante.ci) || 'N/D',
+          telefono: telefonoContacto || 'N/D',
           direccion: direccionDestino || item.direccion || item.ubicacion || item.domicilio || 'N/D',
           comunidad: comunidadDestino || item.comunidad || null,
           provincia: provinciaDestino || item.provincia || null,
+          tipoEmergencia: tipoEmergenciaValor,
+          personasAfectadas: personasAfectadasValor,
+          fechaInicio: fechaInicioValor || null,
           fechaTexto: item.fecha_formateada || item.fecha || item.created_at || '',
           productos: productosArray,
         };
@@ -287,6 +316,25 @@ const obtenerSolicitudesFiltradas = () => {
   }
 };
 
+const formatFechaSoloDia = (raw) => {
+  if (!raw) return '—';
+
+  let iso = raw.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    iso = `${iso}T00:00:00Z`;
+  } else if (!iso.includes('T')) {
+    iso = iso.replace(/\s/, 'T');
+  }
+
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) {
+    return raw;
+  }
+
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+};
+
 
   const obtenerColorBorde = estado => {
     switch (estado) {
@@ -467,19 +515,6 @@ const obtenerSolicitudesFiltradas = () => {
 
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
-                    name="envelope"
-                    size={12}
-                    color={adminlteColors.muted}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.solicitudInfoLabel}>Email:</Text>
-                </View>
-                <Text style={styles.solicitudInfoValueMuted}>
-                  {solicitud.email}
-                </Text>
-
-                <View style={styles.solicitudInfoRow}>
-                  <FontAwesome5
                     name="id-card"
                     size={12}
                     color={adminlteColors.muted}
@@ -493,15 +528,93 @@ const obtenerSolicitudesFiltradas = () => {
 
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
+                    name="envelope"
+                    size={12}
+                    color={adminlteColors.muted}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.solicitudInfoLabel}>Correo:</Text>
+                </View>
+                <Text style={styles.solicitudInfoValueMuted}>
+                  {solicitud.email}
+                </Text>
+
+                <View style={styles.solicitudInfoRow}>
+                  <FontAwesome5
+                    name="phone"
+                    size={12}
+                    color={adminlteColors.muted}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.solicitudInfoLabel}>Celular:</Text>
+                </View>
+                <Text style={styles.solicitudInfoValueMuted}>
+                  {solicitud.telefono}
+                </Text>
+
+                <View style={styles.solicitudInfoRow}>
+                  <FontAwesome5
+                    name="users"
+                    size={12}
+                    color={adminlteColors.muted}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.solicitudInfoLabel}>Comunidad:</Text>
+                </View>
+                <Text style={styles.solicitudInfoValueMuted}>
+                  {solicitud.comunidad || 'N/D'}
+                </Text>
+
+                <View style={styles.solicitudInfoRow}>
+                  <FontAwesome5
+                    name="city"
+                    size={12}
+                    color={adminlteColors.muted}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.solicitudInfoLabel}>Provincia:</Text>
+                </View>
+                <Text style={styles.solicitudInfoValueMuted}>
+                  {solicitud.provincia || 'N/D'}
+                </Text>
+
+                <View style={styles.solicitudInfoRow}>
+                  <FontAwesome5
                     name="map-marker-alt"
                     size={12}
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.solicitudInfoLabel}>Dirección:</Text>
+                  <Text style={styles.solicitudInfoLabel}>Ubicación:</Text>
                 </View>
                 <Text style={styles.solicitudInfoValueMuted}>
                   {solicitud.direccion}
+                </Text>
+
+                <View style={styles.solicitudInfoRow}>
+                  <FontAwesome5
+                    name="exclamation-triangle"
+                    size={12}
+                    color={adminlteColors.muted}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.solicitudInfoLabel}>Tipo de emergencia:</Text>
+                </View>
+                <Text style={styles.solicitudInfoValueMuted}>
+                  {solicitud.tipoEmergencia || 'N/D'}
+                </Text>
+
+                <View style={styles.solicitudInfoRow}>
+                  <FontAwesome5
+                    name="users"
+                    size={12}
+                    color={adminlteColors.muted}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.solicitudInfoLabel}>Personas afectadas:</Text>
+                </View>
+                <Text style={styles.solicitudInfoValueMuted}>
+                  {solicitud.personasAfectadas != null ? solicitud.personasAfectadas : 'N/D'}
                 </Text>
 
                 <View style={styles.solicitudInfoRow}>
@@ -511,10 +624,10 @@ const obtenerSolicitudesFiltradas = () => {
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.solicitudInfoLabel}>Fecha:</Text>
+                  <Text style={styles.solicitudInfoLabel}>Fecha de inicio:</Text>
                 </View>
                 <Text style={styles.solicitudInfoValueMuted}>
-                   {formatFechaSolicitud(solicitud.fechaTexto || solicitud.fecha)}  
+                   {formatFechaSoloDia(solicitud.fechaInicio || solicitud.fecha)}  
                 </Text>
 
                 <View style={styles.solicitudInfoRow}>
@@ -627,29 +740,61 @@ const obtenerSolicitudesFiltradas = () => {
                       </Text>
                     </View>
                     <View style={styles.detalleSection}>
-                      <Text style={styles.detalleLabel}>Email:</Text>
-                      <Text style={styles.detalleValue}>
-                        {solicitudSeleccionada.email}
-                      </Text>
-                    </View>
-                    <View style={styles.detalleSection}>
                       <Text style={styles.detalleLabel}>CI:</Text>
                       <Text style={styles.detalleValue}>
                         {solicitudSeleccionada.ci}
                       </Text>
                     </View>
                     <View style={styles.detalleSection}>
-                      <Text style={styles.detalleLabel}>Dirección:</Text>
+                      <Text style={styles.detalleLabel}>Correo:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.email}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Celular:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.telefono}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Comunidad:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.comunidad || 'N/D'}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Provincia:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.provincia || 'N/D'}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Ubicación:</Text>
                       <Text style={styles.detalleValue}>
                         {solicitudSeleccionada.direccion}
                       </Text>
                     </View>
                     <View style={styles.detalleSection}>
-                      <Text style={styles.detalleLabel}>Fecha:</Text>
+                      <Text style={styles.detalleLabel}>Tipo de emergencia:</Text>
                       <Text style={styles.detalleValue}>
-                        {formatFechaSolicitud(
-                            solicitudSeleccionada.fechaTexto || solicitudSeleccionada.fecha
-                          )}
+                        {solicitudSeleccionada.tipoEmergencia || 'N/D'}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Personas afectadas:</Text>
+                      <Text style={styles.detalleValue}>
+                        {solicitudSeleccionada.personasAfectadas != null
+                          ? solicitudSeleccionada.personasAfectadas
+                          : 'N/D'}
+                      </Text>
+                    </View>
+                    <View style={styles.detalleSection}>
+                      <Text style={styles.detalleLabel}>Fecha de inicio:</Text>
+                      <Text style={styles.detalleValue}>
+                        {formatFechaSoloDia(
+                          solicitudSeleccionada.fechaInicio || solicitudSeleccionada.fecha
+                        )}
                       </Text>
                     </View>
                     <View style={styles.detalleSection}>
