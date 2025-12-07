@@ -85,9 +85,7 @@ export default function LicenciasScreen() {
       {/* Botón Crear Licencia */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Tipos de Licencia
-          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}
@@ -140,7 +138,7 @@ export default function LicenciasScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.licenciaCardTitle}>
-                    Licencia #{String(index + 1).padStart(3, '0')}
+                    Licencia Nº{String(index + 1).padStart(2, '0')}
                   </Text>
                 </View>
               </View>
@@ -154,10 +152,11 @@ export default function LicenciasScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.licenciaInfoLabel}>Tipo Licencia:</Text>
-                </View>
-                <Text style={styles.licenciaInfoValue}>
+                  <Text style={styles.licenciaInfoValue}>
                   {licencia.licencia}
                 </Text>
+                </View>
+                
               </View>
             </View>
             ))}
@@ -324,8 +323,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: adminlteColors.dark,
     marginTop: 2,
-    marginBottom: 4,
-    marginLeft: 18,
+    marginBottom: 2,
+    marginLeft: 8,
   },
   overlayBackdrop: {
     flex: 1,

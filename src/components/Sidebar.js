@@ -104,12 +104,6 @@ const voluntarioMenu = [
     icon: 'truck-monster',
     route: 'TipoVehiculo',
   },
-  {
-    id: 'voluntario',
-    label: 'Voluntarios',
-    icon: 'user',
-    route: 'Voluntario',
-  },
 
 ];
 
@@ -119,7 +113,12 @@ export default function Sidebar({ isVisible, onClose, navigation }) {
   const [shouldRender, setShouldRender] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const { user, logout } = useContext(AuthContext);
-  const finalMenu = user?.administrador ? adminMenu : voluntarioMenu;
+  const isAdmin = !!user && (
+    user.administrador === true || user.administrador === 1 || user.administrador === '1' || user.role === 'admin' || user.roles?.includes?.('admin')         // por si luego mandas un array de roles
+  );
+
+const finalMenu = isAdmin ? adminMenu : voluntarioMenu;
+
   useEffect(() => {
     if (isVisible) {
       setShouldRender(true);

@@ -63,9 +63,7 @@ export default function EstadoScreen() {
       {/* Botón Crear Estado */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Estados
-          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}

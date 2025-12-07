@@ -68,9 +68,7 @@ export default function TipoEmergenciaScreen({ navigation }) {
       {/* Botón Crear Tipo */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Tipos de Emergencia
-          </Text>
+         
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalVisible(true)}

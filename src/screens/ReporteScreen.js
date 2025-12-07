@@ -96,8 +96,7 @@ export default function ReporteScreen() {
       {/* Botón Crear Reporte */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-              Reportes Generados          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}

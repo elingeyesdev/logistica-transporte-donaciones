@@ -103,9 +103,7 @@ export default function DestinoScreen() {
       {/* Botón Crear Destino */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Destinos
-          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}

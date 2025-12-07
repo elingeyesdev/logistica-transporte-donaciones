@@ -138,6 +138,10 @@ export default function VehiculosScreen() {
       setLoading(false);
     }
   };
+  const getMarcaNombre = (idMarca) => {
+    const marca = marcas.find(m => String(m.id_marca) === String(idMarca));
+    return marca?.nombre_marca || 'N/A';
+  };
 
   const obtenerColorBorde = index => {
     const colores = [
@@ -158,9 +162,7 @@ export default function VehiculosScreen() {
       {/* Botón Crear Vehículo */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Vehículos Registrados
-          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}
@@ -227,10 +229,10 @@ export default function VehiculosScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.vehiculoInfoLabel}>Placa:</Text>
+                  <Text style={styles.vehiculoInfoValue}>
+                    {vehiculo.placa}
+                  </Text>
                 </View>
-                <Text style={styles.vehiculoInfoValue}>
-                  {vehiculo.placa}
-                </Text>
 
                 <View style={styles.vehiculoInfoRow}>
                   <FontAwesome5
@@ -240,10 +242,10 @@ export default function VehiculosScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.vehiculoInfoLabel}>Capacidad:</Text>
+                    <Text style={styles.vehiculoInfoValueMuted}>
+                    {vehiculo.capacidad_aproximada} Kg
+                    </Text>
                 </View>
-                <Text style={styles.vehiculoInfoValueMuted}>
-                  {vehiculo.capacidad_aproximada} Kg
-                </Text>
 
                 <View style={styles.vehiculoInfoRow}>
                   <FontAwesome5
@@ -253,10 +255,10 @@ export default function VehiculosScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.vehiculoInfoLabel}>Tipo:</Text>
+                  <Text style={styles.vehiculoInfoValueMuted}>
+                    {vehiculo.tipo_vehiculo?.nombre_tipo_vehiculo || 'N/A'}
+                  </Text>
                 </View>
-                <Text style={styles.vehiculoInfoValueMuted}>
-                  {vehiculo.tipo_vehiculo?.nombre_tipo_vehiculo || 'N/A'}
-                </Text>
 
                 <View style={styles.vehiculoInfoRow}>
                   <FontAwesome5
@@ -266,10 +268,11 @@ export default function VehiculosScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.vehiculoInfoLabel}>Año:</Text>
+                  <Text style={styles.vehiculoInfoValueMuted}>
+                    {vehiculo.modelo_anio}
+                  </Text>
                 </View>
-                <Text style={styles.vehiculoInfoValueMuted}>
-                  {vehiculo.modelo_anio}
-                </Text>
+
 
                 <View style={styles.vehiculoInfoRow}>
                   <FontAwesome5
@@ -279,10 +282,10 @@ export default function VehiculosScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.vehiculoInfoLabel}>Modelo:</Text>
+                    <Text style={styles.vehiculoInfoValueMuted}>
+                      {vehiculo.modelo}
+                    </Text>
                 </View>
-                <Text style={styles.vehiculoInfoValueMuted}>
-                  {vehiculo.modelo}
-                </Text>
 
                 <View style={styles.vehiculoInfoRow}>
                   <FontAwesome5
@@ -291,25 +294,25 @@ export default function VehiculosScreen() {
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.vehiculoInfoLabel}>Marca:</Text>
+                  <Text style={styles.vehiculoInfoLabel}>Marca: </Text>
+                  <Text style={styles.vehiculoInfoValueMuted}>
+                    {getMarcaNombre(vehiculo.id_marca)}
+                  </Text>
                 </View>
-                <Text style={styles.vehiculoInfoValueMuted}>
-                  {vehiculo.marca?.nombre_marca || 'N/A'}
-                </Text>
 
                 <View style={styles.vehiculoInfoRow}>
                   <FontAwesome5
-                    name="tag"
+                    name="brush"
                     size={12}
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.vehiculoInfoLabel}>Color:</Text>
-                </View>
-                <Text style={styles.vehiculoInfoValueMuted}>
+                  <Text style={styles.vehiculoInfoValueMuted}>
                   {vehiculo.color || 'Otro'}
                 </Text>
-
+                </View>
+              
               </View>
             </View>
           ))}
@@ -634,14 +637,14 @@ const styles = StyleSheet.create({
     color: adminlteColors.dark,
     marginTop: 2,
     marginBottom: 4,
-    marginLeft: 18,
+    marginLeft: 8,
   },
   vehiculoInfoValueMuted: {
     fontSize: 12,
     color: adminlteColors.muted,
     marginTop: 2,
     marginBottom: 4,
-    marginLeft: 18,
+    marginLeft: 8,
   },
   modalContainer: {
     flex: 1,

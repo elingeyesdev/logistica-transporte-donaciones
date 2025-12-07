@@ -518,14 +518,13 @@ const formatFechaSoloDia = (raw) => {
                     name="user"
                     size={12}
                     color={adminlteColors.primary}
-                    style={{ marginRight: 6 }}
+                    style={{ marginRight: 6, marginLeft:3 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>Solicitante:</Text>
-                </View>
-                <Text style={styles.solicitudInfoValue}>
+                  <Text style={styles.solicitudInfoValue}>
                   {solicitud.solicitante}
                 </Text>
-
+                </View>
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
                     name="id-card"
@@ -534,10 +533,10 @@ const formatFechaSoloDia = (raw) => {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>CI:</Text>
+                  <Text style={styles.solicitudInfoValueMuted}>
+                    {solicitud.ci}
+                  </Text>
                 </View>
-                <Text style={styles.solicitudInfoValueMuted}>
-                  {solicitud.ci}
-                </Text>
 
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
@@ -547,10 +546,10 @@ const formatFechaSoloDia = (raw) => {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>Correo:</Text>
+                  <Text style={styles.solicitudInfoValueMuted}>
+                    {solicitud.email}
+                  </Text>
                 </View>
-                <Text style={styles.solicitudInfoValueMuted}>
-                  {solicitud.email}
-                </Text>
 
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
@@ -560,10 +559,11 @@ const formatFechaSoloDia = (raw) => {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>Celular:</Text>
-                </View>
-                <Text style={styles.solicitudInfoValueMuted}>
+                  <Text style={styles.solicitudInfoValueMuted}>
                   {solicitud.telefono}
                 </Text>
+                </View>
+
 
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
@@ -573,10 +573,10 @@ const formatFechaSoloDia = (raw) => {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>Comunidad:</Text>
-                </View>
-                <Text style={styles.solicitudInfoValueMuted}>
-                  {solicitud.comunidad || 'N/D'}
+                   <Text style={styles.solicitudInfoValueMuted}>
+                  {solicitud.comunidad || 'N/A'}
                 </Text>
+                </View>
 
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
@@ -586,17 +586,17 @@ const formatFechaSoloDia = (raw) => {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>Provincia:</Text>
-                </View>
-                <Text style={styles.solicitudInfoValueMuted}>
-                  {solicitud.provincia || 'N/D'}
+                  <Text style={styles.solicitudInfoValueMuted}>
+                  {solicitud.provincia || 'N/A'}
                 </Text>
+                </View>
 
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
                     name="map-marker-alt"
                     size={12}
                     color={adminlteColors.muted}
-                    style={{ marginRight: 6 }}
+                    style={{ marginRight: 5, marginLeft:5 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>Ubicación:</Text>
                 </View>
@@ -612,10 +612,10 @@ const formatFechaSoloDia = (raw) => {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>Tipo de emergencia:</Text>
-                </View>
-                <Text style={styles.solicitudInfoValueMuted}>
+                  <Text style={styles.solicitudInfoValueMuted}>
                   {solicitud.tipoEmergencia || 'N/D'}
                 </Text>
+                </View>
 
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
@@ -625,23 +625,23 @@ const formatFechaSoloDia = (raw) => {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>Personas afectadas:</Text>
-                </View>
-                <Text style={styles.solicitudInfoValueMuted}>
+                  <Text style={styles.solicitudInfoValueMuted}>
                   {solicitud.personasAfectadas != null ? solicitud.personasAfectadas : 'N/D'}
                 </Text>
+                </View>
 
                 <View style={styles.solicitudInfoRow}>
                   <FontAwesome5
                     name="calendar"
                     size={12}
                     color={adminlteColors.muted}
-                    style={{ marginRight: 6 }}
+                    style={{ marginRight: 6, marginLeft:3 }}
                   />
                   <Text style={styles.solicitudInfoLabel}>Fecha de inicio:</Text>
-                </View>
-                <Text style={styles.solicitudInfoValueMuted}>
+                  <Text style={styles.solicitudInfoValueMuted}>
                    {formatFechaSoloDia(solicitud.fechaInicio || solicitud.fecha)}  
                 </Text>
+                </View>
 
               </View>
 
@@ -1045,15 +1045,15 @@ const styles = StyleSheet.create({
   },
   solicitudInfoValue: {
     fontSize: 13,
-    color: adminlteColors.primary,
-    marginBottom: 8,
-    marginLeft: 20,
+    color: adminlteColors.dark,
+    marginBottom: 4,
+    marginLeft: 8,
   },
   solicitudInfoValueMuted: {
     fontSize: 13,
     color: adminlteColors.muted,
-    marginBottom: 8,
-    marginLeft: 20,
+    marginBottom: 4,
+    marginLeft: 8,
   },
   productosContainer: {
     flexDirection: 'row',

@@ -23,6 +23,7 @@ import { conductorService } from '../services/conductorService';
 import { getVehiculos } from '../services/vehiculoService';
 import { getEstados } from '../services/estadoService';
 import { getSolicitudes } from '../services/solicitudService';
+import { fetchVoluntarios } from '../services/VoluntarioService';
 
 const paquetesIniciales = [];
 
@@ -67,6 +68,7 @@ export default function PaqueteScreen() {
 
   const [modalDetalleVisible, setModalDetalleVisible] = useState(false);
   const [paqueteSeleccionado, setPaqueteSeleccionado] = useState(null);
+  const [usuariosPorCi, setUsuariosPorCi] = useState({});
 
   const filtrosEstado = [
     { id: 'todos', label: 'Todos', icon: 'list' },
@@ -130,7 +132,7 @@ export default function PaqueteScreen() {
       Alert.alert(
         'Permiso requerido',
         'Necesitamos acceso a tu cámara para que puedas tomar una foto del paquete.'
-      );
+      ); 
       return;
     }
 
@@ -145,7 +147,7 @@ export default function PaqueteScreen() {
     }
   };
 
-  const normalizarPaquetes = (listaBack, solicitudesIndex = {}) =>
+  const normalizarPaquetes = (listaBack, solicitudesIndex = {}, usuariosIndexPorCi = {}) =>
     (listaBack || []).map((p) => {
       const solicitudKey =
         p.id_solicitud != null ? String(p.id_solicitud) : null;
@@ -305,125 +307,29 @@ export default function PaqueteScreen() {
         solicitud?.referencia?.telefono ??
         null;
 
-      const voluntarioRaw =
-        p.voluntario ??
-        p.voluntario_encargado ??
-        p.voluntarioEncargado ??
-        p.voluntario_asignado ??
-        p.voluntarioAsignado ??
-        p.usuario_voluntario ??
-        p.usuarioVoluntario ??
-        p.encargado ??
-        p.encargado_voluntario ??
-        p.encargado_data ??
-        p.encargadoInfo ??
-        p.responsable ??
-        p.responsable_voluntario ??
-        solicitud?.voluntario ??
-        solicitud?.voluntario_encargado ??
-        solicitud?.encargado ??
-        null;
+      const ciEncargado = p.id_encargado;
 
       let voluntarioEncargado = '—';
-      let voluntarioCiEncargado = null;
-      if (typeof voluntarioRaw === 'string') {
-        const limpio = voluntarioRaw.trim();
-        if (limpio) {
-          voluntarioEncargado = limpio;
-        }
-      } else if (voluntarioRaw && typeof voluntarioRaw === 'object') {
-        const partesVoluntario = [
-          voluntarioRaw.nombre,
-          voluntarioRaw.apellido,
-          voluntarioRaw.primer_apellido,
-          voluntarioRaw.segundo_apellido,
-        ]
-          .map((parte) => (parte ? String(parte).trim() : ''))
-          .filter(Boolean);
 
-        const nombreAlterno =
-          voluntarioRaw.nombre_completo ??
-          voluntarioRaw.nombreCompleto ??
-          voluntarioRaw.full_name ??
-          voluntarioRaw.fullName ??
-          voluntarioRaw.alias ??
-          null;
+      if (ciEncargado) {
+        const user = usuariosIndexPorCi[ciEncargado];
 
-        const personaVoluntario =
-          voluntarioRaw.persona ??
-          voluntarioRaw.persona_data ??
-          voluntarioRaw.personaInfo ??
-          voluntarioRaw.datos_persona ??
-          null;
-
-        if (partesVoluntario.length === 0 && personaVoluntario) {
-          const partesPersona = [
-            personaVoluntario.nombre,
-            personaVoluntario.apellido,
-            personaVoluntario.primer_apellido,
-            personaVoluntario.segundo_apellido,
+        if (user) {
+          const nombreCompleto = [
+            user.nombre,
+            user.apellido
           ]
             .map((parte) => (parte ? String(parte).trim() : ''))
-            .filter(Boolean);
+            .filter(Boolean)
+            .join(' ');
 
-          if (partesPersona.length > 0) {
-            partesVoluntario.push(...partesPersona);
+          if (nombreCompleto) {
+            voluntarioEncargado = `${nombreCompleto} - CI ${ciEncargado}`;
+          } else {
+            voluntarioEncargado = `CI ${ciEncargado} 2`;
           }
-        }
-
-        const usuarioVoluntario =
-          voluntarioRaw.usuario ??
-          voluntarioRaw.user ??
-          voluntarioRaw.usuario_data ??
-          null;
-
-        if (partesVoluntario.length > 0) {
-          voluntarioEncargado = partesVoluntario.join(' ');
-        } else if (nombreAlterno) {
-          const limpio = String(nombreAlterno).trim();
-          if (limpio) {
-            voluntarioEncargado = limpio;
-          }
-        } else if (usuarioVoluntario?.name) {
-          const limpio = String(usuarioVoluntario.name).trim();
-          if (limpio) {
-            voluntarioEncargado = limpio;
-          }
-        }
-
-        if (voluntarioEncargado === '—' && voluntarioRaw.nombre_usuario) {
-          const limpio = String(voluntarioRaw.nombre_usuario).trim();
-          if (limpio) {
-            voluntarioEncargado = limpio;
-          }
-        }
-
-        const ciCandidatos = [
-          voluntarioRaw.ci,
-          voluntarioRaw.carnet,
-          voluntarioRaw.documento,
-          voluntarioRaw.documento_identidad,
-          voluntarioRaw.numero_documento,
-          voluntarioRaw.ci_encargado,
-          voluntarioRaw.ciEncargado,
-          personaVoluntario?.ci,
-          personaVoluntario?.carnet,
-          personaVoluntario?.documento,
-          personaVoluntario?.documento_identidad,
-          personaVoluntario?.numero_documento,
-        ];
-
-        const ciEncontrado = ciCandidatos.find((ci) => ci != null && String(ci).trim() !== '');
-        if (ciEncontrado != null) {
-          voluntarioCiEncargado = String(ciEncontrado).trim();
-        }
-      }
-
-      if (voluntarioCiEncargado) {
-        if (voluntarioEncargado === '—') {
-          voluntarioEncargado = `CI ${voluntarioCiEncargado}`;
         } else {
-          voluntarioEncargado = `${voluntarioEncargado} - CI ${voluntarioCiEncargado}`;
+          voluntarioEncargado = `CI ${ciEncargado}`;
         }
       }
 
@@ -439,6 +345,18 @@ export default function PaqueteScreen() {
         p.fecha_revision ??
         null;
 
+      let ubicacionClean = '—';
+      const rawUbicacion = p.ubicacion_actual;
+
+      if (rawUbicacion != null) {
+        const str = String(rawUbicacion).trim();
+        if (str) {
+          const idx = str.indexOf('-');
+          const base = idx !== -1 ? str.slice(0, idx) : str;
+          ubicacionClean = base.trim() || '—';
+          if (base=='(') ubicacionClean='Nombre no registrado';
+        }
+      }
       return {
         id: p.id_paquete,
         codigo:
@@ -458,7 +376,7 @@ export default function PaqueteScreen() {
 
         estado_id: p.estado_id,
         estadoNombre: p.estado?.nombre_estado ?? '—',
-        ubicacionActual: p.ubicacion_actual ?? '—',
+        ubicacionActual: ubicacionClean ?? '—',
 
         fechaAprobacion: p.fecha_aprobacion ?? p.created_at ?? '—',
         fechaCreacion,
@@ -647,9 +565,23 @@ export default function PaqueteScreen() {
         });
 
         setSolicitudesMap(solicitudesIndex);
+      const usuarios = await fetchVoluntarios();
+      const usuariosIndexPorCi = {};
 
+      (usuarios || []).forEach((u) => {
+        const ci = u.ci;
+        if (ci != null) {
+          const key = String(ci).trim();
+          if (key) {
+            usuariosIndexPorCi[key] = u;
+          }
+        }
+        
+        });
+
+        setUsuariosPorCi(usuariosIndexPorCi);
         const lista = await getPaquetes();
-        const normalizados = normalizarPaquetes(lista, solicitudesIndex);
+        const normalizados = normalizarPaquetes(lista, solicitudesIndex, usuariosIndexPorCi);
         setPaquetes(normalizados);
 
         const respCond = await conductorService.getConductores();
@@ -820,7 +752,7 @@ export default function PaqueteScreen() {
         }
 
         const lista = await getPaquetes();
-        setPaquetes(normalizarPaquetes(lista, solicitudesMap));
+        setPaquetes(normalizarPaquetes(lista, solicitudesMap, usuariosPorCi));
 
         setModalVisible(false);
         resetForm();
@@ -898,7 +830,7 @@ export default function PaqueteScreen() {
       }
 
       const lista = await getPaquetes();
-      setPaquetes(normalizarPaquetes(lista, solicitudesMap));
+      setPaquetes(normalizarPaquetes(lista, solicitudesMap, usuariosPorCi));
 
       setModalVisible(false);
       resetForm();
@@ -1105,8 +1037,8 @@ export default function PaqueteScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.label}>Solicitante:</Text>
+                  <Text style={styles.valueMuted}>{p.solicitanteNombre || '—'}</Text>
                 </View>
-                <Text style={styles.valueMuted}>{p.solicitanteNombre || '—'}</Text>
 
                 <View style={styles.row}>
                   <FontAwesome5
@@ -1116,9 +1048,8 @@ export default function PaqueteScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.label}>CI:</Text>
+                  <Text style={styles.valueMuted}>{p.solicitanteCi || '—'}</Text>
                 </View>
-                <Text style={styles.valueMuted}>{p.solicitanteCi || '—'}</Text>
-
                 <View style={styles.row}>
                   <FontAwesome5
                     name="users"
@@ -1127,9 +1058,9 @@ export default function PaqueteScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.label}>Comunidad:</Text>
-                </View>
                 <Text style={styles.valueMuted}>{p.comunidadSolicitud || '—'}</Text>
 
+                </View>
                 <View style={styles.row}>
                   <FontAwesome5
                     name="exclamation-triangle"
@@ -1138,8 +1069,8 @@ export default function PaqueteScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.label}>Emergencia:</Text>
-                </View>
                 <Text style={styles.valueMuted}>{p.tipoEmergencia || '—'}</Text>
+                </View>
 
                 <View style={styles.row}>
                   <FontAwesome5
@@ -1149,10 +1080,10 @@ export default function PaqueteScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.label}>Voluntario encargado:</Text>
-                </View>
-                <Text style={styles.valueMuted}>
+                  <Text style={styles.valueMuted}>
                   {p.voluntarioEncargado || 'El voluntario se asigna al iniciar la ruta'}
                 </Text>
+                </View>
 
                 <View style={styles.row}>
                   <FontAwesome5
@@ -1164,7 +1095,6 @@ export default function PaqueteScreen() {
                   <Text style={styles.label}>Ubicación:</Text>
                 </View>
                 <Text style={styles.valuePrimary}>{p.ubicacionActual || '—'}</Text>
-
                 <View style={styles.row}>
                   <FontAwesome5
                     name="calendar-plus"
@@ -1173,8 +1103,9 @@ export default function PaqueteScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.label}>Fecha Creación:</Text>
+                  <Text style={styles.valueMuted}>{formatFechaAprobacion(p.fechaCreacion) || '—'}</Text>
+
                 </View>
-                <Text style={styles.valueMuted}>{formatFechaAprobacion(p.fechaCreacion) || '—'}</Text>
 
                 {esEstadoEntregado(p.estado_id) && p.fechaEntrega ? (
                   <>
@@ -1921,14 +1852,14 @@ const styles = StyleSheet.create({
   valuePrimary: {
     fontSize: 13,
     color: adminlteColors.primary,
-    marginBottom: 8,
-    marginLeft: 20,
+    marginBottom: 2,
+    marginLeft: 8,
   },
   valueMuted: {
     fontSize: 13,
     color: adminlteColors.muted,
-    marginBottom: 8,
-    marginLeft: 20,
+    marginBottom: 2,
+    marginLeft: 8,
   },
 
   modalContainer: {
@@ -2236,10 +2167,10 @@ card: {
     backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: adminlteColors.primary,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     paddingVertical: 8,
     borderRadius: 4,
-    marginRight: 8,
+    marginRight: 2,
   },
   filtroButtonActive: {
     backgroundColor: adminlteColors.primary,

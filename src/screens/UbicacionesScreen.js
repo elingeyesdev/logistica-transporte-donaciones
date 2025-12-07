@@ -91,9 +91,7 @@ export default function UbicacionesScreen() {
       {/* Botón Crear Ubicación */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Ubicaciones
-          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}

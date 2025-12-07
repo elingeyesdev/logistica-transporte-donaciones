@@ -108,9 +108,7 @@ export default function SolicitantesScreen() {
       {/* Botón Crear Solicitante */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Solicitantes Registrados
-          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}

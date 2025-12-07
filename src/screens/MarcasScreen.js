@@ -83,14 +83,12 @@ export default function MarcasScreen() {
 
   return (
     <AdminLayout>
-      <Text style={styles.pageTitle}>Marcas</Text>
+      <Text style={styles.pageTitle}>Marcas de Vehiculos</Text>
 
       {/* Botón Crear Marca */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Marcas de Vehiculo
-          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}
@@ -145,24 +143,15 @@ export default function MarcasScreen() {
                         style={{ marginRight: 6 }}
                       />
                       <Text style={styles.marcaCardTitle}>
-                        Marca #{String(index + 1).padStart(3, '0')}
+                        Marca Nº{String(index + 1).padStart(2, '0')}
                       </Text>
                     </View>
                   </View>
 
                   <View style={styles.marcaCardBody}>
                     <View style={styles.marcaInfoRow}>
-                      <FontAwesome5
-                        name="copyright"
-                        size={12}
-                        color={adminlteColors.primary}
-                        style={{ marginRight: 6 }}
-                      />
-                      <Text style={styles.marcaInfoLabel}>Nombre Marca:</Text>
+                      <Text style={styles.marcaInfoLabel}>Nombre: {marca.nombre_marca}</Text>
                     </View>
-                    <Text style={styles.marcaInfoValue}>
-                      {marca.nombre_marca}
-                    </Text>
                   </View>
                 </View>
               ))

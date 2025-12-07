@@ -142,6 +142,34 @@ export default function ConductoresScreen() {
     ];
     return colores[index % colores.length];
   };
+  const formatFecha = (isoString) => {
+    if (!isoString) return '—';
+
+    const clean = isoString.replace(/\.\d+Z$/, 'Z');
+
+    const date = new Date(clean);
+    if (isNaN(date.getDate())) {
+      return isoString;
+    }
+
+    try {
+      const deviceTz =
+        Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/La_Paz';
+
+      return new Intl.DateTimeFormat('es-BO', {
+        timeZone: deviceTz,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(date);
+    } catch (e) {
+      const pad = (n) => String(n).padStart(2, '0');
+      const d = date.getDate();
+      const m = date.getMonth() + 1;
+      const y = date.getFullYear();
+      return `${pad(d)}/${pad(m)}/${y}`;
+    }
+  };
 
   return (
     <AdminLayout>
@@ -150,9 +178,6 @@ export default function ConductoresScreen() {
       {/* Botón Crear Conductor */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Conductores Registrados
-          </Text>
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}
@@ -213,42 +238,16 @@ export default function ConductoresScreen() {
               <View style={styles.conductorCardBody}>
                 <View style={styles.conductorInfoRow}>
                   <FontAwesome5
-                    name="user"
-                    size={12}
-                    color={adminlteColors.primary}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.conductorInfoLabel}>Nombre:</Text>
-                </View>
-                <Text style={styles.conductorInfoValue}>
-                  {conductor.nombre}
-                </Text>
-
-                <View style={styles.conductorInfoRow}>
-                  <FontAwesome5
-                    name="user-tag"
-                    size={12}
-                    color={adminlteColors.muted}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.conductorInfoLabel}>Apellido:</Text>
-                </View>
-                <Text style={styles.conductorInfoValueMuted}>
-                  {conductor.apellido}
-                </Text>
-
-                <View style={styles.conductorInfoRow}>
-                  <FontAwesome5
                     name="calendar"
                     size={12}
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.conductorInfoLabel}>Fecha Nacimiento:</Text>
-                </View>
+                  <Text style={styles.conductorInfoLabel}>Fecha de Nacimiento:</Text>
                 <Text style={styles.conductorInfoValueMuted}>
-                  {conductor.fecha_nacimiento}
+                  {formatFecha(conductor.fecha_nacimiento)}
                 </Text>
+                </View>
 
                 <View style={styles.conductorInfoRow}>
                   <FontAwesome5
@@ -258,10 +257,10 @@ export default function ConductoresScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.conductorInfoLabel}>CI:</Text>
+                  <Text style={styles.conductorInfoValueMuted}>
+                    {conductor.ci}
+                  </Text>
                 </View>
-                <Text style={styles.conductorInfoValueMuted}>
-                  {conductor.ci}
-                </Text>
 
                 <View style={styles.conductorInfoRow}>
                   <FontAwesome5
@@ -271,10 +270,11 @@ export default function ConductoresScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.conductorInfoLabel}>Celular:</Text>
-                </View>
-                <Text style={styles.conductorInfoValueMuted}>
+                  <Text style={styles.conductorInfoValueMuted}>
                   {conductor.celular}
-                </Text>
+                  </Text>
+                </View>
+
 
                 <View style={styles.conductorInfoRow}>
                   <FontAwesome5
@@ -284,14 +284,14 @@ export default function ConductoresScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.conductorInfoLabel}>Tipo Licencia:</Text>
-                </View>
-                <Text style={styles.conductorInfoValueMuted}>
+                  <Text style={styles.conductorInfoValueMuted}>
                   {conductor.licencia 
                     ? conductor.licencia.licencia 
                     : conductor.id_licencia 
                       ? licencias.find(l => l.id === conductor.id_licencia || l.id_licencia === conductor.id_licencia)?.licencia || `ID: ${conductor.id_licencia}`
                       : 'Sin licencia'}
-                </Text>
+                  </Text>
+                </View>
               </View>
             </View>
           ))}
@@ -299,7 +299,6 @@ export default function ConductoresScreen() {
         )}
       </ScrollView>
 
-      {/* Modal Crear Conductor (overlay centrado) */}
       <Modal
         visible={modalCrearVisible}
         animationType="fade"
@@ -498,8 +497,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: adminlteColors.muted,
     marginTop: 2,
-    marginBottom: 4,
-    marginLeft: 18,
+    marginBottom: 2,
+    marginLeft: 8,
   },
   overlayBackdrop: {
     flex: 1,

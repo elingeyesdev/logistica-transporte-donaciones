@@ -82,9 +82,7 @@ export default function RolesScreen() {
       {/* Botón Crear Rol */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Roles Registrados
-          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}
@@ -123,7 +121,7 @@ export default function RolesScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.rolCardTitle}>
-                    Rol #{String(index + 1).padStart(3, '0')}
+                    Rol Nº{String(index + 1).padStart(2, '0')}
                   </Text>
                 </View>
               </View>
@@ -137,10 +135,11 @@ export default function RolesScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.rolInfoLabel}>Nombre Rol:</Text>
+                  <Text style={styles.rolInfoValue}>
+                    {rol.nombreRol}
+                  </Text>
                 </View>
-                <Text style={styles.rolInfoValue}>
-                  {rol.nombreRol}
-                </Text>
+                
               </View>
             </View>
           ))}
@@ -319,8 +318,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: adminlteColors.dark,
     marginTop: 2,
-    marginBottom: 4,
-    marginLeft: 18,
+    marginBottom: 2,
+    marginLeft: 8,
   },
   modalContainer: {
     flex: 1,

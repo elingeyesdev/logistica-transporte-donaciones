@@ -109,9 +109,7 @@ export default function SeguimientoPaqueteScreen() {
       {/* Botón Crear Seguimiento */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Seguimiento de Paquete
-          </Text>
+          
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}

@@ -87,9 +87,6 @@ export default function TipoVehiculoScreen() {
       {/* Botón Crear Tipo de Vehículo */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderTitle}>
-            Tipos de Vehículo Registrados
-          </Text>
           <TouchableOpacity
             style={styles.btnCrear}
             onPress={() => setModalCrearVisible(true)}
@@ -142,7 +139,7 @@ export default function TipoVehiculoScreen() {
                     style={{ marginRight: 6 }}
                   />
                   <Text style={styles.tipoVehiculoCardTitle}>
-                    Tipo #{String(index + 1).padStart(3, '0')}
+                    Tipo Nº{String(index + 1).padStart(2, '0')}
                   </Text>
                 </View>
               </View>
@@ -155,11 +152,11 @@ export default function TipoVehiculoScreen() {
                     color={adminlteColors.primary}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.tipoVehiculoInfoLabel}>Nombre Tipo Vehículo:</Text>
+                  <Text style={styles.tipoVehiculoInfoLabel}>Tipo:</Text>
+                  <Text style={styles.tipoVehiculoInfoValue}>
+                    {tipoVehiculo.nombre_tipo_vehiculo}
+                  </Text>
                 </View>
-                <Text style={styles.tipoVehiculoInfoValue}>
-                  {tipoVehiculo.nombre_tipo_vehiculo}
-                </Text>
               </View>
             </View>
             ))}
@@ -202,7 +199,7 @@ export default function TipoVehiculoScreen() {
             <ScrollView style={styles.modalBodyCard}>
             <View style={styles.formGroup}>
               <Text style={styles.label}>
-                Nombre Tipo Vehículo <Text style={styles.required}>*</Text>
+                Nombre del Tipo<Text style={styles.required}>*</Text>
               </Text>
               <TextInput
                 style={styles.input}
@@ -333,7 +330,7 @@ const styles = StyleSheet.create({
     color: adminlteColors.dark,
     marginTop: 2,
     marginBottom: 4,
-    marginLeft: 18,
+    marginLeft: 8,
   },
   modalContainer: {
     flex: 1,
