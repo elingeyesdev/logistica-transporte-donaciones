@@ -64,6 +64,11 @@ Route::middleware(['auth:sanctum', 'activo'])->group(function () {
 
     Route::post('paquete/{paquete}/entrega/verify-code', [PaqueteController::class, 'verifyEntregaCode'])
         ->name('api.paquete.entrega.verify-code');
+        //RENATO Y HELDER GET Y PUT 
+    Route::get('paquetes/pendientes', [PaqueteController::class, 'pendientes'])
+        ->name('api.paquetes.pendientes');
+    Route::put('paquetes/{paquete}/armar', [PaqueteController::class, 'marcarArmado'])
+        ->name('api.paquetes.armar');
     Route::get('usuario', [UserAdminController::class, 'index']);
 
     

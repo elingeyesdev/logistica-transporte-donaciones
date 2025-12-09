@@ -52,6 +52,24 @@ class PaqueteController extends Controller
             ->with('i', ($request->input('page', 1) - 1) * $paquetes->perPage());
     }
 
+    public function pendientes()
+    {
+        $paquetesPendientes = Paquete::with([
+                'estado',
+                'solicitud.solicitante',
+                'solicitud.destino',
+            ])
+            ->whereHas('estado', function ($query) {
+                $query->whereRaw('LOWER(nombre_estado) = ?', ['pendiente']);
+            })
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $paquetesPendientes,
+        ]);
+    }
+
     public function create(): View
     {
         $paquete      = new Paquete();
@@ -163,6 +181,72 @@ class PaqueteController extends Controller
 
         return Redirect::route('paquete.index')
             ->with('success', "Paquete creado (ID {$paq->id_paquete}).");
+    }
+
+    public function marcarArmado(Request $request, Paquete $paquete)
+    {
+        $estadoActual = optional($paquete->estado)->nombre_estado;
+        if (!$estadoActual || strcasecmp(trim($estadoActual), 'Pendiente') !== 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solo se puede armar paquetes pendientes.'
+            ], 422);
+        }
+
+        $estadoArmado = Estado::whereRaw('LOWER(nombre_estado) = ?', ['armado'])->first();
+        if (!$estadoArmado) {
+            return response()->json([
+                'success' => false,
+                'message' => "El estado 'Armado' no existe. Créalo desde el CRUD de Estados."
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $paquete->update(['estado_id' => $estadoArmado->id_estado]);
+
+            $user = Auth::user();
+            $conductorNombre = null;
+            $conductorCi     = null;
+            $vehiculoPlaca   = null;
+
+            if ($paquete->id_conductor) {
+                $conductorNombre = optional($paquete->conductor)->nombre;
+                $conductorApellido = optional($paquete->conductor)->apellido;
+                $conductorNombre = trim(($conductorNombre ?? '') . ' ' . ($conductorApellido ?? '')) ?: null;
+                $conductorCi = optional($paquete->conductor)->ci;
+            }
+
+            if ($paquete->id_vehiculo) {
+                $vehiculoPlaca = optional($paquete->vehiculo)->placa;
+            }
+
+            HistorialSeguimientoDonacione::create([
+                'ci_usuario' => Auth::user()->ci,
+                'estado' => 'Armado',
+                'id_paquete' => $paquete->id_paquete,
+                'fecha_actualizacion' => now(),
+                'imagen_evidencia' => null,
+                'id_ubicacion' => $paquete->id_ubicacion,
+                'conductor_nombre' => optional($paquete->conductor)->nombre,
+                'conductor_ci' => optional($paquete->conductor)->ci,
+                'vehiculo_placa' => optional($paquete->vehiculo)->placa,
+        ]);
+
+
+            $paquete->load(['estado', 'solicitud.solicitante', 'solicitud.destino']);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Paquete actualizado a Armado.',
+            'data'    => $paquete,
+        ]);
     }
 
     private function makeCodigoPaquete(): string
