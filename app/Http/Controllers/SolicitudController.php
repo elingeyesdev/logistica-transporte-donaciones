@@ -96,6 +96,7 @@ class SolicitudController extends Controller
                 'aprobada'           => (bool)($data['aprobada'] ?? false),
                 'apoyoaceptado'      => (bool)($data['apoyoaceptado'] ?? false),
                 'justificacion'      => $data['justificacion'] ?? null,
+                'ci_voluntario' => null
             ]);
 
             DB::commit();
@@ -185,6 +186,7 @@ class SolicitudController extends Controller
                 'aprobada'           => (bool)($data['aprobada'] ?? $solicitud->aprobada),
                 'apoyoaceptado'      => (bool)($data['apoyoaceptado'] ?? $solicitud->apoyoaceptado),
                 'justificacion'      => $data['justificacion'] ?? $solicitud->justificacion,
+                'ci_voluntario' => $data['ci_voluntario'] ?? null
             ]);
 
             DB::commit();
@@ -262,6 +264,7 @@ class SolicitudController extends Controller
             $solicitud->update([
                 'aprobada' => true,
                 'estado'   => 'aprobada',
+                'ci_voluntario' => Auth::user()->ci,
             ]);
 
             DB::commit();
@@ -310,6 +313,8 @@ class SolicitudController extends Controller
             'aprobada'      => false,
             'estado'        => 'negada',
             'justificacion' => $request->justificacion,
+            'ci_voluntario' => Auth::user()->ci,
+
         ]);
         $solicitud->refresh();
         if (optional($solicitud->solicitante)->email) {

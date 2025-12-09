@@ -49,7 +49,7 @@ class SolicitudRequest extends FormRequest
         'aprobada'           => ['nullable','boolean'], 
         'apoyoaceptado'      => ['nullable','boolean'],
         'justificacion'      => ['nullable','string','max:255'],
-
+        'ci_voluntario'     =>['nullable', 'string'],
         'id_tipoemergencia'  => ['required','integer','exists:tipo_emergencia,id_emergencia'],
     ];
 }

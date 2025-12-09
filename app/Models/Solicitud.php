@@ -28,7 +28,8 @@ class Solicitud extends Model
         'fecha_solicitud',
         'aprobada',
         'apoyoaceptado',
-        'justificacion'
+        'justificacion',
+        'ci_voluntario'
     ];
 
 

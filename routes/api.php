@@ -20,6 +20,7 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TrazabilidadController;
 
 
 //PUBLICOS
@@ -30,6 +31,7 @@ Route::get('/health', function () {
     ]);
 });
 Route::post('login', [LoginController::class, 'apiLogin']);
+Route::get('/trazabilidad/{ci}', [TrazabilidadController::class, 'porVoluntario']);
 
 //PARA DONACIONES (renato y helder)
 Route::post('solicitud-publica', action: [SolicitudController::class, 'store']);
