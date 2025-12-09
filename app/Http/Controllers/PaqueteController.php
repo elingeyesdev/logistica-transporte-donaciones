@@ -201,9 +201,19 @@ class PaqueteController extends Controller
             ], 422);
         }
 
+        $request->validate([
+            'ci_usuario'        => ['nullable','string','max:50'],
+            'ubicacion_actual'  => ['nullable','string','max:255'],
+        ]);
+
         DB::beginTransaction();
         try {
-            $paquete->update(['estado_id' => $estadoArmado->id_estado]);
+            $paquete->update([
+                'estado_id'        => $estadoArmado->id_estado,
+                'ubicacion_actual' => $request->filled('ubicacion_actual')
+                    ? $request->input('ubicacion_actual')
+                    : $paquete->ubicacion_actual,
+            ]);
 
             $user = Auth::user();
             $conductorNombre = null;
@@ -221,17 +231,19 @@ class PaqueteController extends Controller
                 $vehiculoPlaca = optional($paquete->vehiculo)->placa;
             }
 
+            $ciUsuario = $request->input('ci_usuario') ?? optional($user)->ci;
+
             HistorialSeguimientoDonacione::create([
-                'ci_usuario' => Auth::user()->ci,
-                'estado' => 'Armado',
-                'id_paquete' => $paquete->id_paquete,
+                'ci_usuario'          => $ciUsuario,
+                'estado'              => 'Armado',
+                'id_paquete'          => $paquete->id_paquete,
                 'fecha_actualizacion' => now(),
-                'imagen_evidencia' => null,
-                'id_ubicacion' => $paquete->id_ubicacion,
-                'conductor_nombre' => optional($paquete->conductor)->nombre,
-                'conductor_ci' => optional($paquete->conductor)->ci,
-                'vehiculo_placa' => optional($paquete->vehiculo)->placa,
-        ]);
+                'imagen_evidencia'    => null,
+                'id_ubicacion'        => $paquete->id_ubicacion,
+                'conductor_nombre'    => optional($paquete->conductor)->nombre,
+                'conductor_ci'        => optional($paquete->conductor)->ci,
+                'vehiculo_placa'      => optional($paquete->vehiculo)->placa,
+            ]);
 
 
             $paquete->load(['estado', 'solicitud.solicitante', 'solicitud.destino']);

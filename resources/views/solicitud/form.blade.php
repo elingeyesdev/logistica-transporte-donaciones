@@ -641,38 +641,38 @@ document.addEventListener('DOMContentLoaded', function () {
 @section('js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const inventarioBaseUrl = @json(rtrim(config('services.inventario.base_url'), '/'));
         const productosList = document.getElementById('productos-list');
         const productosSeleccionados = document.getElementById('productos-seleccionados');
         const insumosInput = document.getElementById('insumos_necesarios');
         const paginationContainer = document.getElementById('productos-pagination');
 
-        const productos = [
-            { id_producto: 1, nombre: 'Camisa', descripcion: 'Camisa manga larga', id_categoria: 1, unidad_medida: 'pieza', stock_total: 125 },
-            { id_producto: 2, nombre: 'Polera', descripcion: 'Polera de algodón', id_categoria: 1, unidad_medida: 'pieza', stock_total: 89 },
-            { id_producto: 3, nombre: 'Pantalón', descripcion: 'Pantalón unisex', id_categoria: 1, unidad_medida: 'pieza', stock_total: 67 },
-            { id_producto: 4, nombre: 'Abrigo', descripcion: 'Abrigo térmico', id_categoria: 1, unidad_medida: 'pieza', stock_total: 45 },
-            { id_producto: 5, nombre: 'Arroz', descripcion: 'Arroz fortificado', id_categoria: 2, unidad_medida: 'kg', stock_total: 200 },
-            { id_producto: 6, nombre: 'Fideo', descripcion: 'Fideo seco', id_categoria: 2, unidad_medida: 'kg', stock_total: 180 },
-            { id_producto: 7, nombre: 'Azúcar', descripcion: 'Azúcar en bolsa', id_categoria: 2, unidad_medida: 'kg', stock_total: 150 },
-            { id_producto: 8, nombre: 'Aceite', descripcion: 'Aceite vegetal', id_categoria: 2, unidad_medida: 'litro', stock_total: 130 },
-            { id_producto: 9, nombre: 'Harina', descripcion: 'Harina de trigo', id_categoria: 2, unidad_medida: 'kg', stock_total: 140 },
-            { id_producto: 10, nombre: 'Lentejas', descripcion: 'Lenteja seca', id_categoria: 2, unidad_medida: 'kg', stock_total: 120 },
-            { id_producto: 11, nombre: 'Agua embotellada', descripcion: 'Botellas de agua', id_categoria: 3, unidad_medida: 'litro', stock_total: 220 },
-            { id_producto: 12, nombre: 'Enlatados', descripcion: 'Atún, sardinas, verduras', id_categoria: 2, unidad_medida: 'unidad', stock_total: 160 },
-            { id_producto: 13, nombre: 'Galletas', descripcion: 'Galletas dulces/saladas', id_categoria: 4, unidad_medida: 'paquete', stock_total: 140 },
-            { id_producto: 14, nombre: 'Bebidas isotónicas', descripcion: 'Rehidratantes', id_categoria: 3, unidad_medida: 'unidad', stock_total: 80 },
-            { id_producto: 15, nombre: 'Mantas', descripcion: 'Mantas / frazadas', id_categoria: 5, unidad_medida: 'pieza', stock_total: 70 },
-            { id_producto: 16, nombre: 'Colchones', descripcion: 'Colchones o colchonetas', id_categoria: 5, unidad_medida: 'pieza', stock_total: 40 },
-            { id_producto: 17, nombre: 'Sábanas', descripcion: 'Juego de sábanas', id_categoria: 5, unidad_medida: 'juego', stock_total: 60 },
-            { id_producto: 18, nombre: 'Botas', descripcion: 'Botas de goma / trabajo', id_categoria: 6, unidad_medida: 'par', stock_total: 55 },
-            { id_producto: 19, nombre: 'Guantes', descripcion: 'Guantes de trabajo', id_categoria: 6, unidad_medida: 'par', stock_total: 75 },
-            { id_producto: 20, nombre: 'Botiquín', descripcion: 'Botiquín de primeros auxilios', id_categoria: 7, unidad_medida: 'kit', stock_total: 35 },
-            { id_producto: 21, nombre: 'Velas', descripcion: 'Velas grandes', id_categoria: 8, unidad_medida: 'paquete', stock_total: 90 },
-            { id_producto: 22, nombre: 'Baterías', descripcion: 'Baterías AA / AAA', id_categoria: 8, unidad_medida: 'blíster', stock_total: 110 },
-        ];
+        let productos = [];
 
         const pageSize = 5;
         let currentPage = 1;
+
+        function loadProductos() {
+            productosList.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando inventario...</div>';
+            const inventarioUrl = `${inventarioBaseUrl}/api/inventario/por-producto`;
+            fetch(inventarioUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener los productos');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    productos = Array.isArray(data) ? data : [];
+                    currentPage = 1;
+                    renderPagination();
+                    renderPage();
+                })
+                .catch(error => {
+                    console.error('Inventario no disponible:', error);
+                    productosList.innerHTML = '<div class="alert alert-warning">No se pudo cargar el inventario. Intente más tarde.</div>';
+                });
+        }
 
         function renderPagination() {
             if (!paginationContainer) return;
@@ -704,6 +704,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function renderPage() {
+            if (!productos.length) {
+                return;
+            }
             productosList.innerHTML = '';
 
             const start = (currentPage - 1) * pageSize;
@@ -785,6 +788,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             renderPagination();
         }
+
+        loadProductos();
         renderPage();
 
         document.getElementById('guardarInsumos').addEventListener('click', function(e) {
