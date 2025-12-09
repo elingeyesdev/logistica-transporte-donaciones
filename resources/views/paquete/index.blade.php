@@ -42,6 +42,11 @@
                       data-value="pendiente">
                 Pendientes
               </button>
+              <button type="button"
+                      class="btn btn-outline-secondary btn-paquete-estado"
+                      data-value="armado">
+                Armados
+              </button>
             </div>
           </div>
 
@@ -152,6 +157,7 @@
 
                 $badgeClass = match($estado) {
                     'Pendiente' => 'badge-warning',
+                    'Armado' => 'badge-primary',
                     'En Camino', 'En camino' => 'badge-info',
                     'Entregado' => 'badge-success',
                     'Esperando Aprobacion' => 'badge-secondary',
@@ -160,12 +166,14 @@
               @endphp
 
               @php
-                $estadoFiltro = 'pendiente';
-                if ($estadoLower && \Illuminate\Support\Str::contains($estadoLower, 'camino')) {
+                  $estadoFiltro = 'pendiente';
+                  if ($estadoLower && \Illuminate\Support\Str::contains($estadoLower, 'camino')) {
                     $estadoFiltro = 'en_camino';
-                } elseif ($estadoLower && \Illuminate\Support\Str::contains($estadoLower, 'entreg')) {
+                  } elseif ($estadoLower && \Illuminate\Support\Str::contains($estadoLower, 'entreg')) {
                     $estadoFiltro = 'entregado';
-                }
+                  } elseif ($estadoLower && \Illuminate\Support\Str::contains($estadoLower, 'armad')) {
+                    $estadoFiltro = 'armado';
+                  }
 
                 $fechaReferencia = $paquete->updated_at ?? $paquete->created_at;
                 $fechaTimestamp  = optional($fechaReferencia)->timestamp ?? '';
