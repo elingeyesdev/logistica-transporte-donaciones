@@ -185,7 +185,7 @@
             <div class="icon">
                 <i class="fas fa-chart-pie"></i>
             </div>
-            <a href="#" class="small-box-footer">Info <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="#" class="small-box-footer">Solicitudes aprobadas</a>
         </div>
     </div>
 </div>
@@ -220,8 +220,8 @@
 </div>
 
 <div class="row">
-    <div class="col-12">
-        <div class="card mb-3">
+    <div class="col-12 d-flex">
+        <div class="card mb-3  col-md-6">
             <div class="card-header border-0">
                 <h3 class="card-title mb-0">Solicitudes (Distribución)</h3>
             </div>
@@ -229,9 +229,16 @@
                 <canvas id="solicitudesChart" style="min-height: 250px; height: 250px; max-height: 250px; width:100%;"></canvas>
             </div>
         </div>
+        <div class="card mb-3 col-md-6">
+            <div class="card-header border-0">
+                <h3 class="card-title mb-0">Solicitudes por Provincia/Comunidad (Top 5)</h3>
+            </div>
+            <div class="card-body pt-2">
+                <canvas id="solicitudesPorComunidadChart" style="min-height:250px;height:250px;width:100%;"></canvas>
+            </div>
+        </div>
     </div>
 </div>
-
 
 <div class="row mt-3 align-items-stretch">
     
@@ -284,9 +291,16 @@
                         <span class="info-box-number" id="paquetes-entregados">{{ $paquetesEntregados }}</span>
                     </div>
                 </div>
+                <div class="info-box mb-3">
+                    <span class="info-box-icon bg-info"><i class="fas fa-stopwatch"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Promedio de Días de Entrega</span>
+                        <span class="info-box-number">{{ $promedioEntrega }} días</span>
+                    </div>
+                </div>
                 <div class="card card-outline card-info mb-0">
                     <div class="card-header py-2">
-                        <h3 class="card-title" style="font-size: 1rem;">Top Voluntarios (Paquetes)</h3>
+                        <h3 class="card-title" style="font-size: 1rem;">Top Voluntarios que atendieron Paquetes</h3>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-sm mb-0">
@@ -324,7 +338,7 @@
                 <table class="table table-sm table-hover">
                     <thead>
                         <tr>
-                            <th>ID Paquete</th>
+                            <th>Cod. Paquete</th>
                             <th>Fecha Creación</th>
                             <th>Fecha Entrega</th>
                             <th class="text-right">Días de Entrega</th>
@@ -333,8 +347,8 @@
                     <tbody id="paquetes-tbody">
                         @forelse($paquetes as $paq)
                             <tr>
-                                <td><a href="{{ route('paquete.show', $paq->id_paquete) }}">#{{ $paq->id_paquete }}</a></td>
-                                <td>{{ \Carbon\Carbon::parse($paq->fecha_creacion)->format('d/m/Y') }}</td>
+                                <td><a href="{{ route('paquete.show', $paq->id_paquete) }}"> {{ optional($paq->solicitud)->codigo_seguimiento ?? $paq->id_paquete }}</a></td>
+                                <td>{{ \Carbon\Carbon::parse($paq->fecha_create)->format('d/m/Y') }}</td>
                                 <td>{{ \Carbon\Carbon::parse($paq->fecha_entrega)->format('d/m/Y') }}</td>
                                 <td class="text-right">
                                     <span class="badge badge-{{ $paq->dias_entrega > 7 ? 'danger' : ($paq->dias_entrega > 3 ? 'warning' : 'success') }}" style="font-size: small;">
@@ -367,13 +381,15 @@ const solicitudesData = {
     negadas: @json($solicitudesNegadas)
 };
 const paquetesData = {
-    voluntarios: @json($voluntariosListado),
+    voluntarios: @json($voluntariosListado),    
     entregadas: @json($paquetesEntregadosListado),
     en_camino: @json($paquetesEnCaminoListado),
     vehiculos: @json($vehiculosListado)
 };
 let currentSolicitudesReport = null;
 let currentPaquetesReport = null;
+let solicitudesPorComunidadChart = null;
+
 const solicitudLabelMap = {
     comunidad: 'Por comunidad',
     aceptadas: 'Aceptadas',
@@ -1032,8 +1048,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return acc;
             }, {});
 
-            const rows = Object.values(grouped)
-                .sort((a, b) => b.total - a.total)
+            const comunidadesArray = Object.values(grouped)
+                .sort((a, b) => b.total - a.total);
+            const rows = comunidadesArray
                 .map(item => `
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
@@ -1043,8 +1060,98 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="badge badge-primary badge-pill">${item.total}</span>
                     </li>
                 `).join('');
+            const comunidades = Object.values(grouped)
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 5);
+
+            const labels = comunidades.map(c => c.nombre);
+            const values = comunidades.map(c => c.total);
+
+            const ctxCom = document.getElementById('solicitudesPorComunidadChart');
+            if (ctxCom && typeof Chart !== 'undefined') {
+                if (solicitudesPorComunidadChart) {
+                    solicitudesPorComunidadChart.destroy();
+                }
+                const baseColors = [
+                    '#007bff',
+                    '#28a745',
+                    '#ffc107',
+                    '#17b8a8',
+                    '#2c895f'
+                ];
+                const barColors = labels.map((_, idx) => baseColors[idx % baseColors.length]);
+                solicitudesPorComunidadChart = new Chart(ctxCom, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Solicitudes',
+                            data: values,
+                            backgroundColor: barColors,
+                            borderColor: barColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                boxWidth: 12,
+                                fontSize: 11
+                            }
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    precision: 0
+                                },
+                                gridLines: {
+                                    color: 'rgba(0,0,0,0.05)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 0
+                                },
+                                gridLines: {
+                                    display: false
+                                }
+                            }]
+                        },
+                        layout: {
+                            padding: {
+                                left: 5,
+                                right: 5,
+                                top: 10,
+                                bottom: 5
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    const label = data.labels[tooltipItem.index] || '';
+                                    const value = data.datasets[0].data[tooltipItem.index] || 0;
+                                    return `${label}: ${value} solicitudes`;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
             resultList.innerHTML = rows;
-            currentSolicitudesReport = buildReportObject('Solicitudes', type, Object.keys(grouped).length, resultList.innerHTML, { items: Object.values(grouped) });
+            currentSolicitudesReport = buildReportObject(
+                'Solicitudes',
+                type,
+                comunidadesArray.length,
+                resultList.innerHTML,
+                { items: comunidadesArray }
+            );
             return;
         }
 
@@ -1092,6 +1199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             renderSolicitudesList(this.value);
         });
         attachDateListeners();
+        renderSolicitudesList(filterSelect.value);
     }
 
     function updateToggleButton() {
@@ -1421,7 +1529,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return `
                         <tr>
                             <td><a href="/paquete/${paq.id_paquete}">#${paq.id_paquete}</a></td>
-                            <td>${paq.fecha_creacion}</td>
+                            <td>${paq.fecha_create}</td>
                             <td>${paq.fecha_entrega}</td>
                             <td class="text-right">
                                 <span class="badge badge-${badgeClass}">

@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DashboardReportExport;
-
 class DashboardController extends Controller
 {
     public function index()
@@ -58,19 +57,27 @@ class DashboardController extends Controller
             $productosMasPedidos = $this->calcularTopProductosDesdeSolicitudes();
         }
 
-        $paquetes = Paquete::whereIn('estado_id', $idsEntregado)
-            ->selectRaw('
-                id_paquete,
-                COALESCE(fecha_creacion::date, created_at::date) as fecha_creacion,
-                COALESCE(fecha_entrega::date, updated_at::date) as fecha_entrega,
-                (COALESCE(fecha_entrega::date, updated_at::date) - COALESCE(fecha_creacion::date, created_at::date)) as dias_entrega
-            ')
-            ->orderByDesc(DB::raw('(COALESCE(fecha_entrega::date, updated_at::date) - COALESCE(fecha_creacion::date, created_at::date))'))
-            ->limit(10)
-            ->get();
+        $paquetes = Paquete::with(['solicitud' => function ($q) {
+            $q->select('id_solicitud', 'codigo_seguimiento');
+        }])
+        ->whereIn('estado_id', $idsEntregado)
+        ->selectRaw('
+            paquete.id_paquete,
+            paquete.id_solicitud,
+            paquete.created_at::date as fecha_create,
+            COALESCE(paquete.fecha_entrega::date, paquete.updated_at::date) as fecha_entrega,
+            (COALESCE(paquete.fecha_entrega::date, paquete.updated_at::date)
+            - COALESCE(paquete.created_at::date)) as dias_entrega
+        ')
+        ->orderBy(DB::raw('
+            (COALESCE(paquete.fecha_entrega::date, paquete.updated_at::date)
+            - COALESCE(paquete.fecha_creacion::date, paquete.created_at::date))
+        '))
+        ->limit(20)
+        ->get();
 
         $promedioEntrega = Paquete::whereIn('estado_id', $idsEntregado)
-            ->selectRaw('AVG(COALESCE(fecha_entrega::date, updated_at::date) - COALESCE(fecha_creacion::date, created_at::date)) as promedio')
+            ->selectRaw('AVG(COALESCE(created_at::date, updated_at::date) - COALESCE(created_at::date)) as promedio')
             ->value('promedio');
 
         $promedioEntrega = $promedioEntrega ? round($promedioEntrega, 1) : 0;
