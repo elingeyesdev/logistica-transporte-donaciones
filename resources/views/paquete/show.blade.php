@@ -17,6 +17,9 @@
                             <a class="btn btn-secondary btn-sm" id="btn-imprimir-reporte">
                                     <i class="fas fa-file-pdf"></i> Reporte PDF
                             </a>
+                            <a class="btn btn-success btn-sm" href="{{ route('paquete.reportes.excel', $paquete->id_paquete) }}">
+                                    <i class="fas fa-file-excel"></i> Reporte Excel
+                            </a>
                             <a class="btn btn-primary btn-sm" href="{{ route('paquete.index') }}"> {{ __('Volver') }}</a>
                         </div>
                     </div>

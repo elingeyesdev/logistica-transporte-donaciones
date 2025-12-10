@@ -29,6 +29,8 @@ use App\Models\Marca;
 use App\Models\TipoVehiculo;
 use Illuminate\Support\Facades\Cache;
 use App\Mail\CodigoEntregaPaquete;
+use App\Exports\PaqueteSeguimientoExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PaqueteController extends Controller
 {
@@ -282,7 +284,13 @@ class PaqueteController extends Controller
 
     public function show(Request $request, $id)
     {
-        $paquete = Paquete::with(['estado','solicitud.solicitante','solicitud.destino', 'conductor', 'vehiculo.marcaVehiculo',])->findOrFail($id);
+        $paquete = Paquete::with([
+            'estado',
+            'solicitud.solicitante',
+            'solicitud.destino',
+            'conductor',
+            'vehiculo.marcaVehiculo',
+            ])->findOrFail($id);
         
         if ($request->wantsJson()) {
             return response()->json([
@@ -292,6 +300,23 @@ class PaqueteController extends Controller
         }
 
         return view('paquete.show', compact('paquete'));
+    }
+
+    public function exportExcel(Paquete $paquete)
+    {
+        $paquete->load([
+            'estado',
+            'solicitud.solicitante',
+            'solicitud.destino',
+            'conductor',
+            'vehiculo.marcaVehiculo',
+            'vehiculo.tipoVehiculo',
+            'encargado',
+        ]);
+
+        $filename = sprintf('Reporte_Paquete_%s.xlsx', $paquete->id_paquete);
+
+        return Excel::download(new PaqueteSeguimientoExport($paquete), $filename);
     }
 
     public function edit(Paquete $paquete): View

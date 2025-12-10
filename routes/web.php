@@ -71,6 +71,8 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::resource('paquete', PaqueteController::class);
     Route::post('paquete/{paquete}/reportes/pdf', [PaqueteController::class, 'storePdfReporte'])
         ->name('paquete.reportes.pdf');
+    Route::get('paquete/{paquete}/reportes/excel', [PaqueteController::class, 'exportExcel'])
+        ->name('paquete.reportes.excel');
     Route::resource('destino', DestinoController::class)
         ->except(['destroy']);
     Route::resource('marca', MarcaController::class);
@@ -104,6 +106,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('reporte', ReporteController::class);
     Route::post('/dashboard/reportes', [ReporteController::class, 'storeDashboardReport'])
         ->name('dashboard.reportes.store');
+    Route::post('/dashboard/reportes/excel', [DashboardController::class, 'exportExcel'])
+        ->name('dashboard.reportes.excel');
     Route::resource('tipo-licencia', TipoLicenciaController::class);
     Route::resource('tipo-emergencia', TipoEmergenciaController::class);
     Route::resource('rol', RolController::class);

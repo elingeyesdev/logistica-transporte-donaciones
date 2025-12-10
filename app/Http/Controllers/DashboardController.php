@@ -10,7 +10,11 @@ use App\Models\Estado;
 use App\Models\Rol;
 use App\Models\Vehiculo;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\DashboardReportExport;
 
 class DashboardController extends Controller
 {
@@ -463,5 +467,40 @@ class DashboardController extends Controller
         }
 
         return view('dashboard', $data);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $validated = $request->validate([
+            'group' => ['required', 'string', 'max:50'],
+            'type' => ['required', 'string', 'max:50'],
+            'headings' => ['required', 'array', 'min:1'],
+            'headings.*' => ['required', 'string'],
+            'rows' => ['required', 'array', 'min:1'],
+            'rows.*' => ['array'],
+        ]);
+
+        $columnCount = count($validated['headings']);
+        $rows = collect($validated['rows'])->map(function ($row) use ($columnCount) {
+            $normalized = array_map(function ($value) {
+                if (is_array($value) || is_object($value)) {
+                    return json_encode($value, JSON_UNESCAPED_UNICODE);
+                }
+                return $value ?? '';
+            }, $row);
+
+            $normalized = array_values($normalized);
+            if (count($normalized) < $columnCount) {
+                $normalized = array_pad($normalized, $columnCount, '');
+            } elseif (count($normalized) > $columnCount) {
+                $normalized = array_slice($normalized, 0, $columnCount);
+            }
+
+            return $normalized;
+        })->toArray();
+
+        $filename = Str::slug($validated['group'].'_'.$validated['type'].'_'.now()->format('Ymd_His')).'.xlsx';
+
+        return Excel::download(new DashboardReportExport($rows, $validated['headings']), $filename);
     }
 }

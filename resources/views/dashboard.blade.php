@@ -74,6 +74,9 @@
                                     <button type="button" class="btn btn-sm btn-success" id="btn-generar-reporte">
                                         <i class="fas fa-file-export"></i> Generar
                                     </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" id="btn-excel-solicitudes">
+                                        <i class="fas fa-file-excel"></i> Excel
+                                    </button>
                                 </div>
                             </div>
                             <select id="filter-solicitudes" class="form-control mb-3">
@@ -104,6 +107,9 @@
                                     </button>
                                     <button type="button" class="btn btn-sm btn-success" id="btn-generar-paquetes">
                                         <i class="fas fa-file-export"></i> Generar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" id="btn-excel-paquetes">
+                                        <i class="fas fa-file-excel"></i> Excel
                                     </button>
                                 </div>
                             </div>
@@ -380,6 +386,7 @@ const paquetesLabelMap = {
     vehiculos: 'Vehículos'
 };
 const dashboardReportStoreUrl = @json(route('dashboard.reportes.store'));
+const dashboardExcelExportUrl = @json(route('dashboard.reportes.excel'));
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -418,6 +425,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const togglePaquetesBtn = document.getElementById('btn-toggle-paquetes');
     const generateSolicitudesBtn = document.getElementById('btn-generar-reporte');
     const generatePaquetesBtn = document.getElementById('btn-generar-paquetes');
+    const excelSolicitudesBtn = document.getElementById('btn-excel-solicitudes');
+    const excelPaquetesBtn = document.getElementById('btn-excel-paquetes');
     const dateFromInput = document.getElementById('filter-date-from');
     const dateToInput = document.getElementById('filter-date-to');
     let listHidden = true;
@@ -454,12 +463,10 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    function downloadBlob(blob, filename) {
+    function downloadBlob(blob, filename, fallbackMime = 'application/pdf') {
         try {
-            if (!(blob instanceof Blob)) {
-                blob = new Blob([blob], { type: 'application/pdf' });
-            }
-            const url = URL.createObjectURL(blob);
+            let effectiveBlob = blob instanceof Blob ? blob : new Blob([blob], { type: fallbackMime });
+            const url = URL.createObjectURL(effectiveBlob);
             const link = document.createElement('a');
             link.href = url;
             link.download = filename;
@@ -784,6 +791,177 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .finally(() => {
                 wrapper.remove();
+            });
+    }
+
+    function buildExcelPayload(report) {
+        if (!report || !Array.isArray(report.items) || !report.items.length) {
+            return null;
+        }
+
+        const safeText = (value) => {
+            if (value === null || value === undefined || value === '') {
+                return '—';
+            }
+            return value;
+        };
+
+        if (report.group === 'Solicitudes') {
+            if (report.type === 'comunidad') {
+                return {
+                    headings: ['Comunidad', 'Provincia', 'Total solicitudes', 'Última solicitud'],
+                    rows: report.items.map(item => [
+                        safeText(item.nombre),
+                        safeText(item.provincia),
+                        item.total ?? 0,
+                        safeText(item.ultimaFecha)
+                    ])
+                };
+            }
+
+            const headings = ['Código', 'Solicitante', 'CI', 'Correo', 'Teléfono', 'Comunidad', 'Provincia', 'Fecha solicitud', 'Tipo de emergencia', 'Personas', 'Estado'];
+            const rows = report.items.map(item => [
+                safeText(item.codigo),
+                safeText(item.solicitante),
+                safeText(item.solicitante_ci),
+                safeText(item.solicitante_correo),
+                safeText(item.solicitante_telefono),
+                safeText(item.comunidad),
+                safeText(item.provincia),
+                safeText(item.fecha),
+                safeText(item.tipo_emergencia),
+                item.cantidad_personas ?? '—',
+                safeText(item.estado)
+            ]);
+            return { headings, rows };
+        }
+
+        if (report.group === 'Paquetes') {
+            if (report.type === 'voluntarios') {
+                const headings = ['CI', 'Nombre', 'Correo', 'Teléfono', 'Total paquetes', 'Solicitudes asociadas'];
+                const rows = report.items.map(item => {
+                    const paquetes = item.paquetes || [];
+                    const solicitudes = paquetes
+                        .map(p => p.solicitud_codigo || p.codigo || p.id || '')
+                        .filter(Boolean)
+                        .join(', ');
+                    return [
+                        safeText(item.ci),
+                        safeText(item.nombre),
+                        safeText(item.correo),
+                        safeText(item.telefono),
+                        paquetes.length,
+                        solicitudes || '—'
+                    ];
+                });
+                return { headings, rows };
+            }
+
+            if (report.type === 'entregadas') {
+                const headings = ['Código paquete', 'Código solicitud', 'Estado', 'Solicitante', 'Fecha entrega', 'Conductor', 'Vehículo', 'Destino', 'Provincia', 'Dirección'];
+                const rows = report.items.map(item => [
+                    safeText(item.codigo),
+                    safeText(item.solicitud_codigo),
+                    safeText(item.estado),
+                    safeText(item.solicitante),
+                    safeText(item.fecha),
+                    safeText(item.conductor),
+                    `${safeText(item.vehiculo)} ${safeText(item.vehiculo_placa)}`.trim(),
+                    safeText(item.destino_comunidad),
+                    safeText(item.destino_provincia),
+                    safeText(item.destino_direccion)
+                ]);
+                return { headings, rows };
+            }
+
+            if (report.type === 'en_camino') {
+                const headings = ['Código paquete', 'Código solicitud', 'Destino', 'Provincia', 'Estado', 'Conductor', 'Vehículo', 'Ubicación', 'Voluntario', 'Fecha salida', 'Fecha solicitud'];
+                const rows = report.items.map(item => [
+                    safeText(item.codigo),
+                    safeText(item.solicitud_codigo),
+                    safeText(item.destino),
+                    safeText(item.provincia),
+                    safeText(item.estado),
+                    safeText(item.conductor),
+                    `${safeText(item.vehiculo)} ${safeText(item.vehiculo_marca)}`.trim(),
+                    safeText(item.ubicacion_actual),
+                    safeText(item.voluntario),
+                    safeText(item.fecha),
+                    safeText(item.fecha_solicitud_creacion)
+                ]);
+                return { headings, rows };
+            }
+
+            if (report.type === 'vehiculos') {
+                const headings = ['Placa', 'Marca', 'Modelo', 'Color', 'Tipo', 'Total paquetes', 'Solicitudes asociadas'];
+                const rows = report.items.map(item => {
+                    const paquetes = item.paquetes || [];
+                    const solicitudes = paquetes
+                        .map(p => p.solicitud_codigo || p.codigo_paquete || p.id || '')
+                        .filter(Boolean)
+                        .join(', ');
+                    return [
+                        safeText(item.placa),
+                        safeText(item.marca),
+                        safeText(item.modelo),
+                        safeText(item.color),
+                        safeText(item.tipo),
+                        paquetes.length,
+                        solicitudes || '—'
+                    ];
+                });
+                return { headings, rows };
+            }
+        }
+
+        return null;
+    }
+
+    function exportReportToExcel(report, filenamePrefix) {
+        if (!dashboardExcelExportUrl) {
+            console.warn('Ruta de exportación de Excel no disponible.');
+            return;
+        }
+
+        if (!report || !Array.isArray(report.items) || !report.items.length) {
+            alert('Selecciona un filtro con datos antes de exportar a Excel.');
+            return;
+        }
+
+        const payload = buildExcelPayload(report);
+        if (!payload || !payload.rows.length) {
+            alert('No hay datos para exportar a Excel.');
+            return;
+        }
+
+        fetch(dashboardExcelExportUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+            },
+            body: JSON.stringify({
+                group: report.group,
+                type: report.type,
+                headings: payload.headings,
+                rows: payload.rows
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error HTTP ' + response.status);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const timestamp = new Date().toISOString().replace(/[-:T]/g, '').replace(/\..+/, '').slice(0, 14);
+                const filename = `${filenamePrefix}_${report.slug}_${timestamp}.xlsx`;
+                downloadBlob(blob, filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            })
+            .catch(error => {
+                console.error('No se pudo generar el Excel del dashboard.', error);
+                alert('No se pudo generar el Excel del reporte.');
             });
     }
 
@@ -1159,6 +1337,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (generatePaquetesBtn) {
         generatePaquetesBtn.addEventListener('click', function() {
             exportCurrentReport(currentPaquetesReport, 'Paquetes');
+        });
+    }
+
+    if (excelSolicitudesBtn) {
+        excelSolicitudesBtn.addEventListener('click', function() {
+            exportReportToExcel(currentSolicitudesReport, 'Solicitudes');
+        });
+    }
+
+    if (excelPaquetesBtn) {
+        excelPaquetesBtn.addEventListener('click', function() {
+            exportReportToExcel(currentPaquetesReport, 'Paquetes');
         });
     }
 
