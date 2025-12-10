@@ -13,6 +13,7 @@ use App\Models\Reporte;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -51,20 +52,11 @@ class DashboardController extends Controller
             ? round(($aceptadas / ($aceptadas + $rechazadas)) * 100, 1)
             : 0;
 
-        $productosMasPedidos = Solicitud::whereNotNull('insumos_necesarios')
-            ->where('insumos_necesarios', '!=', '')
-            ->get()
-            ->pluck('insumos_necesarios')
-            ->flatMap(function($insumos) {
-                return preg_split('/[,;\n\r]+/', $insumos, -1, PREG_SPLIT_NO_EMPTY);
-            })
-            ->map(function($item) {
-                return trim(strtolower($item));
-            })
-            ->filter()
-            ->countBy()
-            ->sortDesc()
-            ->take(5);
+        $productosMasPedidos = $this->obtenerTopProductosDesdeInventario();
+
+        if ($productosMasPedidos->isEmpty()) {
+            $productosMasPedidos = $this->calcularTopProductosDesdeSolicitudes();
+        }
 
         $paquetes = Paquete::whereIn('estado_id', $idsEntregado)
             ->selectRaw('
@@ -469,6 +461,62 @@ class DashboardController extends Controller
         }
 
         return view('dashboard', $data);
+    }
+
+    private function obtenerTopProductosDesdeInventario()
+    {
+        $baseUrl = rtrim(config('services.inventario.base_url'), '/');
+        if (!$baseUrl) {
+            return collect();
+        }
+
+        try {
+            $response = Http::timeout(8)
+                ->acceptJson()
+                ->get($baseUrl.'/api/inventario/por-producto');
+
+            if (!$response->successful()) {
+                return collect();
+            }
+
+            $payload = $response->json();
+            if (!is_array($payload)) {
+                return collect();
+            }
+
+            return collect($payload)
+                ->map(function ($item) {
+                    $nombre = trim((string)($item['nombre'] ?? '')); 
+                    $cantidad = (int)($item['stock_total'] ?? $item['cantidad'] ?? $item['stock'] ?? 0);
+                    return $nombre !== '' ? ['nombre' => $nombre, 'cantidad' => max($cantidad, 0)] : null;
+                })
+                ->filter()
+                ->groupBy('nombre')
+                ->map(fn($items) => (int)$items->sum('cantidad'))
+                ->sortDesc()
+                ->take(5);
+        } catch (\Throwable $exception) {
+            report($exception);
+            return collect();
+        }
+    }
+
+    private function calcularTopProductosDesdeSolicitudes()
+    {
+        return Solicitud::whereNotNull('insumos_necesarios')
+            ->where('insumos_necesarios', '!=', '')
+            ->get()
+            ->pluck('insumos_necesarios')
+            ->flatMap(function ($insumos) {
+                return preg_split('/[,;\n\r]+/', $insumos, -1, PREG_SPLIT_NO_EMPTY);
+            })
+            ->map(function ($item) {
+                return trim(strtolower($item));
+            })
+            ->filter()
+            ->countBy()
+            ->sortDesc()
+            ->take(5);
     }
 
     public function exportExcel(Request $request)

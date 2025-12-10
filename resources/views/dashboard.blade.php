@@ -787,7 +787,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error generando el PDF del dashboard.', error);
-                alert('No se pudo generar el PDF del reporte.'); //NOTIFICACION ADMIN LTE
+                alert('No se pudo generar el PDF del reporte.'); 
             })
             .finally(() => {
                 wrapper.remove();
@@ -1084,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (filterSelect) {
-        // Inicialmente la lista permanece oculta hasta que el usuario escoja un filtro
+        
         filterSelect.addEventListener('change', function() {
             resultList.classList.remove('d-none');
             listHidden = false;
@@ -1312,7 +1312,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (paquetesSelect) {
-        // La lista de paquetes también se mantiene oculta hasta seleccionar
+        
         paquetesSelect.addEventListener('change', function() {
             paquetesResultList.classList.remove('d-none');
             paquetesListHidden = false;
