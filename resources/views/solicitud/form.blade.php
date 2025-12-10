@@ -377,7 +377,9 @@
     const searchBtn          = document.getElementById('btnBuscarUbicacion');
     const suggestionsContainer = document.getElementById('search-suggestions');
 
-    const map = L.map('mapa-ubicacion').setView([defaultLat, defaultLng], defaultZoom);
+        const map = L.map('mapa-ubicacion').setView([defaultLat, defaultLng], defaultZoom);
+        const HOTSPOT_API_URL = 'http://10.26.13.223:8000/api/v1/hotspots/live';
+        const hotspotLayer = L.layerGroup().addTo(map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap',
@@ -517,7 +519,7 @@
       searchTimeout = setTimeout(buscarUbicacion, 400);
     }
 
-    function reverseGeocode(lat, lng) {
+        function reverseGeocode(lat, lng) {
       ubicacionInput.value = 'Cargando...';
       provinciaInput.value = 'Cargando...';
 
@@ -560,6 +562,55 @@
       setMarker(e.latlng.lat, e.latlng.lng);
       reverseGeocode(e.latlng.lat, e.latlng.lng);
     });
+
+        function renderHotspots(points) {
+            hotspotLayer.clearLayers();
+            if (!Array.isArray(points) || !points.length) {
+                return;
+            }
+            points.forEach(point => {
+                const lat = parseFloat(point.latitude);
+                const lng = parseFloat(point.longitude);
+                if (isNaN(lat) || isNaN(lng)) {
+                    return;
+                }
+                const marker = L.circleMarker([lat, lng], {
+                    radius: 6,
+                    color: '#d9534f',
+                    weight: 2,
+                    fillColor: '#f0ad4e',
+                    fillOpacity: 0.8
+                });
+                const brillo = point.brightness ?? 'N/D';
+                const confianza = (point.confidence || '').toString().toUpperCase();
+                const fecha = point.date || 'Sin fecha';
+                const hora = point.time || '';
+                const fuente = point.source || 'Foco detectado';
+                marker.bindPopup(
+                    `<strong>${fuente}</strong><br>` +
+                    `Brillo: ${brillo}<br>` +
+                    `Confianza: ${confianza || 'N/D'}<br>` +
+                    `Fecha: ${fecha} ${hora}`
+                );
+                marker.addTo(hotspotLayer);
+            });
+        }
+
+        function loadHotspots() {
+            fetch(HOTSPOT_API_URL)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Hotspot HTTP ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(payload => {
+                    renderHotspots(payload?.data);
+                })
+                .catch(error => {
+                    console.error('No se pudieron cargar los focos activos:', error);
+                });
+        }
 
     if (searchBtn && searchInput) {
       searchBtn.addEventListener('click', function(e) {
@@ -607,6 +658,8 @@
         { enableHighAccuracy: true, timeout: 8000 }
       );
     }
+
+        loadHotspots();
   }
 
   if (document.readyState === 'loading') {
