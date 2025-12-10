@@ -9,9 +9,11 @@ use App\Models\Conductor;
 use App\Models\Estado;
 use App\Models\Rol;
 use App\Models\Vehiculo;
+use App\Models\Reporte;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DashboardReportExport;
@@ -478,6 +480,8 @@ class DashboardController extends Controller
             'headings.*' => ['required', 'string'],
             'rows' => ['required', 'array', 'min:1'],
             'rows.*' => ['array'],
+            'fecha_reporte' => ['nullable', 'date'],
+            'gestion' => ['nullable', 'string', 'max:255'],
         ]);
 
         $columnCount = count($validated['headings']);
@@ -500,7 +504,31 @@ class DashboardController extends Controller
         })->toArray();
 
         $filename = Str::slug($validated['group'].'_'.$validated['type'].'_'.now()->format('Ymd_His')).'.xlsx';
+        $export = new DashboardReportExport($rows, $validated['headings']);
+        $excelBinary = Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
 
-        return Excel::download(new DashboardReportExport($rows, $validated['headings']), $filename);
+        $relativePath = 'reportes/'.$filename;
+        $stored = Storage::disk('public')->put($relativePath, $excelBinary);
+
+        if (!$stored) {
+            abort(500, 'No se pudo guardar el reporte en el almacenamiento.');
+        }
+
+        $fechaReporte = $validated['fecha_reporte'] ?? now()->toDateString();
+        $gestion = $validated['gestion'] ?? now()->format('Y');
+
+        Reporte::create([
+            'nombre_pdf' => $filename,
+            'ruta_pdf' => $relativePath,
+            'fecha_reporte' => $fechaReporte,
+            'gestion' => $gestion,
+            'id_paquete' => null,
+        ]);
+
+        return response($excelBinary, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Length' => strlen($excelBinary),
+        ]);
     }
 }

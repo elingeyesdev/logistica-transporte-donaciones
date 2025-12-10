@@ -934,6 +934,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        const now = new Date();
+        const fechaReporte = now.toISOString().slice(0, 10);
+        const gestionYear = String(now.getFullYear());
+
         fetch(dashboardExcelExportUrl, {
             method: 'POST',
             headers: {
@@ -945,7 +949,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 group: report.group,
                 type: report.type,
                 headings: payload.headings,
-                rows: payload.rows
+                rows: payload.rows,
+                fecha_reporte: fechaReporte,
+                gestion: gestionYear
             })
         })
             .then(response => {
