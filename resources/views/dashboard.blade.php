@@ -209,7 +209,7 @@
         <div class="small-box bg-teal">
             <div class="inner">
                 <h3 id="voluntarios-conductores">{{ $voluntariosConductores }}</h3>
-                <p>Voluntarios Conductores</p>
+                <p>Conductores</p>
             </div>
             <div class="icon">
                 <i class="fas fa-user-tie"></i>
