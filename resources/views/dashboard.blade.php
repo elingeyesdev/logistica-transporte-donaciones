@@ -179,7 +179,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3 id="tasa-aprobacion">{{ $total > 0 ? round(($aceptadas / $total) * 100) : 0 }}%</h3>
+                <h3 id="tasa-aprobacion">{{ $tasa }}%</h3>
                 <p>Tasa de Aprobación</p>
             </div>
             <div class="icon">
