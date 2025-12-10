@@ -223,7 +223,7 @@
     <div class="col-12 d-flex">
         <div class="card mb-3  col-md-6">
             <div class="card-header border-0">
-                <h3 class="card-title mb-0">Solicitudes (Distribución)</h3>
+                <h3 class="card-title mb-0">Paquetes (Distribución)</h3>
             </div>
             <div class="card-body pt-2">
                 <canvas id="solicitudesChart" style="min-height: 250px; height: 250px; max-height: 250px; width:100%;"></canvas>
@@ -414,10 +414,14 @@ document.addEventListener('DOMContentLoaded', function() {
             solicitudesChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Aceptadas', 'Rechazadas'],
+                    labels: ['Entregados', 'En camino', 'Pendientes'],
                     datasets: [{
-                        data: [{{ $aceptadas }}, {{ $rechazadas }}],
-                        backgroundColor: ['#28a745', '#dc3545']
+                        data: [
+                            {{ $paquetesEntregados }},
+                            {{ $paquetesEnCamino ?? 0 }},
+                            {{ $paquetesPendientes ?? 0 }}
+                        ],
+                        backgroundColor: ['#28a745', '#ffc107', '#6c757d']
                     }]
                 },
                 options: {
@@ -431,7 +435,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-
    
     const filterSelect = document.getElementById('filter-solicitudes');
     const resultList = document.getElementById('filter-solicitudes-result');
@@ -1495,8 +1498,9 @@ document.addEventListener('DOMContentLoaded', function() {
           
             if (solicitudesChart) {
                 solicitudesChart.data.datasets[0].data = [
-                    data.aceptadas,
-                    data.rechazadas
+                    data.paquetesEntregados,
+                    data.paquetesEnCamino,
+                    data.paquetesPendientes
                 ];
                 solicitudesChart.update();
             }

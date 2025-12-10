@@ -31,8 +31,13 @@ class DashboardController extends Controller
         $normalizeEstado = fn($nombre) => strtolower(trim($nombre ?? ''));
 
         $estadosEntregadosObjetivo = ['entregado','entregada'];
+
         $estadosEnCaminoObjetivo = [
             'en camino','en tránsito','en transito','en ruta','en viaje','en transporte'
+        ];
+
+        $estadosPendienteObjetivo = [
+            'pendiente','en preparación','en preparacion','sin asignar'
         ];
 
         $idsEntregado = $estadoCatalogo
@@ -42,6 +47,11 @@ class DashboardController extends Controller
         $idsEnCamino = $estadoCatalogo
             ->filter(fn($estado) => in_array($normalizeEstado($estado->nombre_estado), $estadosEnCaminoObjetivo, true))
             ->pluck('id_estado');
+
+        $idsPendiente = $estadoCatalogo
+            ->filter(fn($estado) => in_array($normalizeEstado($estado->nombre_estado), $estadosPendienteObjetivo, true))
+            ->pluck('id_estado');
+
 
         $aceptadas = Solicitud::whereIn('estado', $estadoAceptado)->count();
 
@@ -80,10 +90,14 @@ class DashboardController extends Controller
             ->selectRaw('AVG(COALESCE(created_at::date, updated_at::date) - COALESCE(created_at::date)) as promedio')
             ->value('promedio');
 
-        $promedioEntrega = $promedioEntrega ? round($promedioEntrega, 1) : 0;
+        $promedioEntrega = $promedioEntrega ? round($promedioEntrega, 2) : 0;
 
         $totalPaquetes = Paquete::count();
         $paquetesEntregados = Paquete::whereIn('estado_id', $idsEntregado)->count();
+        $paquetesEnCamino = Paquete::whereIn('estado_id', $idsEnCamino)->count();
+        $paquetesPendientes = $idsPendiente->isNotEmpty()
+            ? Paquete::whereIn('estado_id', $idsPendiente)->count()
+            : Paquete::whereNotIn('estado_id', $idsEntregado->merge($idsEnCamino))->count();
 
         $totalVoluntarios = User::where('activo', true)->count();
 
@@ -450,6 +464,8 @@ class DashboardController extends Controller
             'promedioEntrega',
             'totalPaquetes',
             'paquetesEntregados',
+            'paquetesEnCamino',
+            'paquetesPendientes',
             'totalVoluntarios',
             'voluntariosConductores',
             'topVoluntariosPaquetes',
@@ -461,6 +477,7 @@ class DashboardController extends Controller
             'paquetesEnCaminoListado',
             'vehiculosListado'
         );
+
 
         // Always return JSON for API requests
         if (request()->wantsJson() || request()->is('api/*')) {

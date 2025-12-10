@@ -261,7 +261,7 @@
                         </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha de Creacion:</strong>
-                            {{ \Carbon\Carbon::parse($paquete->fecha_creacion)->format('d/m/Y') }}
+                            {{ \Carbon\Carbon::parse($paquete->created_at)->format('d/m/Y') }}
                         </div>
                         @php
                             $estadoNombreDetalle = optional($paquete->estado)->nombre_estado;
