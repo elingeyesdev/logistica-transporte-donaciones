@@ -351,3 +351,71 @@
     </div>
 </section>
 @endsection
+
+@section('js')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mapaDiv = document.getElementById('mapa-ruta-vehiculo');
+    if (!mapaDiv) return;
+    mapaDiv.style.display = 'block';
+
+    
+    const paquetes = [
+        @foreach($paquetesEnCamino as $p)
+            {
+                latitud: {{ $p->solicitud->destino->latitud ?? 'null' }},
+                longitud: {{ $p->solicitud->destino->longitud ?? 'null' }},
+                fecha_salida: '{{ $p->fecha_creacion ?? $p->created_at }}',
+                fecha_llegada: '{{ $p->fecha_entrega ?? $p->updated_at }}',
+                comunidad: '{{ $p->solicitud->destino->comunidad ?? '' }}',
+                direccion: '{{ $p->solicitud->destino->direccion ?? '' }}',
+                codigo: '{{ $p->codigo ?? $p->solicitud->codigo_seguimiento ?? '' }}',
+            },
+        @endforeach
+        @foreach($paquetesOtros as $p)
+            {
+                latitud: {{ $p->solicitud->destino->latitud ?? 'null' }},
+                longitud: {{ $p->solicitud->destino->longitud ?? 'null' }},
+                fecha_salida: '{{ $p->fecha_creacion ?? $p->created_at }}',
+                fecha_llegada: '{{ $p->fecha_entrega ?? $p->updated_at }}',
+                comunidad: '{{ $p->solicitud->destino->comunidad ?? '' }}',
+                direccion: '{{ $p->solicitud->destino->direccion ?? '' }}',
+                codigo: '{{ $p->codigo ?? $p->solicitud->codigo_seguimiento ?? '' }}',
+            },
+        @endforeach
+    ];
+
+   
+    const puntos = paquetes.filter(p => p.latitud !== null && p.longitud !== null);
+
+    
+    puntos.sort((a, b) => {
+        const fa = new Date(a.fecha_salida);
+        const fb = new Date(b.fecha_salida);
+        return fa - fb;
+    });
+
+    if (puntos.length === 0) return;
+
+   
+    const map = L.map('mapa-ruta-vehiculo').setView([puntos[0].latitud, puntos[0].longitud], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+   
+    const polyCoords = puntos.map(p => [p.latitud, p.longitud]);
+    const polyline = L.polyline(polyCoords, {color: 'blue', weight: 5}).addTo(map);
+    map.fitBounds(polyline.getBounds());
+
+    
+    puntos.forEach((p, idx) => {
+        const marker = L.marker([p.latitud, p.longitud]).addTo(map);
+        marker.bindPopup(`<strong>${p.codigo}</strong><br>${p.comunidad}<br>${p.direccion}<br>Salida: ${p.fecha_salida}<br>Llegada: ${p.fecha_llegada}`);
+    });
+});
+</script>
+@endsection
