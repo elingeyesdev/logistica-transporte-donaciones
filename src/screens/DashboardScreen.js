@@ -147,42 +147,56 @@ export default function DashboardScreen() {
         </View>
 
         {/* Gráfico de barras: Solicitudes por Provincia/Comunidad (Top 5) */}
-        {Array.isArray(data.solicitudesPorComunidad) && data.solicitudesPorComunidad.length > 0 && (
-          <View style={styles.barContainer}>
-            <Text style={styles.barTitle}>Solicitudes por Provincia/Comunidad (Top 5)</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <BarChart
-                data={{
-                  labels: data.solicitudesPorComunidad.slice(0, 5).map(item => item.comunidad || '—'),
-                  datasets: [
-                    {
-                      data: data.solicitudesPorComunidad.slice(0, 5).map(item => Number(item.total) || 0),
-                    },
-                  ],
-                }}
-                width={Math.max(350, data.solicitudesPorComunidad.slice(0, 5).length * 90)}
-                height={220}
-                yAxisLabel=""
-                yAxisSuffix=""
-                chartConfig={{
-                  backgroundColor: '#fff',
-                  backgroundGradientFrom: '#fff',
-                  backgroundGradientTo: '#fff',
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(23, 162, 184, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
-                  style: { borderRadius: 16 },
-                  propsForLabels: { fontWeight: 'bold' },
-                  propsForBackgroundLines: { stroke: '#eee' },
-                  barPercentage: 0.7,
-                }}
-                style={{ marginVertical: 8, borderRadius: 12 }}
-                fromZero
-                showValuesOnTopOfBars
-              />
-            </ScrollView>
-          </View>
-        )}
+        {Array.isArray(data.solicitudesPorComunidad) && data.solicitudesPorComunidad.length > 0 && (() => {
+          // Agrupa y cuenta solicitudes por comunidad
+          const comunidadCounts = {};
+          data.solicitudesPorComunidad.forEach(item => {
+            const nombre = item.comunidad || '—';
+            comunidadCounts[nombre] = (comunidadCounts[nombre] || 0) + 1;
+          });
+          const topComunidades = Object.entries(comunidadCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+          const barLabels = topComunidades.map(([nombre]) => nombre);
+          const barData = topComunidades.map(([_, count]) => count);
+          return (
+            <View style={styles.barContainer}>
+              <Text style={styles.barTitle}>Solicitudes por Provincia/Comunidad (Top 5)</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <BarChart
+                  data={{
+                    labels: barLabels,
+                    datasets: [
+                      {
+                        data: barData,
+                      },
+                    ],
+                  }}
+                  width={Math.max(350, barLabels.length * 90)}
+                  height={360}
+                  yAxisLabel=""
+                  yAxisSuffix=""
+                  chartConfig={{
+                    backgroundColor: '#fff',
+                    backgroundGradientFrom: '#fff',
+                    backgroundGradientTo: '#fff',
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(23, 162, 184, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
+                    style: { borderRadius: 16 },
+                    propsForLabels: { fontWeight: 'bold' },
+                    propsForBackgroundLines: { stroke: '#eee' },
+                    barPercentage: 0.7,
+                  }}
+                  style={{ marginVertical: 10, borderRadius: 12 }}
+                  fromZero
+                  showValuesOnTopOfBars
+                  verticalLabelRotation={30}
+                />
+              </ScrollView>
+            </View>
+          );
+        })()}
 
 
         <Text style={styles.cardTitle}>Paquetes Entregados</Text>
