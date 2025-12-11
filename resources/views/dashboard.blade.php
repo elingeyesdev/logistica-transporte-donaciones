@@ -1181,7 +1181,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     let html = `<div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Código</th><th>Solicitante</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>`;
                     solicitudes.forEach(s => {
-                        html += `<tr><td>${s.codigo || '-'}</td><td>${s.solicitante || '-'}</td><td>${s.estado || '-'}</td><td>${s.fecha || '-'}</td></tr>`;
+                        // El campo correcto es 'estado' (ya contiene el nombre del estado)
+                        let estado = s.estado || '-';
+                        if (estado && estado !== '-') {
+                            estado = estado.charAt(0).toUpperCase() + estado.slice(1).toLowerCase();
+                        }
+                        html += `<tr><td>${s.codigo || '-'}</td><td>${s.solicitante || '-'}</td><td>${estado}</td><td>${s.fecha || '-'}</td></tr>`;
                     });
                     html += '</tbody></table></div>';
                     cont.innerHTML = html;

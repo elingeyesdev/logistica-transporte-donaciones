@@ -321,6 +321,7 @@ class DashboardController extends Controller
                     'solicitante_telefono' => $solicitanteModel->telefono ?? '—',
                     'insumos' => $solicitud->insumos_necesarios ?? '',
                     'direccion' => $destino->direccion ?? '—',
+                    'estado' => $solicitud->estado ?? 'Sin estado',
                 ];
             })
             ->values();
