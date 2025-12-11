@@ -338,10 +338,13 @@
                 @endif
             </div>
         </div>
-       
+        <div id="mapa-ruta-vehiculo" class="mt-3" style="height: 400px; display: none;">
+           
+        </div>
     </div>
 </div>
             </div>
+            
 
         </div>
     </div>
