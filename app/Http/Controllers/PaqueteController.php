@@ -290,16 +290,22 @@ class PaqueteController extends Controller
             'solicitud.destino',
             'conductor',
             'vehiculo.marcaVehiculo',
+            'vehiculo.tipoVehiculo',
             ])->findOrFail($id);
         
+        $historial = HistorialSeguimientoDonacione::with('ubicacion')
+        ->where('id_paquete', $paquete->id_paquete)
+        ->orderBy('fecha_actualizacion', 'asc')
+        ->get();
+
         if ($request->wantsJson()) {
             return response()->json([
-                'success' => true,
-                'data' => $paquete
+                'success'   => true,
+                'data'      => $paquete,
+                'historial' => $historial,
             ]);
         }
-
-        return view('paquete.show', compact('paquete'));
+        return view('paquete.show', compact('paquete', 'historial'));
     }
 
     public function exportExcel(Paquete $paquete)

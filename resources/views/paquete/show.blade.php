@@ -4,7 +4,35 @@
     {{ $paquete->name ?? __('Mostrar') . " " . __('Paquete') }}
 @endsection
 
+@push('css')
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+>
+@endpush
+
+@push('js')
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+></script>
+@endpush
+
+
 @section('content')
+@php
+    $ubicacionActual = $paquete->ubicacion_actual ?? null;
+    $lat = $lng = null;
+
+    if ($ubicacionActual && preg_match('/\((-?\d+\.\d+),\s*(-?\d+\.\d+)\)/', $ubicacionActual, $matches)) {
+        $lat = $matches[1];
+        $lng = $matches[2];
+    }
+@endphp
+
     <section class="content container-fluid">
         <div class="row">
             <div class="col-md-12">
@@ -180,7 +208,78 @@
                                 if ($fechaEntregaPdf && $estadoSeguimientoLower && \Illuminate\Support\Str::contains($estadoSeguimientoLower, 'entreg')) {
                                     $estadoSeguimiento = trim(($estadoSeguimiento ?? 'Entregado') . ' - ' . $fechaEntregaPdf);
                                 }
+
+                                $historial = $historial ?? collect();
                             @endphp
+
+                            @if($historial->count())
+                                @foreach($historial as $h)
+                                    @php
+                                        $ubic = optional($h->ubicacion);
+
+                                        $fechaHora = $h->fecha_actualizacion
+                                            ? (\Carbon\Carbon::parse($h->fecha_actualizacion)->format('d/m/Y H:i'))
+                                            : '—';
+
+                                        $lat = $ubic->latitud ?? null;
+                                        $lng = $ubic->longitud ?? null;
+                                        $hasCoords = $lat !== null && $lng !== null;
+
+                                        $textoConductor = $h->conductor_nombre
+                                            ? $h->conductor_nombre . ($h->conductor_ci ? ' (CI '.$h->conductor_ci.')' : '')
+                                            : null;
+                                    @endphp
+
+                                    <table style="margin-bottom:12px;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:180px;">Campo</th>
+                                                <th>Valor</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Estado</td>
+                                                <td>{{ $h->estado ?? '—' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Vehículo</td>
+                                                <td>{{ $h->vehiculo_placa ?? '—' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Conductor</td>
+                                                <td>{{ $textoConductor ?? '—' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Ubicación</td>
+                                                <td>
+                                                    @if($hasCoords)
+                                                        <a href="https://www.google.com/maps?q={{ $lat }},{{ $lng }}" target="_blank">
+                                                            {{ $ubic->zona ?? 'Sin dirección' }} ({{ $lat }}, {{ $lng }})
+                                                        </a>
+                                                    @else
+                                                        {{ $ubic->zona ?? '—' }}
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Fecha de reporte</td>
+                                                <td>{{ $fechaHora }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Voluntario Encargado</td>
+                                                <td>
+                                                    @if($h->ci_usuario)
+                                                        CI {{ $h->ci_usuario }}
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                @endforeach
+                            @endif
                             <table style="margin-bottom:12px;">
                                 <thead>
                                     <tr>
@@ -195,7 +294,8 @@
                                     </tr>
                                     <tr>
                                         <td>Vehículo</td>
-                                        <td>{{ optional($paquete->vehiculo)->placa ?? '—' }}  
+                                        <td>
+                                            {{ optional($paquete->vehiculo)->placa ?? '—' }}
                                             @php 
                                                 $marca = optional(optional($paquete->vehiculo)->marcaVehiculo)->nombre_marca;
                                             @endphp
@@ -206,7 +306,12 @@
                                     </tr>
                                     <tr>
                                         <td>Conductor</td>
-                                        <td>{{ trim(($paquete->conductor->nombre ?? '').' '.($paquete->conductor->apellido ?? '')) ?: '—' }}@if($paquete->conductor->ci ?? false) (CI {{ $paquete->conductor->ci }})@endif</td>
+                                        <td>
+                                            {{ trim(($paquete->conductor->nombre ?? '').' '.($paquete->conductor->apellido ?? '')) ?: '—' }}
+                                            @if($paquete->conductor->ci ?? false)
+                                                (CI {{ $paquete->conductor->ci }})
+                                            @endif
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>Ubicación Actual</td>
@@ -217,7 +322,7 @@
                                         <td>{{ now()->format('d/m/Y') }}</td>
                                     </tr>
                                     <tr>
-                                    <td>Voluntario Encargado</td>
+                                        <td>Voluntario Encargado</td>
                                         <td>
                                             @php $encargado = $paquete->encargado; @endphp
                                             {{ $encargado ? $encargado->nombre . ' ' . $encargado->apellido : '—' }}
@@ -226,6 +331,8 @@
                                     </tr>
                                 </tbody>
                             </table>
+
+
                             <div class="footer">Documento generado desde el sistema DAS.</div>
                         </div>
                         <div class="form-group mb-2 mb20">
@@ -255,10 +362,6 @@
                             {{ optional($paquete->estado)->nombre_estado ?? '—' }}
                         </div>
 
-                        <div class="form-group mb-2 mb20">
-                            <strong>Ubicacion Actual:</strong>
-                            {{ $paquete->ubicacion_actual ?? 'La ubicación se ingresa cuando inicia la ruta'}}
-                        </div>
                         <div class="form-group mb-2 mb20">
                             <strong>Fecha de Creacion:</strong>
                             {{ \Carbon\Carbon::parse($paquete->created_at)->format('d/m/Y') }}
@@ -322,9 +425,47 @@
                             {{ $encargado ? $encargado->nombre . ' ' . $encargado->apellido : 'El voluntario se asigna al iniciar la ruta' }}
                             @if($paquete->id_encargado) - CI {{ $paquete->id_encargado }}@endif
                         </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Ubicacion Actual:</strong>
+                            {{ $paquete->ubicacion_actual ?? 'La ubicación se ingresa cuando inicia la ruta'}}
+                        </div>
+                       @if($lat !== null && $lng !== null)
+                            <div class="form-group mb-2 mb20">
+                                <strong>Ubicación Actual del Paquete:</strong>
+                                <div id="mapa-paquete"
+                                    data-lat="{{ $lat }}"
+                                    data-lng="{{ $lng }}"
+                                    style="height: 300px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd;">
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+@push('js')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mapDiv = document.getElementById('mapa-paquete');
+        if (!mapDiv) return;
+        const lat = parseFloat(mapDiv.dataset.lat);
+        const lng = parseFloat(mapDiv.dataset.lng);
+
+        if (isNaN(lat) || isNaN(lng)) {
+            return;
+        }
+        const map = L.map('mapa-paquete').setView([lat, lng], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([lat, lng], { draggable: false }).addTo(map);
+    });
+</script>
+@endpush
+
+
 @endsection

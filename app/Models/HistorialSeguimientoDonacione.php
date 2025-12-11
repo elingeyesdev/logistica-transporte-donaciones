@@ -35,6 +35,9 @@ class HistorialSeguimientoDonacione extends Model
      * @var array<int, string>
      */
 // app/Models/HistorialSeguimientoDonacione.php
+    protected $casts = [
+        'fecha_actualizacion' => 'datetime',
+    ];
     protected $fillable = [
         'ci_usuario',
         'estado',
