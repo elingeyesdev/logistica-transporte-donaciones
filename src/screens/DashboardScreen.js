@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView, Button } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView, Button, Dimensions } from 'react-native';
 import AdminLayout from '../components/AdminLayout';
 import SmallBox from '../components/SmallBox';
 import { getApiConfig, API_BASE_URL } from '../config/api';
 import axios from 'axios';
+import { DoughnutChart } from 'react-native-chart-kit';
+import { PieChart } from 'react-native-chart-kit';
 
 export default function DashboardScreen() {
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,9 @@ export default function DashboardScreen() {
         voluntariosConductores: response.data.voluntariosConductores || 0,
         totalPaquetes: response.data.totalPaquetes || 0,
         paquetesEntregados: response.data.paquetesEntregados || 0,
-        paquetes: response.data.paquetes || [], 
+        paquetesEnCamino: response.data.paquetesEnCamino || 0,
+        paquetesPendientes: response.data.paquetesPendientes || 0,
+        paquetes: response.data.paquetes || [],
       };
 
       console.log('Datos mapeados para el dashboard:', mappedData); 
@@ -88,22 +92,69 @@ export default function DashboardScreen() {
           <SmallBox color="teal" title="Conductores Registrados" value={data.voluntariosConductores}  />
         </View>
 
+
         <View style={styles.row}>
           <SmallBox color="primary" title="Total Paquetes" value={data.totalPaquetes}  />
           <SmallBox color="success" title="Paquetes Entregados" value={data.paquetesEntregados}  />
         </View>
 
-    <View>
-    <View >
-    <Text style={styles.cardTitle}>Paquetes Entregados</Text>
+        {/* Donut Chart de distribución de paquetes */}
+        <View style={styles.donutContainer}>
+          <Text style={styles.donutTitle}>Distribución de Paquetes</Text>
+          <PieChart
+            data={[
+              {
+                name: 'Entregados',
+                population: Number(data.paquetesEntregados) || 0,
+                color: '#28a745',
+                legendFontColor: '#333',
+                legendFontSize: 14,
+              },
+              {
+                name: 'En camino',
+                population: Number(data.paquetesEnCamino) || 0,
+                color: '#17a2b8',
+                legendFontColor: '#333',
+                legendFontSize: 14,
+              },
+              {
+                name: 'Pendientes',
+                population: Number(data.paquetesPendientes) || 0,
+                color: '#ffc107',
+                legendFontColor: '#333',
+                legendFontSize: 14,
+              },
+            ]}
+            width={Dimensions.get('window').width - 32}
+            height={220}
+            chartConfig={{
+              backgroundColor: '#fff',
+              backgroundGradientFrom: '#fff',
+              backgroundGradientTo: '#fff',
+              color: (opacity = 1) => `rgba(23, 162, 184, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
+              style: { borderRadius: 16 },
+              propsForLabels: { fontWeight: 'bold' },
+            }}
+            accessor={'population'}
+            backgroundColor={'transparent'}
+            paddingLeft={0}
+            absolute
+            hasLegend={true}
+            center={[0, 0]}
+            style={{ alignSelf: 'center', marginBottom: 16 }}
+          />
+        </View>
 
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 0, paddingBottom:40,paddingTop:10, margin:0}}
-    >
-      <View style={{ minWidth: 370}}> 
-        <View style={[styles.tableHeaderRow, { paddingVertical: 6 }]}>
+        <Text style={styles.cardTitle}>Paquetes Entregados</Text>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 0, paddingBottom:40,paddingTop:10, margin:0}}
+        >
+          <View style={{ minWidth: 370}}>
+            <View style={[styles.tableHeaderRow, { paddingVertical: 6 }]}>...
           <Text style={[styles.tableHeaderText, { flex: 0.1 }]}>Código</Text>
           <Text style={[styles.tableHeaderText, { flex: 0.2 }]}>Creado</Text>
           <Text style={[styles.tableHeaderText, { flex: 0.2 }]}>Entregado</Text>
@@ -178,11 +229,10 @@ export default function DashboardScreen() {
               No hay paquetes con fechas de entrega.
             </Text>
           </View>
+
         )}
-      </View>
-    </ScrollView>
-  </View>
-</View>
+          </View>
+        </ScrollView>
 
       </ScrollView>
     </AdminLayout>
