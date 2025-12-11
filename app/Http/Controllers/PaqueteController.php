@@ -907,6 +907,56 @@ class PaqueteController extends Controller
             ]);
         }
     }
+public function showDestinoVoluntario(Request $request, string $codigo)
+{
+    $paquete = Paquete::with([
+            'estado',
+            'solicitud.destino',
+            'encargado',
+        ])
+        ->whereHas('solicitud', function ($q) use ($codigo) {
+            $q->where('codigo_seguimiento', $codigo);
+        })
+        ->first();
 
+    if (!$paquete) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Paquete no encontrado para el código indicado.',
+        ], 404);
+    }
 
+    $solicitud = optional($paquete->solicitud);
+    $destino   = optional($solicitud->destino);
+    $encargado = optional($paquete->encargado);
+
+    $data = [
+        'id_paquete' => $paquete->id_paquete,
+        'codigo'     => $solicitud->codigo_seguimiento ?? null,
+        'estado'     => optional($paquete->estado)->nombre_estado,
+
+        'destino' => [
+            'id_destino' => $destino->id_destino ?? null,
+            'comunidad'  => $destino->comunidad ?? null,
+            'direccion'  => $destino->direccion ?? null,
+            'provincia'  => $destino->provincia ?? null,
+            'latitud'    => $destino->latitud ?? null,
+            'longitud'   => $destino->longitud ?? null,
+        ],
+
+        'encargado' => [
+            'ci'       => $encargado->ci ?? $paquete->id_encargado,
+            'nombre'   => $encargado->nombre ?? null,
+            'apellido' => $encargado->apellido ?? null,
+            'completo' => trim(($encargado->nombre ?? '').' '.($encargado->apellido ?? '')) ?: null,
+        ],
+    ];
+
+    return response()->json([
+        'success'        => true,
+        'codigo_busqueda'=> $codigo,
+        'data'           => $data,
+    ]);
 }
+
+    }

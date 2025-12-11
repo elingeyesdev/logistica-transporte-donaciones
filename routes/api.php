@@ -40,6 +40,8 @@ Route::prefix('trazabilidad')->group(function () {
     Route::get('/provincia/{provincia}', [TrazabilidadController::class, 'porProvincia']);
 });
 
+Route::get('/paquetes/destino-voluntario/{codigo}', [PaqueteController::class, 'showDestinoVoluntario']);
+
 //PARA BRIGADAS - MOCHILA DE BOMBEROS
 Route::post('solicitud-publica', action: [SolicitudController::class, 'store']);
 
