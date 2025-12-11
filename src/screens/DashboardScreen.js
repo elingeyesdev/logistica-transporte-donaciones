@@ -30,6 +30,7 @@ export default function DashboardScreen() {
         paquetesEntregados: response.data.paquetesEntregados || 0,
         paquetesEnCamino: response.data.paquetesEnCamino || 0,
         paquetesPendientes: response.data.paquetesPendientes || 0,
+        solicitudesPorComunidad: response.data.solicitudesPorComunidad || [],
         paquetes: response.data.paquetes || [],
       };
 
