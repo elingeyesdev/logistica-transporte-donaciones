@@ -93,16 +93,6 @@ export default function DashboardScreen() {
           <SmallBox color="success" title="Paquetes Entregados" value={data.paquetesEntregados}  />
         </View>
 
-        <View style={styles.cardContainer}>
-          <View style={[styles.card, styles.shadow]}>
-            <Text style={styles.cardTitle}>Resumen General</Text>
-            <Text style={styles.cardText}>Total de solicitudes: {data.total}</Text>
-            <Text style={styles.cardText}>Aceptadas: {data.aceptadas}</Text>
-            <Text style={styles.cardText}>Rechazadas: {data.rechazadas}</Text>
-            <Text style={styles.cardText}>Tasa de aprobación: {data.tasa}%</Text>
-          </View>
-        </View>
-
     <View>
     <View >
     <Text style={styles.cardTitle}>Paquetes Entregados</Text>
@@ -162,7 +152,7 @@ export default function DashboardScreen() {
                 </Text>
 
                 <Text style={[styles.tableCell, { flex: 0.2 }]}>
-                  {formatDate(paq.fecha_creacion)}
+                  {formatDate(paq.fecha_create)}
                 </Text>
 
                 <Text style={[styles.tableCell, { flex: 0.2 }]}>
