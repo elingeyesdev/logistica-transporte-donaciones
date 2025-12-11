@@ -78,7 +78,47 @@ class PaqueteController extends Controller
         $estados      = Estado::orderBy('nombre_estado')->pluck('nombre_estado','id_estado');
         $solicitudes  = Solicitud::with(['solicitante', 'destino'])->get();
         $conductores  = Conductor::orderBy('nombre')->orderBy('apellido')->get();
-        $vehiculos    = Vehiculo::with(['marcaVehiculo','tipoVehiculo'])->orderBy('placa')->get();
+       
+       $estadoEnCaminoIds = Estado::whereRaw('LOWER(nombre_estado) = ?', ['en camino'])
+            ->pluck('id_estado');
+
+        $conductoresOcupadosIds = Paquete::whereIn('estado_id', $estadoEnCaminoIds)
+            ->whereNotNull('id_conductor')
+            ->pluck('id_conductor');
+
+        $conductores = Conductor::orderBy('nombre')->orderBy('apellido')
+            ->when($conductoresOcupadosIds->isNotEmpty(), function ($q) use ($conductoresOcupadosIds) {
+                $q->whereNotIn('conductor_id', $conductoresOcupadosIds);
+            })
+            ->get();
+
+        $vehiculosBloqueadosIds = Paquete::whereIn('estado_id', $estadoEnCaminoIds)
+            ->whereNotNull('id_vehiculo')
+            ->select('id_vehiculo', DB::raw('COUNT(*) as total'))
+            ->groupBy('id_vehiculo')
+            ->havingRaw('COUNT(*) >= 3')
+            ->pluck('id_vehiculo');
+
+        $vehiculoActualId = $paquete->id_vehiculo;
+
+        $vehiculos = Vehiculo::with(['marcaVehiculo','tipoVehiculo'])
+            ->when($vehiculosBloqueadosIds->isNotEmpty(), function ($q) use ($vehiculosBloqueadosIds, $vehiculoActualId) {
+                $ids = $vehiculosBloqueadosIds;
+
+                if ($vehiculoActualId) {
+                    $ids = $ids->filter(function ($id) use ($vehiculoActualId) {
+                        return (int) $id !== (int) $vehiculoActualId;
+                    });
+                }
+
+                if ($ids->isNotEmpty()) {
+                    $q->whereNotIn('id_vehiculo', $ids);
+                }
+            })
+            ->orderBy('capacidad_aproximada')
+            ->get();
+
+
         $licencias    = TipoLicencia::orderBy('licencia')->get();
         $marcas       = Marca::orderBy('nombre_marca')->get();
         $tiposVehiculo = TipoVehiculo::orderBy('nombre_tipo_vehiculo')->get();
@@ -105,6 +145,45 @@ class PaqueteController extends Controller
             $data['fecha_entrega']   = null;
             $data['id_encargado']     = Auth::user()->ci;
             $data['codigo']           = $this->makeCodigoPaquete();
+
+            $estadoIdNuevo = (int) ($data['estado_id'] ?? 0);
+            $estadoNuevo   = Estado::find($estadoIdNuevo);
+            $nombreEstadoNuevo = optional($estadoNuevo)->nombre_estado;
+
+            $esEnCaminoNuevo = $nombreEstadoNuevo &&
+                (strcasecmp($nombreEstadoNuevo, 'En Camino') === 0 || strcasecmp($nombreEstadoNuevo, 'En camino') === 0);
+
+            if ($esEnCaminoNuevo && !empty($data['id_conductor']) && !empty($data['id_vehiculo'])) {
+                $conductorId = (int) $data['id_conductor'];
+                $vehiculoId  = (int) $data['id_vehiculo'];
+
+                $estadoEnCaminoIds = Estado::whereRaw('LOWER(nombre_estado) = ?', ['en camino'])
+                    ->pluck('id_estado');
+
+                $existeConflicto = Paquete::whereIn('estado_id', $estadoEnCaminoIds)
+                    ->where('id_conductor', $conductorId)
+                    ->whereNotNull('id_vehiculo')
+                    ->where('id_vehiculo', '!=', $vehiculoId)
+                    ->exists();
+
+                if ($existeConflicto) {
+                    DB::rollBack();
+
+                    $mensaje = 'El conductor seleccionado ya está asignado a otro vehículo con paquetes en estado "En Camino". '
+                            . 'Selecciona otro conductor o vehículo.';
+
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'success' => false,
+                            'errors'  => ['id_conductor' => [$mensaje]],
+                        ], 422);
+                    }
+
+                    return back()
+                        ->withErrors(['id_conductor' => $mensaje])
+                        ->withInput();
+                }
+            }
 
             if ($request->hasFile('imagen')) {
                 $data['imagen'] = $request->file('imagen')->store('paquetes', 'public');
@@ -330,8 +409,60 @@ class PaqueteController extends Controller
         $paquete->load(['estado','solicitud.solicitante','solicitud.destino']);
         $estados      = Estado::orderBy('nombre_estado')->pluck('nombre_estado','id_estado');
         $solicitudes  = Solicitud::with(['solicitante', 'destino'])->get();
-        $conductores  = Conductor::orderBy('nombre')->orderBy('apellido')->get();
-        $vehiculos    = Vehiculo::with(['marcaVehiculo','tipoVehiculo'])->orderBy('placa')->get();
+        $estadoEnCaminoIds = Estado::whereRaw('LOWER(nombre_estado) = ?', ['en camino'])
+            ->pluck('id_estado');
+
+        $conductoresOcupadosIds = Paquete::whereIn('estado_id', $estadoEnCaminoIds)
+            ->whereNotNull('id_conductor')
+            ->pluck('id_conductor');
+
+        $conductorActualId = $paquete->id_conductor;
+        $conductores = Conductor::orderBy('nombre')->orderBy('apellido')
+            ->when($conductoresOcupadosIds->isNotEmpty(), function ($q) use ($conductoresOcupadosIds, $conductorActualId) {
+                $ids = $conductoresOcupadosIds;
+
+                if ($conductorActualId) {
+                    $ids = $ids->filter(function ($id) use ($conductorActualId) {
+                        return (int) $id !== (int) $conductorActualId;
+                    });
+                }
+
+                if ($ids->isNotEmpty()) {
+                    $q->whereNotIn('conductor_id', $ids);
+                }
+            })
+            ->get();
+        $vehiculosBloqueadosIds = Paquete::whereIn('estado_id', $estadoEnCaminoIds)
+            ->whereNotNull('id_vehiculo')
+            ->select('id_vehiculo', DB::raw('COUNT(*) as total'))
+            ->groupBy('id_vehiculo')
+            ->havingRaw('COUNT(*) >= 3')
+            ->pluck('id_vehiculo')
+            ->filter()
+            ->values();
+
+        
+        $vehiculoActualId = $paquete->id_vehiculo;
+
+        $vehiculos = Vehiculo::with(['marcaVehiculo','tipoVehiculo'])
+            ->when($vehiculosBloqueadosIds->isNotEmpty(), function ($q) use ($vehiculosBloqueadosIds, $vehiculoActualId) {
+                $ids = $vehiculosBloqueadosIds;
+
+                if ($vehiculoActualId) {
+                    $ids = $ids->reject(function ($id) use ($vehiculoActualId) {
+                        return (int) $id === (int) $vehiculoActualId;
+                    });
+                }
+
+                $idsArray = $ids->values()->all();
+
+                if (!empty($idsArray)) {
+                    $q->whereNotIn('id_vehiculo', $idsArray);
+                }
+            })
+            ->orderBy('capacidad_aproximada')
+            ->get();
+        
         $licencias    = TipoLicencia::orderBy('licencia')->get();
         $marcas       = Marca::orderBy('nombre_marca')->get();
         $tiposVehiculo = TipoVehiculo::orderBy('nombre_tipo_vehiculo')->get();
@@ -361,6 +492,44 @@ class PaqueteController extends Controller
 
         $oldNombre = optional($oldEstado)->nombre_estado;
         $newNombre = optional($newEstado)->nombre_estado;
+
+        $newIsEnCamino  = $newNombre &&
+                (strcasecmp($newNombre, 'En Camino') === 0 || strcasecmp($newNombre, 'En camino') === 0);
+
+        if ($newIsEnCamino) {
+            $conductorIdFinal = (int) ($request->input('id_conductor') ?? $paquete->id_conductor);
+            $vehiculoIdFinal  = (int) ($request->input('id_vehiculo') ?? $paquete->id_vehiculo);
+
+            if ($conductorIdFinal && $vehiculoIdFinal) {
+                $estadoEnCaminoIds = Estado::whereRaw('LOWER(nombre_estado) = ?', ['en camino'])
+                    ->pluck('id_estado');
+
+                $existeConflicto = Paquete::whereIn('estado_id', $estadoEnCaminoIds)
+                    ->where('id_conductor', $conductorIdFinal)
+                    ->whereNotNull('id_vehiculo')
+                    ->where('id_vehiculo', '!=', $vehiculoIdFinal)
+                    ->where('id_paquete', '!=', $paquete->id_paquete)
+                    ->exists();
+
+                if ($existeConflicto) {
+                    DB::rollBack();
+
+                    $mensaje = 'El conductor seleccionado ya está asignado a otro vehículo con paquetes en estado "En Camino". '
+                            . 'Selecciona otro conductor o vehículo.';
+
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'success' => false,
+                            'errors'  => ['id_conductor' => [$mensaje]],
+                        ], 422);
+                    }
+
+                    return back()
+                        ->withErrors(['id_conductor' => $mensaje])
+                        ->withInput();
+                }
+            }
+        }
 
         if ($this->esEstadoEntregadoPorNombre($newNombre)) {
             $cacheKeyVerified = "paquete_entrega_verified_{$paquete->id_paquete}";
