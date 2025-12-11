@@ -236,6 +236,24 @@
             <div class="card-body pt-2">
                 <canvas id="solicitudesPorComunidadChart" style="min-height:250px;height:250px;width:100%;"></canvas>
             </div>
+            <!-- Modal AdminLTE para solicitudes por comunidad -->
+            <div class="modal fade" id="modalSolicitudesComunidad" tabindex="-1" role="dialog" aria-labelledby="modalSolicitudesComunidadLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="modalSolicitudesComunidadLabel">Solicitudes de la comunidad</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="tablaSolicitudesComunidadContainer">
+                                <div class="text-center text-muted">Cargando...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1143,9 +1161,33 @@ document.addEventListener('DOMContentLoaded', function() {
                                     return `${label}: ${value} solicitudes`;
                                 }
                             }
+                        },
+                        onClick: function(evt, elements) {
+                            if (!elements.length) return;
+                            const idx = elements[0]._index;
+                            const comunidad = labels[idx];
+                            mostrarModalSolicitudesComunidad(comunidad);
                         }
                     }
                 });
+            // Modal para solicitudes por comunidad
+            function mostrarModalSolicitudesComunidad(comunidad) {
+                // Buscar solicitudes de la comunidad (case-insensitive)
+                const solicitudes = (solicitudesData.comunidad || []).filter(item => (item.comunidad || '').toLowerCase() === comunidad.toLowerCase());
+                const cont = document.getElementById('tablaSolicitudesComunidadContainer');
+                document.getElementById('modalSolicitudesComunidadLabel').textContent = `Solicitudes de la comunidad: ${comunidad}`;
+                if (!solicitudes.length) {
+                    cont.innerHTML = '<div class="alert alert-warning">No hay solicitudes para esta comunidad.</div>';
+                } else {
+                    let html = `<div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Código</th><th>Solicitante</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>`;
+                    solicitudes.forEach(s => {
+                        html += `<tr><td>${s.codigo || '-'}</td><td>${s.solicitante || '-'}</td><td>${s.estado || '-'}</td><td>${s.fecha || '-'}</td></tr>`;
+                    });
+                    html += '</tbody></table></div>';
+                    cont.innerHTML = html;
+                }
+                $('#modalSolicitudesComunidad').modal('show');
+            }
             }
             resultList.innerHTML = rows;
             currentSolicitudesReport = buildReportObject(
