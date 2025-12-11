@@ -31,11 +31,19 @@ Route::get('/health', function () {
     ]);
 });
 Route::post('login', [LoginController::class, 'apiLogin']);
-Route::get('/trazabilidad/{ci}', [TrazabilidadController::class, 'porVoluntario']);
 
-//PARA DONACIONES (renato y helder)
+Route::prefix('trazabilidad')->group(function () {
+    Route::get('/voluntario/{ci}', [TrazabilidadController::class, 'porVoluntario']);
+    Route::get('/paquete/{codigo}', [TrazabilidadController::class, 'porCodigoPaquete']);
+    Route::get('/vehiculo/{placa}', [TrazabilidadController::class, 'porVehiculo']);
+    Route::get('/solicitante/{ci}', [TrazabilidadController::class, 'porSolicitante']);
+    Route::get('/provincia/{provincia}', [TrazabilidadController::class, 'porProvincia']);
+});
+
+//PARA BRIGADAS - MOCHILA DE BOMBEROS
 Route::post('solicitud-publica', action: [SolicitudController::class, 'store']);
- //RENATO Y HELDER GET Y PUT Y PATCH
+
+ //INVENTARIO - ARMADO DE PAQUETES GET Y PUT Y PATCH
     Route::get('paquetes/pendientes', [PaqueteController::class, 'pendientes'])->name('api.paquetes.pendientes');
     Route::put('paquetes/{paquete}/armar', [PaqueteController::class, 'marcarArmado'])->name('api.paquetes.armar');
     Route::patch('paquetes/{paquete}/armar', [PaqueteController::class, 'marcarArmado'])->name('api.paquetes.armar.patch');
