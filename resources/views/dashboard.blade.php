@@ -465,6 +465,76 @@ const dashboardExcelExportUrl = @json(route('dashboard.reportes.excel'));
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 document.addEventListener('DOMContentLoaded', function() {
+    $('#dashboardFiltersModal').on('shown.bs.modal', function() {
+        const toggleListBtn = document.getElementById('btn-toggle-list');
+        const resultList = document.getElementById('filter-solicitudes-result');
+        if (toggleListBtn && resultList) {
+            toggleListBtn.onclick = function() {
+                listHidden = !listHidden;
+                if (listHidden) {
+                    resultList.classList.add('d-none');
+                } else {
+                    resultList.classList.remove('d-none');
+                }
+                updateToggleButton();
+            };
+            updateToggleButton();
+        }
+        const generateSolicitudesBtn = document.getElementById('btn-generar-reporte');
+        if (generateSolicitudesBtn) {
+            generateSolicitudesBtn.onclick = function() {
+                exportCurrentReport(currentSolicitudesReport, 'Solicitudes');
+            };
+        }
+        const excelSolicitudesBtn = document.getElementById('btn-excel-solicitudes');
+        if (excelSolicitudesBtn) {
+            excelSolicitudesBtn.onclick = function() {
+                exportReportToExcel(currentSolicitudesReport, 'Solicitudes');
+            };
+        }
+
+        const togglePaquetesBtn = document.getElementById('btn-toggle-paquetes');
+        const paquetesResultList = document.getElementById('filter-paquetes-result');
+        const paquetesSelect = document.getElementById('filter-paquetes');
+        if (togglePaquetesBtn && paquetesResultList) {
+            togglePaquetesBtn.onclick = function() {
+                paquetesListHidden = !paquetesListHidden;
+                if (paquetesListHidden) {
+                    paquetesResultList.classList.add('d-none');
+                } else {
+                    paquetesResultList.classList.remove('d-none');
+                }
+                updatePaquetesToggleButton();
+            };
+            updatePaquetesToggleButton();
+        }
+        const generatePaquetesBtn = document.getElementById('btn-generar-paquetes');
+        if (generatePaquetesBtn) {
+            generatePaquetesBtn.onclick = function() {
+                exportCurrentReport(currentPaquetesReport, 'Paquetes');
+            };
+        }
+        const excelPaquetesBtn = document.getElementById('btn-excel-paquetes');
+        if (excelPaquetesBtn) {
+            excelPaquetesBtn.onclick = function() {
+                exportReportToExcel(currentPaquetesReport, 'Paquetes');
+            };
+        }
+        // Forzar renderizado de la lista de paquetes según el filtro actual
+        if (paquetesSelect && paquetesResultList) {
+            renderPaquetesList(paquetesSelect.value);
+            paquetesResultList.classList.remove('d-none');
+            paquetesListHidden = false;
+            updatePaquetesToggleButton();
+            // Listener SIEMPRE activo
+            paquetesSelect.onchange = function() {
+                renderPaquetesList(this.value);
+                paquetesResultList.classList.remove('d-none');
+                paquetesListHidden = false;
+                updatePaquetesToggleButton();
+            };
+        }
+    });
     if (typeof Chart === 'undefined') {
         console.warn('Chart.js no está cargado. Activa el plugin Chartjs en config/adminlte.php');
     } else {
@@ -1106,7 +1176,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (type === 'comunidad') {
-            // Agrupar por provincia en vez de comunidad
             const grouped = filtered.reduce((acc, item) => {
                 const key = (item.provincia || 'Sin provincia').toLowerCase();
                 if (!acc[key]) {
@@ -1228,9 +1297,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 });
-            // Modal para solicitudes por comunidad
             function mostrarModalSolicitudesComunidad(comunidad) {
-                // Buscar solicitudes de la provincia (case-insensitive)
                 const solicitudes = (solicitudesData.comunidad || []).filter(item => (item.provincia || '').toLowerCase() === comunidad.toLowerCase());
                 const cont = document.getElementById('tablaSolicitudesComunidadContainer');
                 document.getElementById('modalSolicitudesComunidadLabel').textContent = `Solicitudes de la provincia: ${comunidad}`;
@@ -1432,6 +1499,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+
         if (type === 'entregadas') {
             const dataset = (paquetesData.entregadas || []).filter(passesDateFilter);
             if (!dataset.length) {
@@ -1443,19 +1511,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPaquetesReport = null;
                 return;
             }
-
-            paquetesResultList.innerHTML = dataset.map(item => `
-                <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+            paquetesResultList.innerHTML = dataset.map(item => {
+                const codigo = item.codigo || '-';
+                const solicitante = item.solicitante || '-';
+                const fecha = item.fecha || item.fecha_entrega || '-';
+                const conductor = item.conductor || '-';
+                const id = item.id || '';
+                return `<li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                     <div class="mb-2 mb-md-0">
-                        <strong>${item.codigo}</strong> · ${item.solicitante}<br>
-                        <small class="text-muted">Entrega: ${item.fecha}</small>
+                        <strong>${codigo}</strong> · ${solicitante}<br>
+                        <small class="text-muted">Entrega: ${fecha}</small>
                     </div>
                     <div class="text-md-right">
-                        <div><i class="fas fa-user mr-1"></i>${item.conductor}</div>
-                        <a href="/paquete/${item.id}" class="btn btn-sm btn-outline-secondary mt-2 mt-md-0">Ver</a>
+                        <div><i class="fas fa-user mr-1"></i>${conductor}</div>
+                        <a href="/paquete/${id}" class="btn btn-sm btn-outline-secondary mt-2 mt-md-0">Ver</a>
                     </div>
-                </li>
-            `).join('');
+                </li>`;
+            }).join('');
             currentPaquetesReport = buildReportObject('Paquetes', type, dataset.length, paquetesResultList.innerHTML, { items: dataset });
             return;
         }
@@ -1471,20 +1543,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPaquetesReport = null;
                 return;
             }
-
-            paquetesResultList.innerHTML = dataset.map(item => `
-                <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+            paquetesResultList.innerHTML = dataset.map(item => {
+                const codigo = item.codigo || '-';
+                const destino = item.destino || item.destino_comunidad || '-';
+                const fecha = item.fecha || item.fecha_salida || '-';
+                const provincia = item.provincia || item.destino_provincia || '';
+                const conductor = item.conductor || '-';
+                const vehiculo = item.vehiculo || '-';
+                const id = item.id || '';
+                return `<li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                     <div class="mb-2 mb-md-0">
-                        <strong>${item.codigo}</strong> · ${item.destino}<br>
-                        <small class="text-muted">Salida: ${item.fecha}${item.provincia ? ` · Prov.: ${item.provincia}` : ''}</small>
+                        <strong>${codigo}</strong> · ${destino}<br>
+                        <small class="text-muted">Salida: ${fecha}${provincia ? ` · Prov.: ${provincia}` : ''}</small>
                     </div>
                     <div class="text-md-right">
-                        <div><i class="fas fa-user mr-1"></i>${item.conductor}</div>
-                        <div><i class="fas fa-truck mr-1"></i>${item.vehiculo}</div>
-                        <a href="/paquete/${item.id}" class="btn btn-sm btn-outline-secondary mt-2">Ver</a>
+                        <div><i class="fas fa-user mr-1"></i>${conductor}</div>
+                        <div><i class="fas fa-truck mr-1"></i>${vehiculo}</div>
+                        <a href="/paquete/${id}" class="btn btn-sm btn-outline-secondary mt-2">Ver</a>
                     </div>
-                </li>
-            `).join('');
+                </li>`;
+            }).join('');
             currentPaquetesReport = buildReportObject('Paquetes', type, dataset.length, paquetesResultList.innerHTML, { items: dataset });
             return;
         }
@@ -1500,9 +1578,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPaquetesReport = null;
                 return;
             }
-
             const hasDateFilter = Boolean((dateFromInput && dateFromInput.value) || (dateToInput && dateToInput.value));
-
             const filteredVehicles = [];
             const renderedItems = dataset.map(item => {
                 const paquetes = (item.paquetes || []).filter(passesDateFilter);
@@ -1510,6 +1586,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     return null;
                 }
                 filteredVehicles.push(Object.assign({}, item, { paquetes }));
+                const placa = item.placa || '-';
+                const marca = item.marca || '-';
+                const modelo = item.modelo || '-';
+                const color = item.color || '-';
+                const tipo = item.tipo || '-';
                 const paquetesHtml = paquetes.length
                     ? paquetes.map(paq => {
                         let fechaCreacion = '-';
@@ -1535,13 +1616,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>`;
                     }).join('')
                     : `<small class="text-muted">${hasDateFilter ? 'No hay paquetes en el rango seleccionado.' : 'Sin paquetes registrados.'}</small>`;
-
                 return `
                     <li class="list-group-item">
                         <div>
-                            <strong>${item.placa}</strong> · ${item.marca}
-                            <small class="text-muted d-block">Modelo: ${item.modelo} · Color: ${item.color}</small>
-                            <small class="text-muted d-block">Tipo: ${item.tipo}</small>
+                            <strong>${placa}</strong> · ${marca}
+                            <small class="text-muted d-block">Modelo: ${modelo} · Color: ${color}</small>
+                            <small class="text-muted d-block">Tipo: ${tipo}</small>
                         </div>
                         <div class="mt-2">
                             <small class="text-uppercase text-muted" style="font-size: 0.75rem;">Paquetes asociados</small>
@@ -1550,7 +1630,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </li>
                 `;
             }).filter(Boolean);
-
             if (!renderedItems.length) {
                 paquetesResultList.innerHTML = `
                     <li class="list-group-item text-muted">
@@ -1560,7 +1639,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPaquetesReport = null;
                 return;
             }
-
             paquetesResultList.innerHTML = renderedItems.join('');
             currentPaquetesReport = buildReportObject('Paquetes', type, filteredVehicles.length, paquetesResultList.innerHTML, { items: filteredVehicles });
             return;
