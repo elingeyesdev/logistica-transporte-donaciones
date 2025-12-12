@@ -294,53 +294,95 @@
                 <h3 class="card-title">Estadísticas de Paquetes</h3>
             </div>
             <div class="card-body">
-                <div class="info-box mb-3">
-                    <span class="info-box-icon bg-info"><i class="fas fa-box"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Total Paquetes</span>
-                        <span class="info-box-number" id="total-paquetes">{{ $totalPaquetes }}</span>
-                    </div>
-                </div>
-                <div class="info-box mb-3">
-                    <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Paquetes Entregados</span>
-                        <span class="info-box-number" id="paquetes-entregados">{{ $paquetesEntregados }}</span>
-                    </div>
-                </div>
-                <div class="info-box mb-3">
-                    <span class="info-box-icon bg-info"><i class="fas fa-stopwatch"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Promedio de Días de Entrega</span>
-                        <span class="info-box-number">{{ $promedioEntrega }} días</span>
-                    </div>
-                </div>
-                <div class="card card-outline card-info mb-0">
-                    <div class="card-header py-2">
-                        <h3 class="card-title" style="font-size: 1rem;">Top Voluntarios que atendieron Paquetes</h3>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-sm mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Voluntario</th>
-                                    <th class="text-right">Paquetes</th>
-                                </tr>
-                            </thead>
-                            <tbody id="voluntarios-paquetes-tbody">
-                                @forelse($topVoluntariosPaquetes as $v)
-                                    <tr>
-                                        <td>{{ $v['nombre'] }}<br><small class="text-muted">CI: {{ $v['ci'] }}</small></td>
-                                        <td class="text-right"><span class="badge badge-primary">{{ $v['total'] }}</span></td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="2" class="text-center text-muted">Sin datos</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+
+    {{-- Grid 2x2 de stats --}}
+    <div class="row">
+        <div class="col-6">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-info"><i class="fas fa-box"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total Paquetes</span>
+                    <span class="info-box-number" id="total-paquetes">{{ $totalPaquetes }}</span>
                 </div>
             </div>
+        </div>
+        <div class="col-6">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-info"><i class="fas fa-stopwatch"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Promedio de Días de Entrega</span>
+                    <span class="info-box-number">{{ $promedioEntrega }} días</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Paquetes Entregados</span>
+                    <span class="info-box-number" id="paquetes-entregados">{{ $paquetesEntregados }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-warning"><i class="fas fa-truck"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Paquetes En Camino</span>
+                    <span class="info-box-number" id="paquetes-en-camino">{{ $paquetesEnCamino ?? 0 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-secondary"><i class="fas fa-clock"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Paquetes Pendientes</span>
+                    <span class="info-box-number" id="paquetes-pendientes">{{ $paquetesPendientes ?? 0 }}</span>
+                </div>
+            </div>
+        </div>
+                <div class="col-6">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-secondary"><i class="fas fa-box"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Paquetes Armados</span>
+                    <span class="info-box-number" id="paquetes-armados">{{ $paquetesArmados ?? 0 }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-outline card-info mb-0">
+        <div class="card-header py-2">
+            <h3 class="card-title" style="font-size: 1rem;">Top Voluntarios que atendieron Paquetes</h3>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>Voluntario</th>
+                        <th class="text-right">Paquetes</th>
+                    </tr>
+                </thead>
+                <tbody id="voluntarios-paquetes-tbody">
+                    @forelse($topVoluntariosPaquetes as $v)
+                        <tr>
+                            <td>{{ $v['nombre'] }}<br><small class="text-muted">CI: {{ $v['ci'] }}</small></td>
+                            <td class="text-right"><span class="badge badge-primary">{{ $v['total'] }}</span></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="2" class="text-center text-muted">Sin datos</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
         </div>
     </div>
 </div>

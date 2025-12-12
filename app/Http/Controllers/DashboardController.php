@@ -31,6 +31,7 @@ class DashboardController extends Controller
         $normalizeEstado = fn($nombre) => strtolower(trim($nombre ?? ''));
 
         $estadosEntregadosObjetivo = ['entregado','entregada'];
+        $estadosArmadosObjetivo = ['armado','armada'];
 
         $estadosEnCaminoObjetivo = [
             'en camino','en tránsito','en transito','en ruta','en viaje','en transporte'
@@ -46,6 +47,9 @@ class DashboardController extends Controller
 
         $idsEnCamino = $estadoCatalogo
             ->filter(fn($estado) => in_array($normalizeEstado($estado->nombre_estado), $estadosEnCaminoObjetivo, true))
+            ->pluck('id_estado');
+         $idsArmados = $estadoCatalogo
+            ->filter(fn($estado) => in_array($normalizeEstado($estado->nombre_estado), $estadosArmadosObjetivo, true))
             ->pluck('id_estado');
 
         $idsPendiente = $estadoCatalogo
@@ -98,7 +102,7 @@ class DashboardController extends Controller
         $paquetesPendientes = $idsPendiente->isNotEmpty()
             ? Paquete::whereIn('estado_id', $idsPendiente)->count()
             : Paquete::whereNotIn('estado_id', $idsEntregado->merge($idsEnCamino))->count();
-
+        $paquetesArmados = Paquete::whereIn('estado_id', $idsArmados)->count();
         $totalVoluntarios = User::where('activo', true)->count();
 
         $voluntariosConductores = Conductor::count();
@@ -467,6 +471,7 @@ class DashboardController extends Controller
             'paquetesEntregados',
             'paquetesEnCamino',
             'paquetesPendientes',
+            'paquetesArmados',
             'totalVoluntarios',
             'voluntariosConductores',
             'topVoluntariosPaquetes',

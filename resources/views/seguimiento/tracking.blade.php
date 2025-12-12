@@ -126,6 +126,50 @@ document.addEventListener("DOMContentLoaded", () => {
             lng: p.lng !== undefined ? parseFloat(p.lng) : null,
         }))
         .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+    
+    const destinoLatRaw = @json(optional(optional($paquete->solicitud)->destino)->latitud);
+    const destinoLngRaw = @json(optional(optional($paquete->solicitud)->destino)->longitud);
+
+    const destinoLat = destinoLatRaw !== null && destinoLatRaw !== undefined ? parseFloat(destinoLatRaw) : NaN;
+    const destinoLng = destinoLngRaw !== null && destinoLngRaw !== undefined ? parseFloat(destinoLngRaw) : NaN;
+
+    const hasDestino = Number.isFinite(destinoLat) && Number.isFinite(destinoLng);
+    let destinoMarker = null;
+
+    const addDestinoMarker = (mapInstance) => {
+        if (!hasDestino) return null;
+
+        const destinoIcon = L.divIcon({
+            className: 'bg-transparent',
+            html: `
+                <div style="
+                    background:#dc3545;
+                    border:2px solid #dc3545;
+                    border-radius:50%;
+                    width:34px;height:34px;
+                    display:flex;align-items:center;justify-content:center;
+                    box-shadow:0 3px 8px rgba(0,0,0,.35);
+                ">
+                    <i class="fas fa-map-marker-alt" style="color:#fff;font-size:16px;"></i>
+                </div>
+            `,
+            iconSize: [34, 34],
+            iconAnchor: [17, 17]
+        });
+
+        const m = L.marker([destinoLat, destinoLng], { icon: destinoIcon, zIndexOffset: 1000 })
+            .addTo(mapInstance);
+
+        m.bindTooltip('Destino Final', {
+            permanent: true,
+            direction: 'top',
+            offset: [0, -16],
+            opacity: 0.95
+        });
+
+        return m;
+    };
+
 
     let truckMarker = null;
     let truckTimer = null;
@@ -179,22 +223,36 @@ document.addEventListener("DOMContentLoaded", () => {
         truckTimer = setTimeout(advance, delayMs);
     };
 
-    if (!points.length) {
+    if (!points.length && !hasDestino) {
         return;
     }
 
-    const map = L.map('tracking-map').setView([points[0].lat, points[0].lng], 12);
+    const initialCenter = points.length ? [points[0].lat, points[0].lng] : [destinoLat, destinoLng];
+    const initialZoom = points.length ? 12 : 14;
+
+    const map = L.map('tracking-map').setView(initialCenter, initialZoom);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
     }).addTo(map);
+
+    if (!points.length) {
+        map.setView([destinoLat, destinoLng], 14);
+        return;
+    }
 
     if (points.length === 1) {
         const point = points[0];
         L.marker([point.lat, point.lng])
             .bindPopup(`<strong>${formatDate(point.fecha)}</strong><br>${point.zona ?? ''}`)
             .addTo(map);
-        map.setView([point.lat, point.lng], 14);
+        if (hasDestino) {
+            const b = L.latLngBounds([[point.lat, point.lng], [destinoLat, destinoLng]]);
+            map.fitBounds(b, { padding: [40, 40] });
+        } else {
+            map.setView([point.lat, point.lng], 14);
+        }
+
         startTruckAnimation(map, [point]);
         return;
     }
@@ -202,7 +260,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const fallbackPolyline = () => {
         const latLngs = points.map(p => [p.lat, p.lng]);
         L.polyline(latLngs, { color: 'blue', opacity: 0.6, weight: 4 }).addTo(map);
-        map.fitBounds(latLngs, { padding: [40, 40] });
+        const bounds = L.latLngBounds(latLngs);
+        if (hasDestino) bounds.extend([destinoLat, destinoLng]);
+        map.fitBounds(bounds, { padding: [40, 40] });
+
         startTruckAnimation(map, latLngs);
     };
 
@@ -224,11 +285,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return L.marker(wp.latLng).bindPopup(`<strong>${formatDate(point.fecha) ?? 'Sin fecha'}</strong><br>${point.zona ?? ''}`);
         }
     }).addTo(map);
+    destinoMarker = addDestinoMarker(map);
+
 
     routing.on('routesfound', function(e) {
         const coordinates = e.routes[0]?.coordinates;
         if (coordinates && coordinates.length) {
-            map.fitBounds(coordinates.map(c => [c.lat, c.lng]), { padding: [40, 40] });
+            const bounds = L.latLngBounds(coordinates.map(c => [c.lat, c.lng]));
+            if (hasDestino) bounds.extend([destinoLat, destinoLng]);
+            map.fitBounds(bounds, { padding: [40, 40] });
+
             startTruckAnimation(map, coordinates);
         }
     });

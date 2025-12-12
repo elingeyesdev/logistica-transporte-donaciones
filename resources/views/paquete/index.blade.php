@@ -138,7 +138,7 @@
                 $estado = optional($paquete->estado)->nombre_estado;
                 $estadoLower = $estado ? strtolower($estado) : null;
 
-                $fechaCreacionDisplay = $paquete->fecha_creacion ?? $paquete->created_at;
+                $fechaCreacionDisplay = $paquete->created_at ?? $paquete->created_at;
                 $fechaCreacionFormatted = $fechaCreacionDisplay
                   ? ($fechaCreacionDisplay instanceof \Carbon\Carbon
                     ? $fechaCreacionDisplay->format('d/m/Y')

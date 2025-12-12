@@ -447,23 +447,72 @@
 
 @push('js')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const mapDiv = document.getElementById('mapa-paquete');
-        if (!mapDiv) return;
-        const lat = parseFloat(mapDiv.dataset.lat);
-        const lng = parseFloat(mapDiv.dataset.lng);
+document.addEventListener('DOMContentLoaded', function () {
+    const mapDiv = document.getElementById('mapa-paquete');
+    if (!mapDiv) return;
 
-        if (isNaN(lat) || isNaN(lng)) {
-            return;
-        }
-        const map = L.map('mapa-paquete').setView([lat, lng], 15);
+    const lat = parseFloat(mapDiv.dataset.lat);
+    const lng = parseFloat(mapDiv.dataset.lng);
+    if (isNaN(lat) || isNaN(lng)) return;
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-        L.marker([lat, lng], { draggable: false }).addTo(map);
-    });
+    const destinoLatRaw = @json(optional(optional($paquete->solicitud)->destino)->latitud);
+    const destinoLngRaw = @json(optional(optional($paquete->solicitud)->destino)->longitud);
+
+    const normalizeCoord = (v) => {
+        if (v === null || v === undefined) return NaN;
+        return parseFloat(String(v).replace(',', '.'));
+    };
+
+    const destinoLat = normalizeCoord(destinoLatRaw);
+    const destinoLng = normalizeCoord(destinoLngRaw);
+    const hasDestino = Number.isFinite(destinoLat) && Number.isFinite(destinoLng);
+
+    const map = L.map('mapa-paquete').setView([lat, lng], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const actualMarker = L.marker([lat, lng], { draggable: false })
+        .addTo(map)
+        .bindPopup('Ubicación actual');
+
+    let destinoMarker = null;
+    if (hasDestino) {
+        const destinoIcon = L.divIcon({
+            className: 'bg-transparent',
+            html: `
+                <div style="
+                    background:#dc3545;
+                    border:2px solid #dc3545;
+                    border-radius:50%;
+                    width:34px;height:34px;
+                    display:flex;align-items:center;justify-content:center;
+                    box-shadow:0 3px 8px rgba(0,0,0,.35);
+                ">
+                    <i class="fas fa-map-marker-alt" style="color:#fff;font-size:16px;"></i>
+                </div>
+            `,
+            iconSize: [34, 34],
+            iconAnchor: [17, 17]
+        });
+
+        destinoMarker = L.marker([destinoLat, destinoLng], { icon: destinoIcon, zIndexOffset: 1000 })
+            .addTo(map);
+
+        destinoMarker.bindTooltip('Destino Final', {
+            permanent: true,
+            direction: 'top',
+            offset: [0, -16],
+            opacity: 0.65
+        });
+        const bounds = L.latLngBounds([[lat, lng], [destinoLat, destinoLng]]);
+        map.fitBounds(bounds, { padding: [30, 30] });
+    } else {
+        map.setView([lat, lng], 15);
+    }
+});
 </script>
 @endpush
 
