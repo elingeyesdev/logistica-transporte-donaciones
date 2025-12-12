@@ -188,7 +188,7 @@ class DashboardController extends Controller
             ->map(function($paquete){
                 $fechaEntregaCarbon = $paquete->fecha_entrega ? Carbon::parse($paquete->fecha_entrega) : ($paquete->updated_at ? Carbon::parse($paquete->updated_at) : null);
                 $fechaEntrega = $fechaEntregaCarbon ? $fechaEntregaCarbon->format('d/m/Y') : 'Sin fecha';
-                $fechaCreacionCarbon = $paquete->fecha_creacion ? Carbon::parse($paquete->fecha_creacion) : ($paquete->created_at ? Carbon::parse($paquete->created_at) : null);
+                $fechaCreacionCarbon = Carbon::parse($paquete->created_at);
                 $fechaAprobacionCarbon = $paquete->fecha_aprobacion ? Carbon::parse($paquete->fecha_aprobacion) : null;
                 $solicitud = optional($paquete->solicitud);
                 $solicitante = optional($solicitud->solicitante);
@@ -241,7 +241,7 @@ class DashboardController extends Controller
             ->limit(50)
             ->get()
             ->map(function($paquete){
-                $fechaCarbon = $paquete->fecha_creacion ? Carbon::parse($paquete->fecha_creacion) : ($paquete->created_at ? Carbon::parse($paquete->created_at) : null);
+                $fechaCarbon = $paquete->created_at ? Carbon::parse($paquete->created_at) : ($paquete->created_at ? Carbon::parse($paquete->created_at) : null);
                 $fecha = $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha';
                 $solicitud = optional($paquete->solicitud);
                 $destino = optional($solicitud->destino);

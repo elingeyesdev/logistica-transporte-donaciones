@@ -236,7 +236,6 @@
             <div class="card-body pt-2">
                 <canvas id="solicitudesPorComunidadChart" style="min-height:250px;height:250px;width:100%;"></canvas>
             </div>
-            <!-- Modal AdminLTE para solicitudes por comunidad -->
             <div class="modal fade" id="modalSolicitudesComunidad" tabindex="-1" role="dialog" aria-labelledby="modalSolicitudesComunidadLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
@@ -663,8 +662,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             Estado: ${item.estado || '-'} · Entrega: ${item.fecha_entrega || item.fecha || '-'}
                         </p>
                         <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:0.88rem; color:#1f2937;">
-                            <span><strong>Fecha creación:</strong> ${item.fecha_creacion || '-'}</span>
-                            <span><strong>Fecha aprobación:</strong> ${item.fecha_aprobacion || '-'}</span>
+                            <span><strong>Fecha de creación:</strong> ${item.fecha_creacion || '-'}</span>
+                            <span><strong>Fecha aprobación:</strong> ${item.created_at || '-'}</span>
                         </div>
                         <div style="margin-top:8px; font-size:0.88rem;">
                             <strong>Solicitante:</strong> ${item.solicitante || '-'} (CI ${item.solicitante_ci || '-'})<br>

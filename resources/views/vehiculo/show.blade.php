@@ -89,7 +89,14 @@
 
                                     <tr data-widget="expandable-table" aria-expanded="false">
                                         <td>
-                                            <strong>{{ $codigo }}</strong>
+                                            <strong>
+                                                <span class="paquete-dot"
+                                                    data-paquete-id="{{ $paquete->id_paquete }}"
+                                                    title="Ruta en el mapa"
+                                                    style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6c757d;margin-right:6px;vertical-align:middle;box-shadow:0 1px 2px rgba(0,0,0,.25);">
+                                                </span>
+                                                {{ $codigo }}
+                                            </strong>
                                         </td>
                                         <td>
                                             @if($dest->comunidad || $dest->provincia)
@@ -226,7 +233,14 @@
 
                                     <tr data-widget="expandable-table" aria-expanded="false">
                                         <td>
-                                            <strong>{{ $codigo }}</strong>
+                                            <strong>
+                                                <span class="paquete-dot"
+                                                    data-paquete-id="{{ $paquete->id_paquete }}"
+                                                    title="Ruta en el mapa"
+                                                    style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6c757d;margin-right:6px;vertical-align:middle;box-shadow:0 1px 2px rgba(0,0,0,.25);">
+                                                </span>
+                                                {{ $codigo }}
+                                            </strong>
                                         </td>
                                         <td>
                                             @if($dest->comunidad || $dest->provincia)
@@ -338,7 +352,7 @@
                 @endif
             </div>
         </div>
-        <div id="mapa-ruta-vehiculo" class="mt-3" style="height: 400px; display: none;">
+        <div id="mapa-ruta-vehiculo" class="mt-3" style="height: 400px; display: none;"  data-paquete-url="{{ route('paquete.show', '__ID__') }}">
            
         </div>
     </div>
@@ -357,7 +371,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // seccion unica con b5
     var triggerTabList = [].slice.call(document.querySelectorAll('#vehiculoTabs button'));
     triggerTabList.forEach(function (triggerEl) {
         var tabTrigger = new bootstrap.Tab(triggerEl);
@@ -367,14 +380,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Mapa
     const mapaDiv = document.getElementById('mapa-ruta-vehiculo');
     if (!mapaDiv) return;
     mapaDiv.style.display = 'block';
+    const formatDMY = (value) => {
+        if (!value) return 'Sin fecha';
+
+        const d = new Date(value);
+        if (isNaN(d)) return 'Sin fecha';
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    };
+
 
     const paquetes = [
         @foreach($paquetesEnCamino as $p)
             {
+                id_paquete: {{ $p->id_paquete }},
                 latitud: {{ $p->solicitud->destino->latitud ?? 'null' }},
                 longitud: {{ $p->solicitud->destino->longitud ?? 'null' }},
                 fecha_salida: '{{ $p->fecha_creacion ?? $p->created_at }}',
@@ -386,9 +412,10 @@ document.addEventListener('DOMContentLoaded', function() {
         @endforeach
         @foreach($paquetesOtros as $p)
             {
+                id_paquete: {{ $p->id_paquete }},
                 latitud: {{ $p->solicitud->destino->latitud ?? 'null' }},
                 longitud: {{ $p->solicitud->destino->longitud ?? 'null' }},
-                fecha_salida: '{{ $p->fecha_creacion ?? $p->created_at }}',
+                fecha_salida: '{{ $p->created_at }}',
                 fecha_llegada: '{{ $p->fecha_entrega ?? $p->updated_at }}',
                 comunidad: '{{ $p->solicitud->destino->comunidad ?? '' }}',
                 direccion: '{{ $p->solicitud->destino->direccion ?? '' }}',
@@ -403,19 +430,163 @@ document.addEventListener('DOMContentLoaded', function() {
         const fb = new Date(b.fecha_salida);
         return fa - fb;
     });
+
+
     if (puntos.length === 0) return;
     const map = L.map('mapa-ruta-vehiculo').setView([puntos[0].latitud, puntos[0].longitud], 9);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '© OpenStreetMap'
     }).addTo(map);
-    const polyCoords = puntos.map(p => [p.latitud, p.longitud]);
-    const polyline = L.polyline(polyCoords, {color: 'blue', weight: 5}).addTo(map);
-    map.fitBounds(polyline.getBounds());
-    puntos.forEach((p, idx) => {
-        const marker = L.marker([p.latitud, p.longitud]).addTo(map);
-        marker.bindPopup(`<strong>${p.codigo}</strong><br>${p.comunidad}<br>${p.direccion}<br>Salida: ${p.fecha_salida}<br>Llegada: ${p.fecha_llegada}`);
+    
+    const parseDateSafe = (value) => {
+        const d = new Date(value);
+        return isNaN(d) ? null : d;
+    };
+
+    const palette = [
+        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728',
+        '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
+        '#bcbd22', '#17becf'
+    ];
+
+    const paqueteColorMap = new Map();
+    const getColorForPaquete = (id_paquete) => {
+        if (!paqueteColorMap.has(id_paquete)) {
+            const idx = paqueteColorMap.size % palette.length;
+            paqueteColorMap.set(id_paquete, palette[idx]);
+        }
+        return paqueteColorMap.get(id_paquete);
+    };
+
+    const paintCodigoDots = () => {
+        document.querySelectorAll('.paquete-dot[data-paquete-id]').forEach(el => {
+            const id = parseInt(el.dataset.paqueteId, 10);
+            if (!Number.isFinite(id)) return;
+            el.style.background = getColorForPaquete(id);
+        });
+    };
+
+    const dotIcon = (color) => L.divIcon({
+        className: '',
+        html: `<div style="
+            width:16px;height:16px;border-radius:50%;
+            background:${color};
+            border:2px solid #fff;
+            box-shadow:0 1px 3px rgba(0,0,0,.35);
+        "></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
     });
+
+    let markers = [];
+    let polyline = null;
+
+    const clearMap = () => {
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+        if (polyline) {
+            map.removeLayer(polyline);
+            polyline = null;
+        }
+    };
+
+    const drawAll = (joinedPoints) => {
+        clearMap();
+
+        const coords = joinedPoints.map(p => [p.latitud, p.longitud]);
+        polyline = L.polyline(coords, { color: 'blue', weight: 5 }).addTo(map);
+        map.fitBounds(polyline.getBounds());
+
+        joinedPoints.forEach(p => {
+            const color = getColorForPaquete(p.id_paquete);
+            const marker = L.marker([p.latitud, p.longitud], { icon: dotIcon(color) }).addTo(map);
+
+            const fecha = p.event_at ? formatDMY(p.event_at) : 'Sin fecha';
+            const estadoHtml = p.estado ? `<br>Estado: ${p.estado}` : '';
+            const zonaHtml = p.zona ? `<br>Zona: ${p.zona}` : '';
+            const tipoHtml = p.source === 'historial' ? '<br><em>Historial</em>' : '<br><em>Destino</em>';
+
+            marker.bindPopup(
+                `<strong>${p.codigo}</strong><br>${p.comunidad}<br>${p.direccion}` +
+                `<br>Fecha: ${fecha}` +
+                estadoHtml +
+                zonaHtml +
+                tipoHtml
+            );
+
+            markers.push(marker);
+        });
+    };
+
+    const basePoints = puntos
+        .filter(p => p.id_paquete != null)
+        .map(p => ({
+            ...p,
+            event_at: p.fecha_salida || p.fecha_llegada || null,
+            source: 'base'
+        }));
+    paintCodigoDots();
+    drawAll(basePoints);
+
+    const paqueteUrlTemplate = mapaDiv.dataset.paqueteUrl; 
+
+    const uniqueIds = [...new Set(basePoints.map(p => p.id_paquete))];
+
+    Promise.all(uniqueIds.map(async (id) => {
+        try {
+            const url = paqueteUrlTemplate.replace('__ID__', id);
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) return [];
+
+            const json = await res.json();
+            const historial = Array.isArray(json?.historial) ? json.historial : [];
+
+            return historial.map(h => {
+                const u = h.ubicacion || null;
+                const lat = u && u.latitud != null ? parseFloat(u.latitud) : null;
+                const lng = u && u.longitud != null ? parseFloat(u.longitud) : null;
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+                const base = basePoints.find(bp => bp.id_paquete === id);
+
+                return {
+                    id_paquete: id,
+                    latitud: lat,
+                    longitud: lng,
+                    codigo: base?.codigo ?? '',
+                    comunidad: base?.comunidad ?? '',
+                    direccion: base?.direccion ?? '',
+                    estado: h.estado ?? null,
+                    zona: u?.zona ?? null,
+                    event_at: h.fecha_actualizacion || h.created_at || null,
+                    source: 'historial'
+                };
+            }).filter(Boolean);
+        } catch (e) {
+            console.warn('Historial fetch failed for paquete:', id, e);
+            return [];
+        }
+    })).then((lists) => {
+        const historialPoints = lists.flat();
+
+        const joined = [...historialPoints, ...basePoints]
+            .filter(p => Number.isFinite(p.latitud) && Number.isFinite(p.longitud));
+
+        joined.sort((a, b) => {
+            const da = parseDateSafe(a.event_at);
+            const db = parseDateSafe(b.event_at);
+            if (!da && !db) return 0;
+            if (!da) return 1;
+            if (!db) return -1;
+            return da - db;
+        });
+        paintCodigoDots();
+        drawAll(joined);
+    });
+
+
+
 });
 </script>
 @endsection

@@ -105,6 +105,18 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script>
+const formatDate = (dateStr) => {
+    if (!dateStr) return 'Sin fecha';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return 'Sin fecha';
+
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+
+    return `${day}/${month}/${year}`;
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     const parsedPoints = JSON.parse(String.raw`{!! json_encode($points) !!}`) || [];
     const points = parsedPoints
@@ -180,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (points.length === 1) {
         const point = points[0];
         L.marker([point.lat, point.lng])
-            .bindPopup(`<strong>${point.fecha ?? 'Sin fecha'}</strong><br>${point.zona ?? ''}`)
+            .bindPopup(`<strong>${formatDate(point.fecha)}</strong><br>${point.zona ?? ''}`)
             .addTo(map);
         map.setView([point.lat, point.lng], 14);
         startTruckAnimation(map, [point]);
@@ -209,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
         show: false,
         createMarker: function(i, wp) {
             const point = points[i];
-            return L.marker(wp.latLng).bindPopup(`<strong>${point.fecha ?? 'Sin fecha'}</strong><br>${point.zona ?? ''}`);
+            return L.marker(wp.latLng).bindPopup(`<strong>${formatDate(point.fecha) ?? 'Sin fecha'}</strong><br>${point.zona ?? ''}`);
         }
     }).addTo(map);
 
