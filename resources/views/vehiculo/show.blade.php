@@ -63,7 +63,96 @@
         <div class="tab-content" id="vehiculoTabsContent">
             <div class="tab-pane fade show active" id="ruta" role="tabpanel" aria-labelledby="ruta-tab">
                 @if($paquetesEnCamino->isNotEmpty())
-                    <h5 class="mb-2 text-dark" style="font-weight: 700;">Paquetes en ruta</h5>
+                    <h5 class="mb-2 text-dark d-flex align-items-center" style="font-weight: 700;">
+                        Paquetes en ruta
+                        <button id="pdf-paquetes-ruta" class="btn btn-danger btn-sm ms-2" title="Descargar PDF" style="font-size: 0.95em;">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                    </h5>
+                    @section('js')
+                    @parent
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const pdfBtn = document.getElementById('pdf-paquetes-ruta');
+                        if (pdfBtn) {
+                            pdfBtn.addEventListener('click', function() {
+                                const paquetes = window.paquetesEnRutaForPdf || [];
+                                if (!paquetes.length) return alert('No hay paquetes en ruta para exportar.');
+                                const wrapper = document.createElement('div');
+                                wrapper.innerHTML = '<h2 style="text-align:center;">Reporte de Paquetes en Ruta</h2>';
+                                paquetes.forEach(function(p, idx) {
+                                    const card = document.createElement('div');
+                                    card.style = 'border:1px solid #ccc;padding:12px;margin-bottom:18px;border-radius:8px;';
+                                    card.innerHTML =
+                                        `<h3 style='color:#138496;'>Paquete #${idx+1} - Código: <b>${p.codigo}</b></h3>`+
+                                        `<p><b>Destino:</b> ${p.destino}</p>`+
+                                        `<p><b>Conductor:</b> ${p.conductor}</p>`+
+                                        `<p><b>Estado:</b> ${p.estado}</p>`+
+                                        `<p><b>Productos:</b> ${p.productos}</p>`+
+                                        `<p><b>Destino completo:</b> ${p.destino_completo}</p>`+
+                                        `<p><b>Fecha de aprobación:</b> ${p.fecha_aprobacion}</p>`+
+                                        `<p><b>Solicitante:</b> ${p.solicitante}</p>`+
+                                        `<p><b>CI Solicitante:</b> ${p.ci_solicitante}</p>`+
+                                        `<p><b>Contacto Solicitante:</b> ${p.contacto_solicitante}</p>`+
+                                        (p.referencia ? `<p><b>Referencia:</b> ${p.referencia}</p>` : '')+
+                                        (p.contacto_referencia ? `<p><b>Contacto Referencia:</b> ${p.contacto_referencia}</p>` : '')+
+                                        (p.imagen ? `<img src='${p.imagen}' alt='Evidencia' style='max-width:180px;max-height:180px;object-fit:cover;margin-top:8px;'>` : '<div style="color:#888;">Imagen no disponible</div>');
+                                    wrapper.appendChild(card);
+                                });
+                                html2pdf().set({
+                                    margin: 10,
+                                    filename: 'paquetes_en_ruta.pdf',
+                                    html2canvas: { scale: 2 },
+                                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                                }).from(wrapper).save();
+                            });
+                        }
+                    });
+                    </script>
+                    @php
+                    // Prepara los datos de paquetes en ruta para el PDF en JS
+                    $paquetesEnRutaForPdf = $paquetesEnCamino->map(function($paquete) {
+                        $sol = $paquete->solicitud;
+                        $dest = optional($sol?->destino);
+                        $cond  = optional($paquete->conductor);
+                        $estadoNombre = optional($paquete->estado)->nombre_estado ?? '—';
+                        $codigo = $sol->codigo_seguimiento ?? $paquete->codigo ?? '—';
+                        $conductorNombre = trim(($cond->nombre ?? '').' '.($cond->apellido ?? ''));
+                        $productos = $sol->insumos_necesarios ?? '—';
+                        $destinoCompleto = collect([
+                            $dest->comunidad ?? null,
+                            $dest->provincia ?? null,
+                            $dest->direccion ?? null
+                        ])->filter()->implode(', ');
+                        $fechaAprobacion = $paquete->created_at ? \Carbon\Carbon::parse($paquete->created_at)->format('d/m/Y') : '—';
+                        $solicitantePersona = optional($sol?->solicitante);
+                        $nombreSolicitante = trim(($solicitantePersona->nombre ?? '').' '.($solicitantePersona->apellido ?? '')) ?: '—';
+                        $ciSolicitante = $solicitantePersona->ci ?? '—';
+                        $telefonoSolicitante = $solicitantePersona->telefono ?? '—';
+                        $tieneReferencia = filled($sol->nombre_referencia) || filled($sol->celular_referencia);
+                        $imageUrl = $paquete->imagen ? route('paquete.imagen', $paquete->id_paquete) : null;
+                        return [
+                            'codigo' => $codigo,
+                            'destino' => ($dest->comunidad ?? '—').($dest->provincia ? ', '.$dest->provincia : ''),
+                            'conductor' => $conductorNombre ?: '—',
+                            'estado' => $estadoNombre,
+                            'productos' => $productos,
+                            'destino_completo' => $destinoCompleto ?: '—',
+                            'fecha_aprobacion' => $fechaAprobacion,
+                            'solicitante' => $nombreSolicitante,
+                            'ci_solicitante' => $ciSolicitante,
+                            'contacto_solicitante' => $telefonoSolicitante,
+                            'referencia' => $sol->nombre_referencia ?? '',
+                            'contacto_referencia' => $sol->celular_referencia ?? '',
+                            'imagen' => $imageUrl,
+                        ];
+                    })->values();
+                    @endphp
+                    <script>
+                    window.paquetesEnRutaForPdf = @json($paquetesEnRutaForPdf);
+                    </script>
+                    @endsection
                     <div class="table-responsive mb-3">
                         <table class="table table-sm table-hover align-middle">
                             <thead>
@@ -378,19 +467,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-        // Toggle map visibility based on active tab
+        
         const mapaDiv = document.getElementById('mapa-ruta-vehiculo');
         const rutaTab = document.getElementById('ruta-tab');
         const entregadosTab = document.getElementById('entregados-tab');
         function updateMapVisibility() {
             if (!mapaDiv) return;
-            // Show only if 'Paquetes en ruta' tab is active
             const rutaActive = rutaTab.classList.contains('active');
             mapaDiv.style.display = rutaActive ? 'block' : 'none';
         }
-        // Initial state
         updateMapVisibility();
-        // Listen for tab changes
         rutaTab && rutaTab.addEventListener('shown.bs.tab', updateMapVisibility);
         entregadosTab && entregadosTab.addEventListener('shown.bs.tab', updateMapVisibility);
     const formatDMY = (value) => {
