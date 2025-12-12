@@ -437,6 +437,7 @@
 
 @section('js')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 let solicitudesChart = null;
 const solicitudesData = {
@@ -1088,57 +1089,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function exportReportToExcel(report, filenamePrefix) {
-        if (!dashboardExcelExportUrl) {
-            console.warn('Ruta de exportación de Excel no disponible.');
-            return;
-        }
-
         if (!report || !Array.isArray(report.items) || !report.items.length) {
             alert('Selecciona un filtro con datos antes de exportar a Excel.');
             return;
         }
-
         const payload = buildExcelPayload(report);
         if (!payload || !payload.rows.length) {
             alert('No hay datos para exportar a Excel.');
             return;
         }
-
+        // SheetJS: crear workbook y hoja
+        const ws = XLSX.utils.aoa_to_sheet([payload.headings, ...payload.rows]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
         const now = new Date();
-        const fechaReporte = now.toISOString().slice(0, 10);
-        const gestionYear = String(now.getFullYear());
-
-        fetch(dashboardExcelExportUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
-            },
-            body: JSON.stringify({
-                group: report.group,
-                type: report.type,
-                headings: payload.headings,
-                rows: payload.rows,
-                fecha_reporte: fechaReporte,
-                gestion: gestionYear
-            })
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error HTTP ' + response.status);
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const timestamp = new Date().toISOString().replace(/[-:T]/g, '').replace(/\..+/, '').slice(0, 14);
-                const filename = `${filenamePrefix}_${report.slug}_${timestamp}.xlsx`;
-                downloadBlob(blob, filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            })
-            .catch(error => {
-                console.error('No se pudo generar el Excel del dashboard.', error);
-                alert('No se pudo generar el Excel del reporte.');
-            });
+        const timestamp = now.toISOString().replace(/[-:T]/g, '').replace(/\..+/, '').slice(0, 14);
+        const filename = `${filenamePrefix}_${report.slug}_${timestamp}.xlsx`;
+        XLSX.writeFile(wb, filename);
     }
 
     function passesDateFilter(item) {
