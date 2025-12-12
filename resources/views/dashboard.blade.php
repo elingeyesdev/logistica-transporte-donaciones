@@ -1106,12 +1106,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (type === 'comunidad') {
+            // Agrupar por provincia en vez de comunidad
             const grouped = filtered.reduce((acc, item) => {
-                const key = (item.comunidad || 'Sin comunidad').toLowerCase();
+                const key = (item.provincia || 'Sin provincia').toLowerCase();
                 if (!acc[key]) {
                     acc[key] = {
-                        nombre: item.comunidad || 'Sin comunidad',
-                        provincia: item.provincia,
+                        nombre: item.provincia || 'Sin provincia',
                         total: 0,
                         ultimaFecha: item.fecha,
                         ultimaFechaIso: item.fecha_iso,
@@ -1127,24 +1127,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 return acc;
             }, {});
 
-            const comunidadesArray = Object.values(grouped)
+            const provinciasArray = Object.values(grouped)
                 .sort((a, b) => b.total - a.total);
-            const rows = comunidadesArray
+            const rows = provinciasArray
                 .map(item => `
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>${item.nombre}</strong>${item.provincia ? `<br><small class="text-muted">Provincia: ${item.provincia}</small>` : ''}
+                            <strong>${item.nombre}</strong>
                             <br><small class="text-muted">Última solicitud: ${item.ultimaFecha}</small>
                         </div>
                         <span class="badge badge-primary badge-pill">${item.total}</span>
                     </li>
                 `).join('');
-            const comunidades = Object.values(grouped)
+            const provincias = Object.values(grouped)
                 .sort((a, b) => b.total - a.total)
                 .slice(0, 5);
 
-            const labels = comunidades.map(c => c.nombre);
-            const values = comunidades.map(c => c.total);
+            const labels = provincias.map(c => c.nombre);
+            const values = provincias.map(c => c.total);
 
             const ctxCom = document.getElementById('solicitudesPorComunidadChart');
             if (ctxCom && typeof Chart !== 'undefined') {
@@ -1223,28 +1223,50 @@ document.addEventListener('DOMContentLoaded', function() {
                         onClick: function(evt, elements) {
                             if (!elements.length) return;
                             const idx = elements[0]._index;
-                            const comunidad = labels[idx];
-                            mostrarModalSolicitudesComunidad(comunidad);
+                            const provincia = labels[idx];
+                            mostrarModalSolicitudesProvincia(provincia);
                         }
                     }
                 });
             // Modal para solicitudes por comunidad
             function mostrarModalSolicitudesComunidad(comunidad) {
-                // Buscar solicitudes de la comunidad (case-insensitive)
-                const solicitudes = (solicitudesData.comunidad || []).filter(item => (item.comunidad || '').toLowerCase() === comunidad.toLowerCase());
+                // Buscar solicitudes de la provincia (case-insensitive)
+                const solicitudes = (solicitudesData.comunidad || []).filter(item => (item.provincia || '').toLowerCase() === comunidad.toLowerCase());
                 const cont = document.getElementById('tablaSolicitudesComunidadContainer');
-                document.getElementById('modalSolicitudesComunidadLabel').textContent = `Solicitudes de la comunidad: ${comunidad}`;
+                document.getElementById('modalSolicitudesComunidadLabel').textContent = `Solicitudes de la provincia: ${comunidad}`;
                 if (!solicitudes.length) {
-                    cont.innerHTML = '<div class="alert alert-warning">No hay solicitudes para esta comunidad.</div>';
+                    cont.innerHTML = '<div class="alert alert-warning">No hay solicitudes para esta provincia.</div>';
                 } else {
-                    let html = `<div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Código</th><th>Solicitante</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>`;
+                    let html = `<div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Código</th><th>Solicitante</th><th>Comunidad</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>`;
                     solicitudes.forEach(s => {
-                        // El campo correcto es 'estado' (ya contiene el nombre del estado)
                         let estado = s.estado || '-';
                         if (estado && estado !== '-') {
                             estado = estado.charAt(0).toUpperCase() + estado.slice(1).toLowerCase();
                         }
-                        html += `<tr><td>${s.codigo || '-'}</td><td>${s.solicitante || '-'}</td><td>${estado}</td><td>${s.fecha || '-'}</td></tr>`;
+                        html += `<tr><td>${s.codigo || '-'}</td><td>${s.solicitante || '-'}</td><td>${s.comunidad || '-'}</td><td>${estado}</td><td>${s.fecha || '-'}</td></tr>`;
+                    });
+                    html += '</tbody></table></div>';
+                    cont.innerHTML = html;
+                }
+                $('#modalSolicitudesComunidad').modal('show');
+            }
+
+            
+            function mostrarModalSolicitudesProvincia(provincia) {
+                
+                const solicitudes = (solicitudesData.comunidad || []).filter(item => (item.provincia || '').toLowerCase() === provincia.toLowerCase());
+                const cont = document.getElementById('tablaSolicitudesComunidadContainer');
+                document.getElementById('modalSolicitudesComunidadLabel').textContent = `Solicitudes de la provincia: ${provincia}`;
+                if (!solicitudes.length) {
+                    cont.innerHTML = '<div class="alert alert-warning">No hay solicitudes para esta provincia.</div>';
+                } else {
+                    let html = `<div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Código</th><th>Solicitante</th><th>Comunidad</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>`;
+                    solicitudes.forEach(s => {
+                        let estado = s.estado || '-';
+                        if (estado && estado !== '-') {
+                            estado = estado.charAt(0).toUpperCase() + estado.slice(1).toLowerCase();
+                        }
+                        html += `<tr><td>${s.codigo || '-'}</td><td>${s.solicitante || '-'}</td><td>${s.comunidad || '-'}</td><td>${estado}</td><td>${s.fecha || '-'}</td></tr>`;
                     });
                     html += '</tbody></table></div>';
                     cont.innerHTML = html;
