@@ -45,9 +45,44 @@
                             <a class="btn btn-secondary btn-sm" id="btn-imprimir-reporte">
                                     <i class="fas fa-file-pdf"></i> Reporte PDF
                             </a>
-                            <a class="btn btn-success btn-sm" href="{{ route('paquete.reportes.excel', $paquete->id_paquete) }}">
-                                    <i class="fas fa-file-excel"></i> Reporte Excel
-                            </a>
+                            <button id="excel-paquete-unico" class="btn btn-success btn-sm">
+                                <i class="fas fa-file-excel"></i> Reporte Excel
+                            </button>
+                            @php
+                            $paqueteExcel = [
+                                'codigo' => $paquete->codigo ?? $paquete->solicitud->codigo_seguimiento ?? '—',
+                                'destino' => optional($paquete->solicitud->destino)->comunidad ?? '—',
+                                'provincia' => optional($paquete->solicitud->destino)->provincia ?? '—',
+                                'direccion' => optional($paquete->solicitud->destino)->direccion ?? '—',
+                                'conductor' => optional($paquete->conductor)->nombre ?? '—',
+                                'estado' => optional($paquete->estado)->nombre_estado ?? '—',
+                                'productos' => $paquete->solicitud->insumos_necesarios ?? '—',
+                                'fecha_aprobacion' => $paquete->created_at ? \Carbon\Carbon::parse($paquete->created_at)->format('d/m/Y') : '—',
+                                'solicitante' => optional($paquete->solicitud->solicitante)->nombre ?? '—',
+                                'ci_solicitante' => optional($paquete->solicitud->solicitante)->ci ?? '—',
+                                'contacto_solicitante' => optional($paquete->solicitud->solicitante)->telefono ?? '—',
+                                'referencia' => $paquete->solicitud->nombre_referencia ?? '',
+                                'contacto_referencia' => $paquete->solicitud->celular_referencia ?? '',
+                            ];
+                            @endphp
+                            <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+                            <script>
+                            window.addEventListener('DOMContentLoaded', function() {
+                                const btn = document.getElementById('excel-paquete-unico');
+                                if (!btn) return;
+                                btn.addEventListener('click', function() {
+                                    const p = @json($paqueteExcel);
+                                    const wsData = [
+                                        Object.keys(p),
+                                        Object.values(p)
+                                    ];
+                                    const ws = XLSX.utils.aoa_to_sheet(wsData);
+                                    const wb = XLSX.utils.book_new();
+                                    XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+                                    XLSX.writeFile(wb, 'paquete_'+(p.codigo||'reporte')+'.xlsx');
+                                });
+                            });
+                            </script>
                             <a class="btn btn-primary btn-sm" href="{{ route('paquete.index') }}"> {{ __('Volver') }}</a>
                         </div>
                     </div>
