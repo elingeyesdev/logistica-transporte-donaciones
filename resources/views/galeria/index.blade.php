@@ -65,7 +65,8 @@
         const btnGratitude = document.getElementById('btnGratitude');
         const btnAnimals   = document.getElementById('btnAnimals');
 
-        const ANIMALES = 'http://localhost:8001'; 
+        // La URL base de animales viene desde el backend (.env)
+        const ANIMALES = @json(env('ANIMALES_API_URL', 'http://localhost:8001'));
         const ANIMALS_API_URL = ANIMALES + '/api/releases'; 
         function buildImageUrl(relativePath) {
             if (!relativePath) return null;

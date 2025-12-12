@@ -37,9 +37,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
                         <div class="float-left">
-                            <span class="card-title">{{ __('Mostrar') }} Paquete</span>
+                            <span class="card-title"><i class="fas fa-box mr-2"></i>{{ __('Mostrar') }} Paquete</span>
                         </div>
                         <div class="float-right">
                             <a class="btn btn-secondary btn-sm" id="btn-imprimir-reporte">
