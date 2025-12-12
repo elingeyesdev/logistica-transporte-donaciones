@@ -378,9 +378,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const mapaDiv = document.getElementById('mapa-ruta-vehiculo');
-    if (!mapaDiv) return;
-    mapaDiv.style.display = 'block';
+        // Toggle map visibility based on active tab
+        const mapaDiv = document.getElementById('mapa-ruta-vehiculo');
+        const rutaTab = document.getElementById('ruta-tab');
+        const entregadosTab = document.getElementById('entregados-tab');
+        function updateMapVisibility() {
+            if (!mapaDiv) return;
+            // Show only if 'Paquetes en ruta' tab is active
+            const rutaActive = rutaTab.classList.contains('active');
+            mapaDiv.style.display = rutaActive ? 'block' : 'none';
+        }
+        // Initial state
+        updateMapVisibility();
+        // Listen for tab changes
+        rutaTab && rutaTab.addEventListener('shown.bs.tab', updateMapVisibility);
+        entregadosTab && entregadosTab.addEventListener('shown.bs.tab', updateMapVisibility);
     const formatDMY = (value) => {
         if (!value) return 'Sin fecha';
 
