@@ -68,6 +68,9 @@
                         <button id="pdf-paquetes-ruta" class="btn btn-danger btn-sm ms-2" title="Descargar PDF" style="font-size: 0.95em;">
                             <i class="fas fa-file-pdf"></i> PDF
                         </button>
+                        <button id="excel-paquetes-ruta" class="btn btn-success btn-sm ms-2" title="Descargar Excel" style="font-size: 0.95em;">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
                     </h5>
                     @section('js')
                     @parent
@@ -301,6 +304,45 @@
                         <button id="pdf-paquetes-entregados" class="btn btn-danger btn-sm ms-2" title="Descargar PDF" style="font-size: 0.95em;">
                             <i class="fas fa-file-pdf"></i> PDF
                         </button>
+                        <button id="excel-paquetes-entregados" class="btn btn-success btn-sm ms-2" title="Descargar Excel" style="font-size: 0.95em;">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+                    <script>
+                    function exportToExcel(paquetes, filename) {
+                        if (!paquetes.length) return alert('No hay datos para exportar.');
+                        const wsData = [
+                            [
+                                'Código', 'Destino', 'Conductor', 'Estado', 'Productos', 'Destino completo',
+                                'Fecha de aprobación', 'Solicitante', 'CI Solicitante', 'Contacto Solicitante',
+                                'Referencia', 'Contacto Referencia'
+                            ],
+                            ...paquetes.map(p => [
+                                p.codigo, p.destino, p.conductor, p.estado, p.productos, p.destino_completo,
+                                p.fecha_aprobacion, p.solicitante, p.ci_solicitante, p.contacto_solicitante,
+                                p.referencia, p.contacto_referencia
+                            ])
+                        ];
+                        const ws = XLSX.utils.aoa_to_sheet(wsData);
+                        const wb = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+                        XLSX.writeFile(wb, filename);
+                    }
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const excelBtnRuta = document.getElementById('excel-paquetes-ruta');
+                        if (excelBtnRuta) {
+                            excelBtnRuta.addEventListener('click', function() {
+                                exportToExcel(window.paquetesEnRutaForPdf || [], 'paquetes_en_ruta.xlsx');
+                            });
+                        }
+                        const excelBtnEntregados = document.getElementById('excel-paquetes-entregados');
+                        if (excelBtnEntregados) {
+                            excelBtnEntregados.addEventListener('click', function() {
+                                exportToExcel(window.paquetesEntregadosForPdf || [], 'paquetes_entregados.xlsx');
+                            });
+                        }
+                    });
+                    </script>
                     </h5>
                     @php
                     $paquetesEntregadosForPdf = $paquetesOtros->map(function($paquete) {
