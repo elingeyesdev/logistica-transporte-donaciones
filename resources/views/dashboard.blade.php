@@ -246,6 +246,11 @@
                             </button>
                         </div>
                         <div class="modal-body">
+                            <div class="d-flex justify-content-end mb-2">
+                                <button id="btn-generar-reporte-provincia" class="btn btn-success btn-sm" style="display:none;">
+                                    <i class="fas fa-file-pdf"></i> Generar reporte
+                                </button>
+                            </div>
                             <div id="tablaSolicitudesComunidadContainer">
                                 <div class="text-center text-muted">Cargando...</div>
                             </div>
@@ -1324,9 +1329,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const solicitudes = (solicitudesData.comunidad || []).filter(item => (item.provincia || '').toLowerCase() === provincia.toLowerCase());
                 const cont = document.getElementById('tablaSolicitudesComunidadContainer');
                 document.getElementById('modalSolicitudesComunidadLabel').textContent = `Solicitudes de la provincia: ${provincia}`;
+                const btnReporte = document.getElementById('btn-generar-reporte-provincia');
                 if (!solicitudes.length) {
                     cont.innerHTML = '<div class="alert alert-warning">No hay solicitudes para esta provincia.</div>';
+                    if (btnReporte) btnReporte.style.display = 'none';
                 } else {
+                    // Render tabla como antes
                     let html = `<div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Código</th><th>Solicitante</th><th>Comunidad</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>`;
                     solicitudes.forEach(s => {
                         let estado = s.estado || '-';
@@ -1337,8 +1345,70 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     html += '</tbody></table></div>';
                     cont.innerHTML = html;
+                    if (btnReporte) btnReporte.style.display = '';
+                    // Listener para generar PDF
+                    btnReporte.onclick = function() {
+                        generarReporteProvinciaPDF(provincia, solicitudes);
+                    };
                 }
                 $('#modalSolicitudesComunidad').modal('show');
+            function generarReporteProvinciaPDF(provincia, solicitudes) {
+                if (!window.html2pdf) {
+                    alert('No se puede generar el PDF. Falta html2pdf.js');
+                    return;
+                }
+                let cardsHtml = solicitudes.map(item => {
+                    return `<li style="list-style:none; page-break-inside: avoid; break-inside: avoid; margin-bottom:16px;">
+                        <div style="border:1px solid #d1d5db; border-radius:9px; padding:14px 16px; background:#fff; page-break-inside: avoid; break-inside: avoid;">
+                            <h3 style="margin:0 0 4px; font-size:1.1rem; color:#14325c;">${item.codigo || '-'} · ${item.solicitante || 'Sin solicitante'}</h3>
+                            <p style="margin:0 0 8px; color:#4b5563; font-size:0.95rem;">
+                                Estado: ${item.estado || '-'} · Tipo: ${item.tipo_emergencia || '-'}
+                            </p>
+                            <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:0.92rem; color:#1f2937;">
+                                <span><strong>Fecha solicitud:</strong> ${item.fecha || '-'}</span>
+                                <span><strong>Fecha inicio:</strong> ${item.fecha_inicio || '-'}</span>
+                                <span><strong>Personas:</strong> ${item.cantidad_personas ?? '-'}</span>
+                            </div>
+                            <div style="margin-top:8px; font-size:0.92rem;">
+                                <strong>Solicitante:</strong> ${item.solicitante || '-'} (CI ${item.solicitante_ci || '-'})<br>
+                                <strong>Contacto:</strong> ${item.solicitante_correo || '-'} · ${item.solicitante_telefono || '-'}
+                            </div>
+                            <div style="margin-top:8px; font-size:0.92rem;">
+                                <strong>Destino:</strong> ${item.comunidad || '-'}<br>
+                                <strong>Dirección:</strong> ${item.direccion || '-'}<br>
+                                <strong>Coordenadas:</strong> ${(item.latitud && item.longitud) ? `${item.latitud}, ${item.longitud}` : '—'}
+                            </div>
+                            <div style="margin-top:8px; font-size:0.92rem;">
+                                <strong>Insumos necesarios:</strong>
+                                <div style="margin-top:2px; white-space:pre-wrap;">${item.insumos ? item.insumos.replace(/\n/g, '<br>') : '—'}</div>
+                            </div>
+                            ${item.justificacion ? `<div style="margin-top:8px; font-size:0.92rem; background:#fff5f5; border:1px solid #f5c2c7; border-radius:6px; padding:8px;"><strong>Motivo del rechazo:</strong><div style="margin-top:2px;">${item.justificacion}</div></div>` : ''}
+                        </div>
+                    </li>`;
+                }).join('');
+                const titulo = `Solicitudes de la provincia: ${provincia}`;
+                const now = new Date();
+                const fecha = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `
+                    <div style='font-family:Helvetica,Arial,sans-serif;color:#111827;'>
+                        <div style='font-size:22px;font-weight:700;color:#14325c;margin-bottom:8px;'>${titulo}</div>
+                        <div style='font-size:13px;color:#6b7280;margin-bottom:16px;'>Generado: ${fecha}</div>
+                        <ul style='list-style:none;padding:0;margin:0;'>${cardsHtml}</ul>
+                    </div>
+                `;
+                document.body.appendChild(wrapper);
+                html2pdf().set({
+                    margin: 10,
+                    filename: `Solicitudes_${provincia.replace(/\s+/g,'_')}_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                }).from(wrapper).toPdf().get('pdf').then(pdf => {
+                }).save().then(() => {
+                    wrapper.remove();
+                });
+            }
             }
             }
             resultList.innerHTML = rows;
