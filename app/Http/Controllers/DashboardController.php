@@ -391,6 +391,7 @@ class DashboardController extends Controller
                             'estado' => optional($paquete->estado)->nombre_estado ?? 'Sin estado',
                             'fecha' => $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha',
                             'fecha_iso' => $fechaCarbon ? $fechaCarbon->toDateString() : null,
+                            'created_at' => $paquete->created_at ? Carbon::parse($paquete->created_at)->toIso8601String() : null,
                         ];
                     })->values();
                 })
@@ -445,6 +446,7 @@ class DashboardController extends Controller
                             'estado' => optional($paquete->estado)->nombre_estado ?? 'Sin estado',
                             'fecha' => $fechaCarbon ? $fechaCarbon->format('d/m/Y') : 'Sin fecha',
                             'fecha_iso' => $fechaCarbon ? $fechaCarbon->toDateString() : null,
+                            'created_at' => $paquete->created_at ? Carbon::parse($paquete->created_at)->toIso8601String() : null,
                         ];
                     })->values();
                 })

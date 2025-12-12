@@ -1353,13 +1353,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 const paquetesParaMostrar = hasDateFilter ? paquetesFiltrados : (item.paquetes || []);
                 const paquetesHtml = paquetesParaMostrar.length
-                    ? paquetesParaMostrar.map(paq => `
-                        <div class="border rounded p-2 mb-2">
-                            <div><small class="text-muted">Código de Solicitud:</small> <strong>${paq.solicitud_codigo}</strong></div>
-                            <div><small class="text-muted">Estado:</small> ${paq.estado}</div>
-                            <div><small class="text-muted">Fecha de Creación:</small> ${paq.fecha}</div>
-                        </div>
-                    `).join('')
+                    ? paquetesParaMostrar.map(paq => {
+                        let fechaCreacion = '-';
+                        if (paq.created_at) {
+                            let d = paq.created_at;
+                            if (d.length >= 10) {
+                                let datePart = d.substring(0, 10);
+                                let timePart = d.length > 10 ? d.substring(11, 16) : '';
+                                let parts = datePart.split('-');
+                                if (parts.length === 3) {
+                                    fechaCreacion = parts[2] + '/' + parts[1] + '/' + parts[0] + (timePart ? (' ' + timePart) : '');
+                                } else {
+                                    fechaCreacion = d;
+                                }
+                            } else {
+                                fechaCreacion = d;
+                            }
+                        }
+                        return `<div class="border rounded p-2 mb-2">
+                            <div><small class="text-muted">Código de Solicitud:</small> <strong>${paq.solicitud_codigo || '-'}</strong></div>
+                            <div><small class="text-muted">Estado:</small> ${paq.estado || '-'}</div>
+                            <div><small class="text-muted">Fecha de Creación:</small> <span>${fechaCreacion}</span></div>
+                        </div>`;
+                    }).join('')
                     : '<small class="text-muted">Sin paquetes registrados.</small>';
 
                 filteredVoluntarios.push(Object.assign({}, item, { paquetes: paquetesParaMostrar }));
@@ -1473,13 +1489,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 filteredVehicles.push(Object.assign({}, item, { paquetes }));
                 const paquetesHtml = paquetes.length
-                    ? paquetes.map(paq => `
-                        <div class="border rounded p-2 mb-2">
-                            <div><small class="text-muted">Código de Solicitud:</small> <strong>${paq.solicitud_codigo}</strong></div>
-                            <div><small class="text-muted">Estado:</small> ${paq.estado}</div>
-                            <div><small class="text-muted">Fecha de Creación:</small> ${paq.fecha}</div>
-                        </div>
-                    `).join('')
+                    ? paquetes.map(paq => {
+                        let fechaCreacion = '-';
+                        if (paq.created_at) {
+                            let d = paq.created_at;
+                            if (d.length >= 10) {
+                                let datePart = d.substring(0, 10);
+                                let timePart = d.length > 10 ? d.substring(11, 16) : '';
+                                let parts = datePart.split('-');
+                                if (parts.length === 3) {
+                                    fechaCreacion = parts[2] + '/' + parts[1] + '/' + parts[0] + (timePart ? (' ' + timePart) : '');
+                                } else {
+                                    fechaCreacion = d;
+                                }
+                            } else {
+                                fechaCreacion = d;
+                            }
+                        }
+                        return `<div class="border rounded p-2 mb-2">
+                            <div><small class="text-muted">Código de Solicitud:</small> <strong>${paq.solicitud_codigo || '-'}</strong></div>
+                            <div><small class="text-muted">Estado:</small> ${paq.estado || '-'}</div>
+                            <div><small class="text-muted">Fecha de Creación:</small> <span>${fechaCreacion}</span></div>
+                        </div>`;
+                    }).join('')
                     : `<small class="text-muted">${hasDateFilter ? 'No hay paquetes en el rango seleccionado.' : 'Sin paquetes registrados.'}</small>`;
 
                 return `
