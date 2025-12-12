@@ -2,7 +2,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SolicitudController;
-use App\Http\Controllers\paqueteController;
+use App\Http\Controllers\PaqueteController;
 use App\Http\Controllers\EstadoController;
 use App\Http\Controllers\SolicitanteController;
 use App\Http\Controllers\UbicacionController;
@@ -135,7 +135,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 /** 
 Route::get('solicitud/buscar', [SolicitudController::class, 'buscarPorCodigo'])->name('solicitud.buscar');
 Route::resource('solicitud', SolicitudController::class);
-Route::resource('paquete', paqueteController::class);
+Route::resource('paquete', PaqueteController::class);
 Route::resource('estado', EstadoController::class);
 Route::resource('solicitante', SolicitanteController::class);
 Route::resource('destino', controller: DestinoController::class);

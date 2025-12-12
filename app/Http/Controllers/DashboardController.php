@@ -326,6 +326,10 @@ class DashboardController extends Controller
                     'insumos' => $solicitud->insumos_necesarios ?? '',
                     'direccion' => $destino->direccion ?? '—',
                     'estado' => $solicitud->estado ?? 'Sin estado',
+                    'cantidad_personas' => $solicitud->cantidad_personas,
+                    'latitud' => $destino->latitud,
+                    'longitud' => $destino->longitud,
+
                 ];
             })
             ->values();

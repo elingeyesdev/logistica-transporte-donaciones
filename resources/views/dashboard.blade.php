@@ -687,51 +687,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function buildSolicitudPdfCards(items) {
-        if (!items || !items.length) return '';
-        return items.map(item => {
-            const coords = (item.latitud !== null && item.latitud !== undefined && item.longitud !== null && item.longitud !== undefined)
-                ? `${item.latitud}, ${item.longitud}`
-                : '—';
-            const direccion = item.direccion || '—';
-            const provincia = item.provincia && item.provincia !== '—' ? `, ${item.provincia}` : '';
-            const insumos = item.insumos ? item.insumos.replace(/\n/g, '<br>') : '—';
-            const justificacion = item.justificacion ? item.justificacion.replace(/\n/g, '<br>') : null;
-            return `
-                <li style="list-style:none; page-break-inside: avoid; break-inside: avoid;">
-                    <div style="border:1px solid #d1d5db; border-radius:9px; padding:10px 12px; margin-bottom:10px; page-break-inside: avoid; break-inside: avoid;">
-                        <h3 style="margin:0 0 4px; font-size:1rem;">${item.codigo} · ${item.solicitante || 'Sin solicitante'}</h3>
-                        <p style="margin:0 0 8px; color:#4b5563; font-size:0.9rem;">
-                            Estado: ${item.estado || '-'} · Tipo: ${item.tipo_emergencia || '-'}
-                        </p>
-                        <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:0.88rem; color:#1f2937;">
-                            <span><strong>Fecha solicitud:</strong> ${item.fecha || '-'}</span>
-                            <span><strong>Fecha inicio:</strong> ${item.fecha_inicio || '-'}</span>
-                            <span><strong>Personas:</strong> ${item.cantidad_personas ?? '-'}</span>
-                        </div>
-                        <div style="margin-top:8px; font-size:0.88rem;">
-                            <strong>Solicitante:</strong> ${item.solicitante || '-'} (CI ${item.solicitante_ci || '-'})<br>
-                            <strong>Contacto:</strong> ${item.solicitante_correo || '-'} · ${item.solicitante_telefono || '-'}
-                        </div>
-                        <div style="margin-top:8px; font-size:0.88rem;">
-                            <strong>Destino:</strong> ${item.comunidad || '-'}${provincia}<br>
-                            <strong>Dirección:</strong> ${direccion}<br>
-                            <strong>Coordenadas:</strong> ${coords}
-                        </div>
-                        <div style="margin-top:8px; font-size:0.88rem;">
-                            <strong>Insumos necesarios:</strong>
-                            <div style="margin-top:2px; white-space:pre-wrap;">${insumos}</div>
-                        </div>
-                        ${justificacion ? `
-                            <div style="margin-top:8px; font-size:0.88rem; background:#fff5f5; border:1px solid #f5c2c7; border-radius:6px; padding:8px;">
-                                <strong>Motivo del rechazo:</strong>
-                                <div style="margin-top:2px;">${justificacion}</div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </li>
-            `;
-        }).join('');
-    }
+    return items.map(item => `
+        <li style="list-style:none; page-break-inside:avoid;">
+            <div style="border:1px solid #d1d5db; border-radius:8px; padding:10px 12px; margin-bottom:10px;">
+                <h3 style="margin:0 0 4px; font-size:1rem;">
+                    ${item.codigo} · ${item.solicitante}
+                </h3>
+                <p style="margin:0 0 6px; font-size:0.9rem; color:#4b5563;">
+                    Estado: ${item.estado} · Tipo: ${item.tipo_emergencia}
+                </p>
+                <div style="font-size:0.88rem;">
+                    <strong>Fecha:</strong> ${item.fecha}<br>
+                    <strong>Destino:</strong> ${item.comunidad || '-'}
+                    <strong>Coordenadas:</strong> ${renderCoordsLink(item.latitud, item.longitud)}
+                </div>
+            </div>
+        </li>
+    `).join('');
+}
 
     function buildComunidadPdfCards(items) {
         if (!items || !items.length) return '';
@@ -887,6 +860,26 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
     }
+    function buildGoogleMapsUrl(lat, lng) {
+        const has = lat !== null && lat !== undefined && lat !== '' &&
+                    lng !== null && lng !== undefined && lng !== '';
+        if (!has) return null;
+
+        const q = encodeURIComponent(`${lat},${lng}`);
+        return `https://www.google.com/maps/search/?api=1&query=${q}`;
+    }
+
+    function renderCoordsLink(lat, lng) {
+        const url = buildGoogleMapsUrl(lat, lng);
+        if (!url) return '—';
+
+        const label = `${lat}, ${lng}`;
+        return `<a href="${url}" target="_blank" rel="noopener"
+                    style="color:#1d4ed8; text-decoration:underline;">
+                    ${label}
+                </a>`;
+    }
+
 
     function exportCurrentReport(report, filenamePrefix) {
         if (!report || report.count <= 0 || !report.content) {
@@ -918,7 +911,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const wrapper = document.createElement('div');
         wrapper.innerHTML = buildFormalPdfLayout(report, `<ul style="list-style:none;padding:0;margin:0;">${listMarkup}</ul>`, prettyDate);
-        const hasCustomLayout = (report.group === 'Solicitudes') || (report.group === 'Paquetes' && ['entregadas','en_camino'].includes(report.type));
+        //const hasCustomLayout = (report.group === 'Solicitudes') || (report.group === 'Paquetes' && ['entregadas','en_camino'].includes(report.type));
         const shouldStyleItems = !hasCustomLayout;
         if (shouldStyleItems) {
             wrapper.querySelectorAll('li').forEach(li => {
@@ -939,6 +932,7 @@ document.addEventListener('DOMContentLoaded', function() {
             filename,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
+            enableLinks: true,
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
@@ -1098,7 +1092,6 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('No hay datos para exportar a Excel.');
             return;
         }
-        // SheetJS: crear workbook y hoja
         const ws = XLSX.utils.aoa_to_sheet([payload.headings, ...payload.rows]);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
@@ -1292,7 +1285,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             
             function mostrarModalSolicitudesProvincia(provincia) {
-                
                 const solicitudes = (solicitudesData.comunidad || []).filter(item => (item.provincia || '').toLowerCase() === provincia.toLowerCase());
                 const cont = document.getElementById('tablaSolicitudesComunidadContainer');
                 document.getElementById('modalSolicitudesComunidadLabel').textContent = `Solicitudes de la provincia: ${provincia}`;
@@ -1301,7 +1293,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     cont.innerHTML = '<div class="alert alert-warning">No hay solicitudes para esta provincia.</div>';
                     if (btnReporte) btnReporte.style.display = 'none';
                 } else {
-                    // Render tabla como antes
                     let html = `<div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Código</th><th>Solicitante</th><th>Comunidad</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>`;
                     solicitudes.forEach(s => {
                         let estado = s.estado || '-';
@@ -1313,7 +1304,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     html += '</tbody></table></div>';
                     cont.innerHTML = html;
                     if (btnReporte) btnReporte.style.display = '';
-                    // Listener para generar PDF
                     btnReporte.onclick = function() {
                         generarReporteProvinciaPDF(provincia, solicitudes);
                     };
@@ -1343,7 +1333,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div style="margin-top:8px; font-size:0.92rem;">
                                 <strong>Destino:</strong> ${item.comunidad || '-'}<br>
                                 <strong>Dirección:</strong> ${item.direccion || '-'}<br>
-                                <strong>Coordenadas:</strong> ${(item.latitud && item.longitud) ? `${item.latitud}, ${item.longitud}` : '—'}
+                                <strong>Coordenadas:</strong> ${renderCoordsLink(item.latitud, item.longitud)}
                             </div>
                             <div style="margin-top:8px; font-size:0.92rem;">
                                 <strong>Insumos necesarios:</strong>
@@ -1370,6 +1360,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     filename: `Solicitudes_${provincia.replace(/\s+/g,'_')}_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2 },
+                    enableLinks: true,
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 }).from(wrapper).toPdf().get('pdf').then(pdf => {
                 }).save().then(() => {
