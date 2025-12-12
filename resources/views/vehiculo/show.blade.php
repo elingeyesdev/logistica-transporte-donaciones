@@ -9,14 +9,12 @@
     <div class="">
         <div class="col-md-12" style="font-size:large;">
              <div class="card mb-3">
-                <div class="card-header d-flex justify-content-between">
-                    <div>
-                        <h3 class="">{{ __('Mostrar vehículo') }}</h3>
+                <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="float-left">
+                        <span class="card-title"><i class="fas fa-car mr-2"></i>{{ __('Mostrar vehículo') }}</span>
                     </div>
-                    <div>
-                        <a class="btn btn-primary btn-sm" href="{{ route('vehiculo.index') }}">
-                            {{ __('Volver') }}
-                        </a>
+                    <div class="float-right">
+                        <a class="btn btn-primary btn-sm" href="{{ route('vehiculo.index') }}">{{ __('Volver') }}</a>
                     </div>
                 </div>
 

@@ -9,9 +9,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
                         <div class="float-left">
-                            <span class="card-title">{{ __('Mostrar') }} Marca</span>
+                            <span class="card-title"><i class="fas fa-industry mr-2"></i>{{ __('Mostrar') }} Marca</span>
                         </div>
                         <div class="float-right">
                             <a class="btn btn-primary btn-sm" href="{{ route('marca.index') }}"> {{ __('Volver') }}</a>
