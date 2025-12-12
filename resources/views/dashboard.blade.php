@@ -484,14 +484,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function buildReportObject(group, type, count, htmlContent, options = {}) {
+        const reportTitleMap = {
+        'Solicitudes:comunidad': 'Reporte de Solicitudes por Comunidad',
+        'Solicitudes:aceptadas': 'Reporte de Solicitudes Aprobadas',
+        'Solicitudes:negadas':   'Reporte de Solicitudes Rechazadas',
+        'Paquetes:voluntarios': 'Reporte de Paquetes por Voluntario',
+        'Paquetes:entregadas':  'Reporte de Paquetes Entregados',
+        'Paquetes:en_camino':   'Reporte de Paquetes en Camino',
+        'Paquetes:vehiculos':   'Reporte de Paquetes por Vehículo',
+        };
+
         const labelMap = group === 'Solicitudes' ? solicitudLabelMap : paquetesLabelMap;
         const label = labelMap[type] || 'Listado';
         const rangeLabel = getDateRangeLabel();
+        const key = `${group}:${type}`;
+        const prettyTitle = reportTitleMap[key] || `${group} - ${label}`;
+
         return {
             group,
             type,
             count: typeof count === 'number' ? count : 0,
-            title: `${group} - ${label}`,
+            title: prettyTitle,
             subtitle: rangeLabel ? `Rango: ${rangeLabel}` : 'Sin filtro de fechas',
             content: htmlContent,
             items: options.items || [],
@@ -735,7 +748,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div style="font-family:'Helvetica Neue', Arial, sans-serif; color:#111827;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid ${accentColor}; padding-bottom:10px; margin-bottom:16px;">
                     <div>
-                        <div style="font-size:20px; font-weight:700; color:${accentColor};">DAS · Alas Chiquitanas</div>
+                        <div style="font-size:20px; font-weight:700; color:${accentColor};">Logística y Transporte</div>
                         <div style="font-size:13px; color:${secondaryText};">Panel de ${report.group}</div>
                     </div>
                     <div style="text-align:right; font-size:12px; color:${secondaryText};">
@@ -743,10 +756,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div><strong>Generado:</strong> ${prettyDate}</div>
                     </div>
                 </div>
-                <div style="display:flex; flex-wrap:wrap; gap:12px; padding:12px; border:1px solid #e5e7eb; border-radius:10px; background:#f9fafb; font-size:0.92rem;">
-                    <div><strong>Filtro aplicado:</strong> ${report.subtitle}</div>
-                    <div><strong>Total de registros:</strong> ${report.count}</div>
+
+                <div style="display:flex; flex-wrap:wrap; gap:12px; background:#f9fafb; font-size:0.7rem; margin-bottom:5px">
+                    <div><small>Filtro aplicado:</small> ${report.subtitle}</div>
+                    <div><small>Total de registros:</small> ${report.count}</div>
                 </div>
+                <h2 style="margin:0 0 10px; font-size:18px; font-weight:700; color:${accentColor};">
+                    ${report.title}
+                </h2>
+
                 <div style="margin-top:18px;">${listHtml}</div>
             </div>
         `;
@@ -781,7 +799,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const todaySlug = `${now.getFullYear()}-${month}-${day}`;
 
         const wrapper = document.createElement('div');
-        wrapper.style.padding = '18px';
         wrapper.innerHTML = buildFormalPdfLayout(report, `<ul style="list-style:none;padding:0;margin:0;">${listMarkup}</ul>`, prettyDate);
         const hasCustomLayout = (report.group === 'Solicitudes') || (report.group === 'Paquetes' && ['entregadas','en_camino'].includes(report.type));
         const shouldStyleItems = !hasCustomLayout;
