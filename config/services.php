@@ -42,5 +42,8 @@ return [
     'hotspot' => [
         'base_url' => env('HOTSPOT_API_URL', 'http://127.0.0.1:8000'),
     ],
+    'animales' => [
+        'base_url' => env('ANIMALES_API_URL', 'http://127.0.0.1:8000' ),
+    ],
 
 ];

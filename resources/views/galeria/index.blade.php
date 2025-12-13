@@ -65,15 +65,14 @@
         const btnGratitude = document.getElementById('btnGratitude');
         const btnAnimals   = document.getElementById('btnAnimals');
 
-        // La URL base de animales viene desde el backend (.env)
-        const ANIMALES = @json(env('ANIMALES_API_URL', 'http://localhost:8001'));
-        const ANIMALS_API_URL = ANIMALES + '/api/releases'; 
+        const animalesBaseUrl = @json(rtrim(config('services.animales.base_url'), '/'));
+        const ANIMALS_API_URL = animalesBaseUrl + '/api/releases';
         function buildImageUrl(relativePath) {
             if (!relativePath) return null;
             if (/^https?:\/\//i.test(relativePath)) {
                 return relativePath;
             }
-            return ANIMALES + '/storage/' + relativePath.replace(/^\/+/, '');
+            return animalesBaseUrl + '/storage/' + relativePath.replace(/^\/+/, '');
         }
         let animalsLoaded = false;
         function formatReleaseDate(isoString) {
