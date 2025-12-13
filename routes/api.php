@@ -3,6 +3,7 @@
 use App\Http\Controllers\TrazabilidadController;
 use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\LogisticaPaquetesProxyController;
+use App\Http\Controllers\DonacionesInventarioProxyController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,10 @@ Route::prefix('gateway')->group(function () {
         Route::patch('paquetes/{id}/armar', [LogisticaPaquetesProxyController::class, 'armar'])
             ->whereNumber('id');
         Route::get('paquetes/destino-voluntario/{codigo}', [LogisticaPaquetesProxyController::class, 'destinoVoluntario']);
+    });
+
+    Route::prefix('donaciones')->group(function () {
+        Route::get('inventario/por-producto', [DonacionesInventarioProxyController::class, 'porProducto']);
     });
 });
 
