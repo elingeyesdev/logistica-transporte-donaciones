@@ -47,7 +47,16 @@
               class="form-control @error('estado_id') is-invalid @enderror" required>
         <option value="">-- Seleccione --</option>
         @foreach($estados as $id => $nombre)
-          @if($paqueteEnEdicion && (strcasecmp($nombre, 'Pendiente') === 0 || strcasecmp($nombre, 'Armado') === 0))
+          @php
+            $esPendiente = $paqueteEnEdicion && isset($paquete->estado) && strcasecmp($paquete->estado->nombre_estado ?? '', 'Pendiente') === 0;
+            $esArmado = $paqueteEnEdicion && strcasecmp($nombre, 'Armado') === 0;
+            $esEnCamino = $paqueteEnEdicion && strcasecmp($nombre, 'En camino') === 0;
+            $esEntregado = $paqueteEnEdicion && strcasecmp($nombre, 'Entregado') === 0;
+          @endphp
+          @if($paqueteEnEdicion && (strcasecmp($nombre, 'Pendiente') === 0 || $esArmado))
+            @continue
+          @endif
+          @if($esPendiente && ($esEnCamino || $esEntregado))
             @continue
           @endif
           <option value="{{ $id }}"

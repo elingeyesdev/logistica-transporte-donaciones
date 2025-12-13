@@ -232,15 +232,17 @@
                       <a class="btn btn-sm btn-dark mr-2" href="{{ route('paquete.show', $paquete->id_paquete) }}">
                         <i class="fa fa-eye"></i>
                       </a>
-                      @php
-                       $estadoNombre = $estado ?? optional($paquete->estado)->nombre_estado;
-                      @endphp
 
-                      @if( ! $estadoNombre || !in_array(strtolower($estadoNombre), ['entregado', 'entregada']) )
+                        @php
+                        $estadoNombre = $estado ?? optional($paquete->estado)->nombre_estado;
+                        $estadoLower = strtolower($estadoNombre ?? '');
+                        @endphp
+
+                        @if( $estadoLower !== 'entregado' && $estadoLower !== 'entregada' && $estadoLower !== 'pendiente')
                           <a class="btn btn-sm btn-info mr-2" href="{{ route('paquete.edit', $paquete->id_paquete) }}">
-                              <i class="fa fa-edit"></i>
+                            <i class="fa fa-edit"></i>
                           </a>
-                      @endif
+                        @endif
 
                       
                     </div>
