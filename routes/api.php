@@ -9,4 +9,7 @@ Route::prefix('gateway')->group(function () {
     Route::get('/trazabilidad/vehiculo/{placa}', [TrazabilidadController::class, 'getTraceabilityByPlaca']);
     Route::get('/trazabilidad/solicitante/{ci_solicitante}', [TrazabilidadController::class, 'getTraceabilityBySolicitante']);
     Route::get('/trazabilidad/provincia/{provincia}', [TrazabilidadController::class, 'getTraceabilityByProvincia']);
+
+    Route::get('trazabilidad/animales/especie/{especie}', [TrazabilidadController::class, 'getAnimalesPorEspecie']);
+    Route::get('trazabilidad/animales/liberados', [TrazabilidadController::class, 'getAnimalesLiberados']);
 });

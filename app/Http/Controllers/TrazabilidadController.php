@@ -53,5 +53,34 @@ class TrazabilidadController extends Controller
             'services' => $client->fetchByProvincia($provincia),
         ]);
     }
+    public function getAnimalesPorEspecie(string $especie) //SOLO RESCATE DE ANIMALES
+    {
+        $client = new MicroserviceClient();
+
+        $animales = $client->fetchAnimalesPorEspecie($especie);
+
+        return response()->json([
+            'success'  => true,
+            'tipo'     => 'animales_por_especie',
+            'query'    => $especie,
+            'services' => [
+                'animales' => $animales,
+            ],
+        ]);
+    }
+    public function getAnimalesLiberados()//SOLO RESCATE DE ANIMALES
+    {
+        $client = new MicroserviceClient();
+
+        $animales = $client->fetchAnimalesLiberados();
+
+        return response()->json([
+            'success'  => true,
+            'tipo'     => 'animales_liberados',
+            'services' => [
+                'animales' => $animales,
+            ],
+        ]);
+    }
 
 }

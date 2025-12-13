@@ -175,5 +175,58 @@ class MicroserviceClient
         return $results;
     }
 
+    public function fetchAnimalesPorEspecie(string $especie): array
+    {
+        $url = env('MS_ANIMALES_URL');
+
+        if (!$url) {
+            return [
+                'error' => "RUTA PARA MS_ANIMALES_URL NO EXISTE",
+            ];
+        }
+
+        $baseUrl = rtrim($url, '/');
+        $encoded = rawurlencode($especie);
+
+        try {
+            $response = Http::timeout(10)
+                ->get("{$baseUrl}/api/trazabilidad/animales/especie/{$encoded}");
+
+            return $response->successful()
+                ? $response->json()
+                : ['error' => "Status {$response->status()}"];
+        } catch (\Throwable $e) {
+            return [
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function fetchAnimalesLiberados(): array
+    {
+        $url = env('MS_ANIMALES_URL');
+
+        if (!$url) {
+            return [
+                'error' => "RUTA PARA MS_ANIMALES_URL NO EXISTE",
+            ];
+        }
+
+        $baseUrl = rtrim($url, '/');
+
+        try {
+            $response = Http::timeout(10)
+                ->get("{$baseUrl}/api/trazabilidad/animales/liberados");
+
+            return $response->successful()
+                ? $response->json()
+                : ['error' => "Status {$response->status()}"];
+        } catch (\Throwable $e) {
+            return [
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
 
 }
