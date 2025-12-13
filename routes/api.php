@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\TrazabilidadController;
+use App\Http\Controllers\RegistroController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('gateway')->group(function () {
@@ -12,4 +14,10 @@ Route::prefix('gateway')->group(function () {
 
     Route::get('trazabilidad/animales/especie/{especie}', [TrazabilidadController::class, 'getAnimalesPorEspecie']);
     Route::get('trazabilidad/animales/liberados', [TrazabilidadController::class, 'getAnimalesLiberados']);
+    Route::get(
+    '/registro/ci/{ci}',
+    [RegistroController::class, 'getSimplePersonaByCi']
+);
+
 });
+

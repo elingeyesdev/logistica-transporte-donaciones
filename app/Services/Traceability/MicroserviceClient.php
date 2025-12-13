@@ -240,5 +240,83 @@ class MicroserviceClient
         }
     }
 
+    public function fetchFirstSimpleIdentityByCi(string $ci): array
+{
+    $priorityServices = [
+        'logistica'        => 'MS_LOGISTICA_URL',
+        'donaciones'       => 'MS_DONACIONES_URL',
+        'voluntarios_post' => 'MS_VOLUNTARIOS_POST_URL',
+        'brigadas'         => 'MS_BRIGADAS_URL',
+        'animales'         => 'MS_ANIMALES_URL',
+        'predicciones'     => 'MS_PREDICCIONES_URL',
+    ];
+
+    $attempts = [];
+
+    foreach ($priorityServices as $name => $envVar) {
+        $url = env($envVar);
+
+        if (!$url) {
+            $attempts[] = [
+                'system'  => $name,
+                'status'  => 'env_missing',
+                'message' => "RUTA PARA $envVar NO EXISTE",
+            ];
+            continue;
+        }
+
+        try {
+            $response = Http::timeout(5)
+                ->get("$url/api/registro/ci/" . urlencode($ci));
+
+            $attempts[] = [
+                'system' => $name,
+                'status' => $response->status(),
+            ];
+
+            if (!$response->successful()) {
+                continue;
+            }
+
+            $body = $response->json();
+            $persona = $body['persona'] ?? $body['data'] ?? null;
+
+            if (!empty($body['success']) && !empty($body['found']) && is_array($persona)) {
+                return [
+                    'success'  => true,
+                    'found'    => true,
+                    'system'   => $name,
+                    'persona'  => [
+                        'nombre'   => $persona['nombre']   ?? null,
+                        'apellido' => $persona['apellido'] ?? null,
+                        'telefono' => $persona['telefono'] ?? null,
+                    ],
+                    'attempts' => $attempts,
+                ];
+            }
+
+        } catch (\Throwable $e) {
+            $attempts[] = [
+                'system'  => $name,
+                'status'  => 'exception',
+                'message' => $e->getMessage(),
+            ];
+            continue;
+        }
+    }
+
+    return [
+        'success'  => true,
+        'found'    => false,
+        'system'   => null,
+        'persona'  => [
+            'nombre'   => null,
+            'apellido' => null,
+            'telefono' => null,
+        ],
+        'attempts' => $attempts,
+    ];
+}
+
 
 }
