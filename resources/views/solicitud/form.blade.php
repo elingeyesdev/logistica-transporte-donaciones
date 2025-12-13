@@ -654,7 +654,11 @@
           reverseGeocode(lat, lng);
         },
         function(err) {
-          console.warn("Geolocalización rechazada o falló:", err);
+            console.warn("Geolocalización rechazada o falló:", err);
+            const fallbackLat = -17.722213878615346;
+            const fallbackLng = -63.17462682731379;
+            setMarker(fallbackLat, fallbackLng);
+            reverseGeocode(fallbackLat, fallbackLng);
         },
         { enableHighAccuracy: true, timeout: 8000 }
       );

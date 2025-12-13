@@ -272,8 +272,8 @@
         }
     }
 
-    $defaultLat = (is_numeric($latValue) && $latValue) ? (float) $latValue : -17.8146;
-    $defaultLng = (is_numeric($lngValue) && $lngValue) ? (float) $lngValue : -63.1561;
+    $defaultLat = (is_numeric($latValue) && $latValue) ? (float) $latValue : -17.722213878615346;
+    $defaultLng = (is_numeric($lngValue) && $lngValue) ? (float) $lngValue : -63.17462682731379;
     $hasCoords  = (is_numeric($latValue) && $latValue && is_numeric($lngValue) && $lngValue);
     $defaultZoom = $hasCoords ? 13 : 6;
 @endphp
@@ -290,6 +290,9 @@
 
     const mapContainer = document.getElementById('mapa-ubicacion-paquete');
     if (!mapContainer) return;
+
+    const FALLBACK_LAT = -17.722213878615346;
+    const FALLBACK_LNG = -63.17462682731379;
 
     const defaultLat  = Number("{{ $defaultLat }}");
     const defaultLng  = Number("{{ $defaultLng }}");
@@ -390,15 +393,14 @@
         },
         function(error) {
           console.warn("Error o permiso denegado en geolocalización:", error);
-
+          setMarker(FALLBACK_LAT, FALLBACK_LNG);
           latInput.value = "";
           lngInput.value = "";
 
           const geoAlert = document.getElementById("geo-alert");
           geoAlert.classList.remove("d-none");
           geoAlert.innerHTML = `
-              <strong>Permiso de ubicación requerido:</strong><br>
-              Debe habilitar la ubicación en su dispositivo para actualizar la posición del paquete.
+              Se usó una ubicación de referencia para registrar la posición del paquete.
           `;
         },
         { enableHighAccuracy: true, timeout: 8000 }
