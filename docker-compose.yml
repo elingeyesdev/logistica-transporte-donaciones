@@ -23,6 +23,7 @@ services:
       INVENTARIO_API_URL: http://donaciones.dasalas.shop/api/inventario/por-producto
       HOTSPOT_API_URL: http://brigadas.dasalas.shop/api/v1/hotspots/live
       ANIMALES_API_URL: http://rescate.dasalas.shop/releases
+      GATEWAY_REGISTRO_SIMPLE_URL: http://gatealas.dasalas.shop/api/gateway/registro/ci
     depends_on:
       - db
     networks:
