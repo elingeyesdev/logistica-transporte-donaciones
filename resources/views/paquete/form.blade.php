@@ -47,7 +47,7 @@
               class="form-control @error('estado_id') is-invalid @enderror" required>
         <option value="">-- Seleccione --</option>
         @foreach($estados as $id => $nombre)
-          @if($paqueteEnEdicion && strcasecmp($nombre, 'Pendiente') === 0)
+          @if($paqueteEnEdicion && (strcasecmp($nombre, 'Pendiente') === 0 || strcasecmp($nombre, 'Armado') === 0))
             @continue
           @endif
           <option value="{{ $id }}"
