@@ -379,7 +379,7 @@ export default function PaqueteScreen() {
         ubicacionActual: ubicacionClean ?? '—',
 
         fechaAprobacion: p.fecha_aprobacion ?? p.created_at ?? '—',
-        fechaCreacion,
+        fechaCreacion:  p.created_at ,
         fechaActualizacion,
 
         fechaEntrega: p.fecha_entrega ?? null,
@@ -474,6 +474,80 @@ export default function PaqueteScreen() {
     return `Vehículo ID ${id}`;
   };
 
+  const obtenerVehiculosDisponibles = () => {
+    const conteoPorVehiculo = {};
+
+    (paquetes || []).forEach((p) => {
+      if (esPaqueteEnCamino(p) && p.id_vehiculo) {
+        const vid = String(p.id_vehiculo);
+        conteoPorVehiculo[vid] = (conteoPorVehiculo[vid] || 0) + 1;
+      }
+    });
+
+    const vehiculosBloqueadosIds = Object.keys(conteoPorVehiculo).filter(
+      (vid) => conteoPorVehiculo[vid] >= 3
+    );
+
+    const vehiculoActualId =
+      paqueteActual && paqueteActual.id_vehiculo
+        ? String(paqueteActual.id_vehiculo)
+        : null;
+
+    return (vehiculos || []).filter((v) => {
+      const vid = String(v.id_vehiculo);
+      if (vehiculoActualId && vid === vehiculoActualId) {
+        return true;
+      }
+
+      return !vehiculosBloqueadosIds.includes(vid);
+    });
+  };
+
+  const obtenerConductoresDisponibles = () => {
+    const paquetesLista = paquetes || [];
+
+    const paqueteIdActual = paqueteActual ? paqueteActual.id : null;
+    const vehiculoIdFinal =
+      vehiculoId ||
+      (paqueteActual && paqueteActual.id_vehiculo
+        ? String(paqueteActual.id_vehiculo)
+        : null);
+
+    const conductoresBloqueados = new Set();
+
+    paquetesLista.forEach((p) => {
+      if (!esPaqueteEnCamino(p)) return;
+      if (!p.id_conductor || !p.id_vehiculo) return;
+
+      if (paqueteIdActual && p.id === paqueteIdActual) return;
+
+      const cId = String(p.id_conductor);
+      const vId = String(p.id_vehiculo);
+
+      if (vehiculoIdFinal) {
+        if (vId !== vehiculoIdFinal) {
+          conductoresBloqueados.add(cId);
+        }
+      } else {
+        conductoresBloqueados.add(cId);
+      }
+    });
+
+    return (conductores || []).filter((c) => {
+      const id = String(c.conductor_id);
+      if (
+        paqueteActual &&
+        paqueteActual.id_conductor &&
+        String(paqueteActual.id_conductor) === id
+      ) {
+        return true;
+      }
+
+      return !conductoresBloqueados.has(id);
+    });
+  };
+
+
   const getEstadoLabelById = (id) => {
     if (!id) return 'Sin estado';
     const found = estados.find((e) => String(e.id_estado) === String(id));
@@ -494,14 +568,26 @@ export default function PaqueteScreen() {
       if (nombre.includes('pendiente')) return 'pendiente';
       if (nombre.includes('camino')) return 'en_camino';
       if (nombre.includes('entregado')) return 'entregado';
+      if (nombre.includes('armado')) return 'armado';
+
       return 'otro';
     };
 
+    const esPaqueteEnCamino = (p) => getEstadoKey(p) === 'en_camino';
+    const getEstadoCategoriaDesdeNombre = (nombre) => {
+      const value = (nombre || '').toLowerCase();
+      if (value.includes('pendiente')) return 'pendiente';
+      if (value.includes('armado')) return 'armado';
+      if (value.includes('camino')) return 'en_camino';
+      if (value.includes('entregado')) return 'entregado';
+      return 'otro';
+    };
     const getEstadoBadgeColor = (nombre) => {
       const value = (nombre || '').toLowerCase();
       if (value.includes('pendiente')) return adminlteColors.warning;
       if (value.includes('camino')) return adminlteColors.info;
       if (value.includes('entreg')) return adminlteColors.success;
+      if (value.includes('armado')) return adminlteColors.danger;
       return adminlteColors.secondary;
     };
 
@@ -521,8 +607,8 @@ export default function PaqueteScreen() {
 
       const estadoPrioridad = {
         en_camino: 0,
-        pendiente: 1,
-        otro: 2,
+        pendiente: 2,
+        armado: 1,
         entregado: 3,
       };
 
@@ -703,6 +789,28 @@ export default function PaqueteScreen() {
     }
   };
 
+  const obtenerEstadosDisponiblesParaPicker = () => {
+    if (!paqueteActual) return estados || [];
+
+    const categoriaActual = getEstadoCategoriaDesdeNombre(paqueteActual.estadoNombre);
+
+    return (estados || []).filter((e) => {
+      const cat = getEstadoCategoriaDesdeNombre(e.nombre_estado);
+      if (categoriaActual === 'pendiente') {
+        return true;
+      }
+      if (categoriaActual === 'armado') {
+        if (cat === 'pendiente') return false;
+        return true;
+      }
+      if (categoriaActual === 'en_camino') {
+        return cat === 'en_camino' || cat === 'entregado';
+      }
+      return true;
+    });
+  };
+
+
   const guardarCambiosPaquete = async () => {
     if (!paqueteActual) return;
 
@@ -881,6 +989,9 @@ export default function PaqueteScreen() {
     }
     if (estado === 'entregado') {
       return adminlteColors.success;
+    }
+    if (estado === 'armado') {
+      return adminlteColors.danger;
     }
 
     const colors = [
@@ -1102,7 +1213,7 @@ export default function PaqueteScreen() {
                     color={adminlteColors.muted}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.label}>Fecha Creación:</Text>
+                  <Text style={styles.label}>Fecha de Creación:</Text>
                   <Text style={styles.valueMuted}>{formatFechaAprobacion(p.fechaCreacion) || '—'}</Text>
 
                 </View>
@@ -1137,7 +1248,7 @@ export default function PaqueteScreen() {
                   <Text style={styles.btnVerPaqueteText}>Ver</Text>
                 </TouchableOpacity>
 
-                {!esEstadoEntregado(p.estado_id) && (
+                {(['armado', 'en_camino'].includes(getEstadoKey(p))) && (
                   <TouchableOpacity
                     style={styles.btnEditarPaquete}
                     onPress={() => {
@@ -1169,6 +1280,7 @@ export default function PaqueteScreen() {
                     <Text style={styles.btnEditarPaqueteText}>Actualizar</Text>
                   </TouchableOpacity>
                 )}
+
               </View>
             </View>
           ))}
@@ -1608,8 +1720,8 @@ export default function PaqueteScreen() {
                       <Text style={styles.pickerItemText}>— Sin asignar —</Text>
                     </TouchableOpacity>
 
-                    {conductores.map(c => {
-                      const label = getConductorLabelById(c.conductor_id);
+                  {obtenerConductoresDisponibles().map((c) => {
+                    const label = getConductorLabelById(c.conductor_id);
                       return (
                         <TouchableOpacity
                           key={c.conductor_id}
@@ -1652,7 +1764,7 @@ export default function PaqueteScreen() {
                       <Text style={styles.pickerItemText}>— Sin asignar —</Text>
                     </TouchableOpacity>
 
-                    {vehiculos.map(v => (
+                    {obtenerVehiculosDisponibles().map((v) => (
                       <TouchableOpacity
                         key={v.id_vehiculo}
                         style={styles.pickerItem}
@@ -1694,7 +1806,7 @@ export default function PaqueteScreen() {
                       <Text style={styles.pickerItemText}>— Sin seleccionar —</Text>
                     </TouchableOpacity>
 
-                    {estados.map((e) => (
+                    {obtenerEstadosDisponiblesParaPicker().map((e) => (
                       <TouchableOpacity
                         key={e.id_estado}
                         style={styles.pickerItem}
