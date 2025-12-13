@@ -526,13 +526,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 exportReportToExcel(currentPaquetesReport, 'Paquetes');
             };
         }
-        // Forzar renderizado de la lista de paquetes según el filtro actual
         if (paquetesSelect && paquetesResultList) {
             renderPaquetesList(paquetesSelect.value);
             paquetesResultList.classList.remove('d-none');
             paquetesListHidden = false;
             updatePaquetesToggleButton();
-            // Listener SIEMPRE activo
             paquetesSelect.onchange = function() {
                 renderPaquetesList(this.value);
                 paquetesResultList.classList.remove('d-none');
@@ -549,14 +547,15 @@ document.addEventListener('DOMContentLoaded', function() {
             solicitudesChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Entregados', 'En camino', 'Pendientes'],
+                    labels: ['Entregados', 'En camino', 'Pendientes', 'Armados'],
                     datasets: [{
                         data: [
                             {{ $paquetesEntregados }},
                             {{ $paquetesEnCamino ?? 0 }},
-                            {{ $paquetesPendientes ?? 0 }}
+                            {{ $paquetesPendientes ?? 0 }},
+                            {{ $paquetesArmados ?? 0 }}
                         ],
-                        backgroundColor: ['#28a745', '#ffc107', '#6c757d']
+                        backgroundColor: ['#28a745', '#ffc107', '#6c757d', '#33a0ff']
                     }]
                 },
                 options: {
@@ -1765,7 +1764,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 solicitudesChart.data.datasets[0].data = [
                     data.paquetesEntregados,
                     data.paquetesEnCamino,
-                    data.paquetesPendientes
+                    data.paquetesPendientes,
+                    data.paquetesArmados
                 ];
                 solicitudesChart.update();
             }

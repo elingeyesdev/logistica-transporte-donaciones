@@ -490,8 +490,6 @@ class DashboardController extends Controller
             'vehiculosListado'
         );
 
-
-        // Always return JSON for API requests
         if (request()->wantsJson() || request()->is('api/*')) {
             return response()->json($data);
         }
