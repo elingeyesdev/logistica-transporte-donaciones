@@ -8,7 +8,7 @@ services:
       - .:/var/www
     environment:
       DB_CONNECTION: pgsql
-      DB_HOST: db       # Nombre del servicio del contenedor de postgres
+      DB_HOST: db  
       DB_PORT: 5432
       DB_DATABASE: das_db
       DB_USERNAME: admin
@@ -20,6 +20,9 @@ services:
       MAIL_PASSWORD: drhoiwwgiqboivtq
       MAIL_ENCRYPTION: tls
       MAIL_FROM_ADDRESS: anagvs36@gmail.com
+      INVENTARIO_API_URL: http://donaciones.dasalas.shop/api/inventario/por-producto
+      HOTSPOT_API_URL: http://brigadas.dasalas.shop/api/v1/hotspots/live
+      ANIMALES_API_URL: http://rescate.dasalas.shop/releases
     depends_on:
       - db
     networks:
