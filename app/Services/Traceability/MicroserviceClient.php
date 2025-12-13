@@ -144,7 +144,7 @@ class MicroserviceClient
         return $results;
     }
 
-    public function fetchByProvincia(string $provincia)//INCENDIOS, ANIMALES, LOGISTICA
+    public function fetchByProvincia(string $provincia)//INCENDIOS, ANIMALES, LOGISTICA, PREDICCION
     {
         $results = [];
 
@@ -158,16 +158,28 @@ class MicroserviceClient
                 continue;
             }
 
+            $baseUrl = rtrim($url, '/');
+            $encodedProvincia = rawurlencode($provincia);
+            $segment = $name === 'prediccion'
+                ? 'ubicacion'
+                : 'provincia';
+
+            $fullUrl = "{$baseUrl}/api/trazabilidad/{$segment}/{$encodedProvincia}";
+
             try {
-                $response = Http::timeout(5)
-                    ->get("$url/api/trazabilidad/provincia/{$provincia}");
+                $response = Http::timeout(5)->get($fullUrl);
 
                 $results[$name] = $response->successful()
                     ? $response->json()
-                    : ['error' => "Status {$response->status()}"];
+                    : [
+                        'error'  => "Status {$response->status()}",
+                        'url'    => $fullUrl,
+                        'segment'=> $segment,
+                    ];
             } catch (\Throwable $e) {
                 $results[$name] = [
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
+                    'url'   => $fullUrl,
                 ];
             }
         }
