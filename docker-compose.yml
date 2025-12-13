@@ -25,6 +25,7 @@ services:
       ANIMALES_API_URL: http://rescate.dasalas.shop/
       GATEWAY_REGISTRO_SIMPLE_URL: http://gatealas.dasalas.shop/api/gateway/registro/ci
       HELPDESK_API_URL: https://proyecto-de-ultimo-minuto.online
+      APP_NAME: 'Logistica y Transporte'
     depends_on:
       - db
     networks:
