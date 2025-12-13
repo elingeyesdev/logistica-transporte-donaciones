@@ -24,7 +24,7 @@ services:
       HOTSPOT_API_URL: http://brigadas.dasalas.shop/
       ANIMALES_API_URL: http://rescate.dasalas.shop/
       GATEWAY_REGISTRO_SIMPLE_URL: http://gatealas.dasalas.shop/api/gateway/registro/ci
-      HELPDESK_API_URL=https://proyecto-de-ultimo-minuto.online
+      HELPDESK_API_URL: https://proyecto-de-ultimo-minuto.online
     depends_on:
       - db
     networks:
