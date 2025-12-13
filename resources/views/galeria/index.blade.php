@@ -197,7 +197,7 @@
                 })
                 .catch(error => {
                     console.error('Error al cargar las imágenes de animales:', error);
-                    animalsContainer.innerHTML = '<p class="text-danger mx-3 my-2">Error al cargar las imágenes de animales.</p>';
+                    animalsContainer.innerHTML = '<h5 class="text-dark mx-3 my-2">Galeria de animales no disponible. Para mas información ver LINK</h5>';
                 });
         }
     });

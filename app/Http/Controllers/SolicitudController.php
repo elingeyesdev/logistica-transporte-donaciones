@@ -116,7 +116,7 @@ class SolicitudController extends Controller
             throw $e;
         }
 
-        if ($request->is('api/*')) {
+        if ($request->is('api/*') || $request->is('api/solicitud-publica')) {
             return response()->json([
                 'success' => true,
                 'data'    => $solicitud,
