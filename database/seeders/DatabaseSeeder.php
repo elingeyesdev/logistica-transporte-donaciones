@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             TipoLicenciaSeeder::class,
             TipoVehiculoSeeder::class,
             TipoEmergenciaSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

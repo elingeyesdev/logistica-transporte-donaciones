@@ -30,7 +30,6 @@ return [
 
     // Mostrar borde en el iframe
     'iframe_border' => env('HELPDESK_WIDGET_BORDER', false),
-    
 
     /*
     |--------------------------------------------------------------------------
