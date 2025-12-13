@@ -167,3 +167,10 @@ Route::post('/usuario/{id}/cambiar-rol', [UserAdminController::class, 'cambiarRo
 Route::get('/galeria', [PaqueteController::class, 'galeria'])->name('galeria.index');
 
 
+
+
+// ========== HELPDESK WIDGET ==========
+// Ruta generada por: php artisan helpdeskwidget:install
+Route::get('helpdesk', function () {
+    return view('helpdesk');
+})->name('helpdesk')->middleware('auth');

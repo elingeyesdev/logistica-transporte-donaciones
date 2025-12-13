@@ -300,124 +300,89 @@ return [
     |
     */
 
-    'menu' => [
-        [
-            'type' => 'fullscreen-widget',
-            'topnav_right' => true,
-        ],
+   'menu' => [
+    [
+        'type' => 'fullscreen-widget',
+        'topnav_right' => true,
+    ],
 
-        // Sidebar items:
-        [
-            'text' => 'Estadísticas',
-            'route' => 'dashboard',
-            'icon' => 'fas fa-tachometer-alt',
-            'can'   => 'admin',
-        ],
-        [
-            'text' => 'Solicitudes',
-            'url'  => 'solicitud',
-            'icon' => 'fas fa-fw fa-file',
-            'can'   => 'voluntario',
-         ],
+    [
+        'text'  => 'Estadísticas',
+        'route' => 'dashboard',
+        'icon'  => 'fas fa-tachometer-alt',
+        'can'   => 'admin',
+    ],
 
-        [
-            'text' => 'Paquetes',
-            'url'  => 'paquete',
-            'icon' => 'fas fa-fw fa-box',
-            'can'   => 'voluntario',
-        ],
-        [
-            'text' => 'Tipo de Emergencia',
-            'url'  => 'tipo-emergencia',
-            'icon' => 'fas fa-fw fa-plus',
-            'can'   => 'admin',
-        ],
-        [
-            'text' => 'Estados',
-            'url'  => 'estado',
-            'icon' => 'fas fa-flag',
-            'can'   => 'admin',
-        ],
-        [
-            'text' => 'Solicitantes',
-            'url'  => 'solicitante',
-            'icon' => 'fas fa-user-friends',
-            'can'   => 'voluntario',
-        ],
-        [
-            'text' => 'Destinos',
-            'url'  => 'destino',
-            'icon' => 'fas fa-map-marker-alt',
-            'can'   => 'voluntario',
-        ],
-        [
-            'text' => 'Ubicaciones',
-            'url'  => 'ubicacion',
-            'icon' => 'fas fa-map-pin',
-            'can'   => 'voluntario',
-        ],
-         [
-            'text' => 'Voluntarios',
-            'url'  => 'usuario',
-            'icon' => 'fas fa-user',
-            'can'   => 'admin',
-        ],
-         [
-            'text' => 'Reportes',
-            'url'  => 'reporte',
-            'icon' => 'fas fa-book',
-            'can'   => 'admin',
-        ],
-        [
-            'text' => 'Seguimiento de Paquetes',
-            'url'  => 'seguimiento',
-            'icon' => 'fas fa-map',
-            'can'   => 'voluntario',
-        ],
-         [
-            'text' => 'Licencias',
-            'url'  => 'tipo-licencia',
-            'icon' => 'fas fa-id-card',
-            'can'   => 'admin',
-        ],
-         [
-            'text' => 'Conductores',
-            'url'  => 'conductor',
-            'icon' => 'fas fa-users',
-            'can'   => 'voluntario',
-        ],
-         [
-            'text' => 'Marcas',
-            'url'  => 'marca',
-            'icon' => 'fas fa-flag-checkered',
-            'can'   => 'voluntario',
-        ],
-        [
-            'text' => 'Vehiculos',
-            'url'  => 'vehiculo',
-            'icon' => 'fas fa-car',
-            'can'   => 'voluntario',
-        ],
-         [
-            'text' => 'Tipo de Vehiculo',
-            'url'  => 'tipo-vehiculo',
-            'icon' => 'fas fa-th-large',
-            'can'   => 'voluntario',
-        ],
-         [
-            'text' => 'Roles',
-            'url'  => 'rol',
-            'icon' => 'fas fa-user-shield',
-            'can'   => 'admin',
-        ],
-         [
-            'text' => 'Galería de Agradecimiento',
-            'url'  => 'galeria',
-            'icon' => 'fas fa-images',
-            'can'   => 'voluntario',
-        ],
+  
+    [
+        'text' => 'Solicitudes',
+        'url'  => 'solicitud',
+        'icon' => 'fas fa-fw fa-file',
+        'can'  => 'voluntario',
+    ],
+    [
+        'text' => 'Paquetes',
+        'url'  => 'paquete',
+        'icon' => 'fas fa-fw fa-box',
+        'can'  => 'voluntario',
+    ],
+    [
+        'text' => 'Seguimiento de Paquetes',
+        'url'  => 'seguimiento',
+        'icon' => 'fas fa-map',
+        'can'  => 'voluntario',
+    ],
+    [
+        'text' => 'Vehículos',
+        'url' => 'vehiculo',
+        'icon' => 'fas fa-car',
+        'can' => 'voluntario'
+    ],
 
-    ], 
+    [
+        'text' => 'Catálogos',
+        'icon' => 'fas fa-book-open',
+        'can'  => 'voluntario',
+        'submenu' => [
+            ['text' => 'Solicitantes', 'url' => 'solicitante', 'icon' => 'fas fa-user-friends', 'can' => 'voluntario'],
+            ['text' => 'Destinos',     'url' => 'destino',     'icon' => 'fas fa-map-marker-alt', 'can' => 'voluntario'],
+            ['text' => 'Ubicaciones',  'url' => 'ubicacion',   'icon' => 'fas fa-map-pin', 'can' => 'voluntario'],
+            ['text' => 'Conductores',  'url' => 'conductor',   'icon' => 'fas fa-users', 'can' => 'voluntario'],
+            ['text' => 'Marcas',       'url' => 'marca',       'icon' => 'fas fa-flag-checkered', 'can' => 'voluntario'],
+            ['text' => 'Tipo de Vehículo','url' => 'tipo-vehiculo','icon' => 'fas fa-th-large', 'can' => 'voluntario'],
+        ],
+    ],
+
+    ['header' => 'ADMIN'],
+
+    [
+        'text' => 'Administración',
+        'icon' => 'fas fa-user-shield',
+        'can'  => 'admin',
+        'submenu' => [
+            ['text' => 'Voluntarios', 'url' => 'usuario', 'icon' => 'fas fa-user', 'can' => 'admin'],
+            ['text' => 'Roles',       'url' => 'rol',     'icon' => 'fas fa-user-shield', 'can' => 'admin'],
+            ['text' => 'Estados',     'url' => 'estado',  'icon' => 'fas fa-flag', 'can' => 'admin'],
+            ['text' => 'Tipo de Emergencia','url' => 'tipo-emergencia','icon' => 'fas fa-fw fa-plus', 'can' => 'admin'],
+            ['text' => 'Licencias',   'url' => 'tipo-licencia', 'icon' => 'fas fa-id-card', 'can' => 'admin'],
+            ['text' => 'Reportes',    'url' => 'reporte', 'icon' => 'fas fa-book', 'can' => 'admin'],
+        ],
+    ],
+
+    [
+        'text' => 'Galería de Agradecimiento',
+        'url'  => 'galeria',
+        'icon' => 'fas fa-images',
+        'can'  => 'voluntario',
+    ],
+    [
+        'text' => 'Centro de Soporte',
+        'url'  => 'helpdesk',
+        'icon' => 'fas fa-phone',
+        'can'  => 'voluntario',
+    ],
+],
+
 
     /*
     |--------------------------------------------------------------------------

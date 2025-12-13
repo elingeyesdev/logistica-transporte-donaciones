@@ -74,4 +74,20 @@ class User extends Authenticatable
         return $this->hasOne(\App\Models\Conductor::class, 'ci', 'ci');
     }
 
+    public function getEmailAttribute()
+    {
+        return $this->correo_electronico;
+    }
+
+    public function getFirstNameAttribute()
+    {
+        return $this->nombre;
+    }
+
+    public function getLastNameAttribute()
+    {
+        return $this->apellido;
+    }
+
+
 }
