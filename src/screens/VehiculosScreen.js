@@ -14,8 +14,6 @@ import {
   Platform,
   Keyboard,
   TouchableWithoutFeedback,
-
-
 } from 'react-native';
 import { adminlteColors } from '../theme/adminlte';
 import AdminLayout from '../components/AdminLayout';
@@ -23,6 +21,8 @@ import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import * as vehiculoService from '../services/vehiculoService';
 import * as tipoVehiculoService from '../services/tipoVehiculoService';
 import * as marcaService from '../services/marcaService';
+import { getPaquetes } from '../services/paqueteService';
+import { getSolicitudes } from '../services/solicitudService';
 
 export default function VehiculosScreen() {
   const [vehiculos, setVehiculos] = useState([]);
@@ -40,6 +40,13 @@ export default function VehiculosScreen() {
     color: '',
     color_otro: '',
   });
+  const [paquetes, setPaquetes] = useState([]);
+  const [solicitudesMap, setSolicitudesMap] = useState({});
+
+  const [modalPaquetesVisible, setModalPaquetesVisible] = useState(false);
+  const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState(null);
+  const [paquetesVehiculoSeleccionado, setPaquetesVehiculoSeleccionado] = useState([]);
+
   const colores = [
     { label: 'Rojo', value: 'Rojo' },
     { label: 'Blanco', value: 'Blanco' },
@@ -55,6 +62,7 @@ export default function VehiculosScreen() {
     cargarVehiculos();
     cargarTiposVehiculo();
     cargarMarcas();
+    cargarPaquetesYSolicitudes();
   }, []);
 
   const cargarVehiculos = async () => {
@@ -87,6 +95,25 @@ export default function VehiculosScreen() {
       console.error('Error al cargar marcas:', error);
     }
   };
+
+  const cargarPaquetesYSolicitudes = async () => {
+    try {
+      const solicitudes = await getSolicitudes();
+      const index = {};
+      (solicitudes || []).forEach(s => {
+        if (s.id_solicitud != null) {
+          index[String(s.id_solicitud)] = s;
+        }
+      });
+      setSolicitudesMap(index);
+
+      const listaPaquetes = await getPaquetes();
+      setPaquetes(listaPaquetes || []);
+    } catch (error) {
+      console.error('Error al cargar paquetes/solicitudes:', error);
+    }
+  };
+
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -155,6 +182,58 @@ export default function VehiculosScreen() {
     return colores[index % colores.length];
   };
 
+  const getEstadoKeyFromPaquete = (p) => {
+    const nombre = (
+      p.estado?.nombre_estado ||
+      p.estado_nombre ||
+      p.estadoNombre ||
+      ''
+    ).toLowerCase();
+
+    if (nombre.includes('camino')) return 'en_camino';
+    if (nombre.includes('pendiente')) return 'pendiente';
+    if (nombre.includes('armado')) return 'armado';
+    if (nombre.includes('entregado')) return 'entregado';
+    return 'otro';
+  };
+
+  const esPaqueteEnCamino = (p) => getEstadoKeyFromPaquete(p) === 'en_camino';
+
+  const getPaquetesEnCaminoPorVehiculo = (vehiculoId) => {
+    if (!vehiculoId) return [];
+    return (paquetes || []).filter(
+      (p) =>
+        p.id_vehiculo &&
+        String(p.id_vehiculo) === String(vehiculoId) &&
+        esPaqueteEnCamino(p)
+    );
+  };
+
+  const getDestinoDesdeSolicitud = (solicitud) => {
+    if (!solicitud) return '—';
+
+    const destinoRaw =
+      solicitud.destino
+      null;
+
+    if (!destinoRaw) return '—';
+
+    if (typeof destinoRaw === 'object') {
+      const partes = [
+        destinoRaw.comunidad,
+        destinoRaw.direccion,
+        destinoRaw.provincia
+      ]
+        .map((x) => (x ? String(x).trim() : ''))
+        .filter(Boolean);
+
+      return partes.length > 0 ? partes.join(', ') : '—';
+    }
+
+    return '—';
+  };
+
+
   return (
     <AdminLayout>
       <Text style={styles.pageTitle}>Vehículos Registrados</Text>
@@ -178,7 +257,6 @@ export default function VehiculosScreen() {
         </View>
       </View>
 
-      {/* Lista de Vehículos */}
       <ScrollView style={styles.vehiculosContainer}>
         {loading ? (
           <View style={{ padding: 20, alignItems: 'center' }}>
@@ -195,7 +273,10 @@ export default function VehiculosScreen() {
           </View>
         ) : (
           <View style={styles.vehiculosGrid}>
-            {vehiculos.map((vehiculo, index) => (
+            {vehiculos.map((vehiculo, index) => {
+              const paquetesEnCamino = getPaquetesEnCaminoPorVehiculo(vehiculo.id_vehiculo);
+              const countPaquetes = paquetesEnCamino.length;
+              return(
               <View
                 key={vehiculo.id_vehiculo ? `vehiculo-${vehiculo.id_vehiculo}` : `vehiculo-index-${index}`}
                 style={[
@@ -206,6 +287,7 @@ export default function VehiculosScreen() {
                   },
                 ]}
               >
+                
               <View style={styles.vehiculoCardHeader}>
                 <View style={styles.vehiculoCardHeaderContent}>
                   <FontAwesome5
@@ -218,6 +300,51 @@ export default function VehiculosScreen() {
                     {vehiculo.placa}
                   </Text>
                 </View>
+                 {countPaquetes > 0 && (
+
+                    <TouchableOpacity
+                      style={styles.badgePaquetes}
+                      onPress={() => {
+                        setVehiculoSeleccionado(vehiculo);
+
+                        const detalles = paquetesEnCamino.map((p) => {
+                          const solicitud =
+                            p.id_solicitud != null
+                              ? solicitudesMap[String(p.id_solicitud)]
+                              : null;
+
+                          const codigo =
+                            solicitud?.codigo_seguimiento ||
+                            solicitud?.codigo ||
+                            p.codigo ||
+                            (p.id_solicitud != null
+                              ? `SOL-${p.id_solicitud}`
+                              : `ID-${p.id_paquete || p.id}`);
+
+                          const destino = getDestinoDesdeSolicitud(solicitud);
+
+                          return {
+                            id: p.id_paquete || p.id,
+                            codigo,
+                            destino,
+                          };
+                        });
+
+                        setPaquetesVehiculoSeleccionado(detalles);
+                        setModalPaquetesVisible(true);
+                      }}
+                    >
+                      <Text style={styles.badgePaquetesText}>
+                        {countPaquetes} Paquete{countPaquetes !== 1 ? 's' : ''} 
+                      </Text>
+                      <FontAwesome5
+                        name="chevron-down"
+                        size={11}
+                        color="#ffffff"
+                        style={{ marginLeft: 3 }}
+                      />
+                    </TouchableOpacity>
+                  )}
               </View>
 
               <View style={styles.vehiculoCardBody}>
@@ -312,10 +439,10 @@ export default function VehiculosScreen() {
                   {vehiculo.color || 'Otro'}
                 </Text>
                 </View>
-              
               </View>
             </View>
-          ))}
+            );
+          })} 
           </View>
         )}
       </ScrollView>
@@ -489,6 +616,7 @@ export default function VehiculosScreen() {
                   );
                 })}
               </View>
+
               {formData.color === 'Otro' && ( 
                 <View style={{ marginTop: 8 }}>
                   <Text style={styles.label}>Especificar color</Text>
@@ -546,6 +674,79 @@ export default function VehiculosScreen() {
           </KeyboardAvoidingView>
         </View>
       </Modal>
+      <Modal
+        visible={modalPaquetesVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setModalPaquetesVisible(false);
+          setVehiculoSeleccionado(null);
+          setPaquetesVehiculoSeleccionado([]);
+        }}
+      >
+          <View style={styles.overlayBackdrop}>
+            <View style={styles.modalCardPaquetes}>
+              <View style={styles.modalHeaderCardPaquetes}>
+                <View style={styles.modalHeaderContent}>
+                  <FontAwesome5
+                    name="boxes"
+                    size={18}
+                    color="#ffffff"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.modalHeaderTitle}>
+                    Paquetes en camino
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    setModalPaquetesVisible(false);
+                    setVehiculoSeleccionado(null);
+                    setPaquetesVehiculoSeleccionado([]);
+                  }}
+                  style={styles.modalCloseButton}
+                >
+                  <MaterialIcons name="close" size={24} color="#ffffff" />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.modalBodyCard}>
+                {vehiculoSeleccionado && (
+                  <Text style={[styles.label, { marginBottom: 8 }]}>
+                    Vehículo: {vehiculoSeleccionado.placa}
+                  </Text>
+                )}
+
+                {paquetesVehiculoSeleccionado.length === 0 ? (
+                  <Text style={styles.vehiculoInfoValueMuted}>
+                    No hay paquetes en camino para este vehículo.
+                  </Text>
+                ) : (
+                  paquetesVehiculoSeleccionado.map((item) => (
+                    <View key={item.id} style={styles.paqueteRow}>
+                      <Text style={styles.paqueteCodigo}>{item.codigo}</Text>
+                      <Text style={styles.paqueteDestino}>{item.destino}</Text>
+                    </View>
+                  ))
+                )}
+              </ScrollView>
+
+              <View style={styles.modalFooterCard}>
+                <TouchableOpacity
+                  style={styles.modalFooterButtonSecondary}
+                  onPress={() => {
+                    setModalPaquetesVisible(false);
+                    setVehiculoSeleccionado(null);
+                    setPaquetesVehiculoSeleccionado([]);
+                  }}
+                >
+                  <Text style={styles.modalFooterButtonText}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
     </AdminLayout>
   );
 }
@@ -609,7 +810,25 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+
   },
+  badgePaquetes: {
+    backgroundColor: adminlteColors.info,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  badgePaquetesText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
   vehiculoCardHeaderContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -675,6 +894,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 16,
   },
+  modalCardPaquetes: {
+    width: '92%',
+    maxHeight: '80%',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 6,
+  },
+  modalHeaderCardPaquetes: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: adminlteColors.info,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
+  paqueteRow: {
+    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    paddingBottom: 8,
+  },
+  paqueteCodigo: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: adminlteColors.dark,
+  },
+  paqueteDestino: {
+    fontSize: 13,
+    color: adminlteColors.muted,
+    marginTop: 2,
+  },
+
   formGroup: {
     marginBottom: 16,
   },
