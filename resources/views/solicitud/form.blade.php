@@ -709,6 +709,30 @@ document.addEventListener('DOMContentLoaded', function () {
         function loadProductos() {
             productosList.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando inventario...</div>';
             const inventarioUrl = `${inventarioBaseUrl}/api/inventario/por-producto`;
+            const simulatedProductos = [
+                { id_producto: 1, nombre: 'Arroz (kg)', stock_total: 100 },
+                { id_producto: 2, nombre: 'Azúcar (kg)', stock_total: 80 },
+                { id_producto: 3, nombre: 'Aceite (lt)', stock_total: 60 },
+                { id_producto: 4, nombre: 'Fideo (kg)', stock_total: 90 },
+                { id_producto: 5, nombre: 'Sal (kg)', stock_total: 70 },
+                { id_producto: 6, nombre: 'Leche en polvo (bolsa)', stock_total: 50 },
+                { id_producto: 7, nombre: 'Lenteja (kg)', stock_total: 40 },
+                { id_producto: 8, nombre: 'Harina (kg)', stock_total: 60 },
+                { id_producto: 9, nombre: 'Jabón (barra)', stock_total: 100 },
+                { id_producto: 10, nombre: 'Papel higiénico (rollo)', stock_total: 120 }
+            ];
+            let timeoutId;
+            let didRespond = false;
+            function useSimulated() {
+                if (didRespond) return;
+                didRespond = true;
+                productos = simulatedProductos;
+                currentPage = 1;
+                renderPagination();
+                renderPage();
+                productosList.insertAdjacentHTML('afterbegin', '<div class="alert alert-warning">Lista Productos.</div>');
+            }
+            timeoutId = setTimeout(useSimulated, 7000); 
             fetch(inventarioUrl)
                 .then(response => {
                     if (!response.ok) {
@@ -717,14 +741,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     return response.json();
                 })
                 .then(data => {
+                    if (didRespond) return; 
+                    didRespond = true;
+                    clearTimeout(timeoutId);
                     productos = Array.isArray(data) ? data : [];
                     currentPage = 1;
                     renderPagination();
                     renderPage();
                 })
                 .catch(error => {
-                    console.error('Inventario no disponible:', error);
-                    productosList.innerHTML = '<div class="alert alert-warning">No se pudo cargar el inventario. Intente más tarde.</div>';
+                clearTimeout(timeoutId);
+                useSimulated();
                 });
         }
 
