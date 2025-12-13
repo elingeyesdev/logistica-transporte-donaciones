@@ -67,3 +67,83 @@
   <button type="submit" class="btn btn-primary w-100">Registrar</button>
 </form>
 @endsection
+@section('auth_footer')
+    @php
+        $gatewayLookupUrl = rtrim(env('GATEWAY_REGISTRO_SIMPLE_URL', ''), '/');
+    @endphp
+
+    @if($gatewayLookupUrl)
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const ciInput       = document.getElementById('ci');
+                const nombreInput   = document.getElementById('nombre');
+                const apellidoInput = document.getElementById('apellido');
+                const telefonoInput = document.getElementById('telefono');
+
+                const lookupBaseUrl = @json($gatewayLookupUrl);
+
+                if (!ciInput || !lookupBaseUrl) {
+                    return;
+                }
+
+                let lastLookupCi = null;
+                let isFetching   = false;
+
+                ciInput.addEventListener('blur', async function () {
+                    const ci = (ciInput.value || '').trim();
+
+                    if (ci.length < 5 || ci === lastLookupCi || isFetching) {
+                        return;
+                    }
+
+                    lastLookupCi = ci;
+                    isFetching   = true;
+
+                    try {
+                        const url = `${lookupBaseUrl}/${encodeURIComponent(ci)}`;
+
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Client-System': 'logistica',
+                            },
+                        });
+
+                        if (!response.ok) {
+                            console.warn('Gateway lookup failed with status', response.status);
+                            return;
+                        }
+
+                        const json = await response.json();
+
+                        if (!json.success || !json.found || !json.data) {
+                            return;
+                        }
+
+                        const data = json.data;
+
+                        if (nombreInput && !nombreInput.value.trim() && data.nombre) {
+                            nombreInput.value = data.nombre;
+                        }
+                        if (apellidoInput && !apellidoInput.value.trim() && data.apellido) {
+                            apellidoInput.value = data.apellido;
+                        }
+                        if (telefonoInput && !telefonoInput.value.trim() && data.telefono) {
+                            telefonoInput.value = data.telefono;
+                        }
+
+                        if (data.ci && ciInput.value.trim() !== data.ci) {
+                            ciInput.value = data.ci;
+                        }
+
+                    } catch (error) {
+                        console.error('Error llamando al gateway para autocompletar', error);
+                    } finally {
+                        isFetching = false;
+                    }
+                });
+            });
+        </script>
+    @endif
+@endsection

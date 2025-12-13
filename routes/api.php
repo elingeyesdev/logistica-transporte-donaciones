@@ -22,6 +22,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TrazabilidadController;
 
+use App\Http\Controllers\Auth\RegistroSimpleController;
+//GATEWAY BUSQUEDA DE USUARIOS
+Route::get('registro/ci/{ci}', [RegistroSimpleController::class, 'showByCi']);
 
 //PUBLICOS
 Route::get('/health', function () {
