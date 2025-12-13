@@ -695,7 +695,7 @@ document.addEventListener('DOMContentLoaded', function () {
 @section('js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const inventarioBaseUrl = @json(rtrim(config('services.inventario.base_url'), '/'));
+        const gatewayBaseUrl = @json(rtrim(config('services.gateway.base_url'), '/'));
         const productosList = document.getElementById('productos-list');
         const productosSeleccionados = document.getElementById('productos-seleccionados');
         const insumosInput = document.getElementById('insumos_necesarios');
@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function loadProductos() {
             productosList.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando inventario...</div>';
-            const inventarioUrl = `${inventarioBaseUrl}/api/inventario/por-producto`;
+            const inventarioUrl = `${gatewayBaseUrl}/api/gateway/donaciones/inventario/por-producto`;
             const simulatedProductos = [
                 { id_producto: 1, nombre: 'Arroz (kg)', stock_total: 100 },
                 { id_producto: 2, nombre: 'Azúcar (kg)', stock_total: 80 },

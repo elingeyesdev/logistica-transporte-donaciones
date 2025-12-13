@@ -499,7 +499,7 @@ class DashboardController extends Controller
 
     private function obtenerTopProductosDesdeInventario()
     {
-        $baseUrl = rtrim(config('services.inventario.base_url'), '/');
+        $baseUrl = rtrim(config('services.gateway.base_url'), '/');
         if (!$baseUrl) {
             return collect();
         }
@@ -507,7 +507,7 @@ class DashboardController extends Controller
         try {
             $response = Http::timeout(8)
                 ->acceptJson()
-                ->get($baseUrl.'/api/inventario/por-producto');
+                ->get($baseUrl.'/api/gateway/donaciones/inventario/por-producto');
 
             if (!$response->successful()) {
                 return collect();
