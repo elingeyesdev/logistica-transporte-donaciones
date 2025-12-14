@@ -66,13 +66,14 @@
         const btnAnimals   = document.getElementById('btnAnimals');
 
         const animalesBaseUrl = @json(rtrim(config('services.gateway.base_url'), '/'));
+        const imagenBaseUrl = @json(rtrim(config('services.animales.base_url'), '/'));
         const ANIMALS_API_URL = animalesBaseUrl + '/api/gateway/animales/releases';
         function buildImageUrl(relativePath) {
             if (!relativePath) return null;
             if (/^https?:\/\//i.test(relativePath)) {
                 return relativePath;
             }
-            return animalesBaseUrl + '/storage/' + relativePath.replace(/^\/+/, '');
+            return imagenBaseUrl + '/storage/' + relativePath.replace(/^\/+/, '');
         }
         let animalsLoaded = false;
         function formatReleaseDate(isoString) {
