@@ -378,8 +378,8 @@
     const suggestionsContainer = document.getElementById('search-suggestions');
 
         const map = L.map('mapa-ubicacion').setView([defaultLat, defaultLng], defaultZoom);
-        const hotspotBaseUrl = @json(rtrim(config('services.hotspot.base_url'), '/'));
-        const HOTSPOT_API_URL = `${hotspotBaseUrl}/api/v1/hotspots/live`;
+        const hotspotBaseUrl = @json(rtrim(config('services.gateway.base_url'), '/'));
+        const HOTSPOT_API_URL = `${hotspotBaseUrl}/api/gateway/brigadas/hotspots`;
         const hotspotLayer = L.layerGroup().addTo(map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
