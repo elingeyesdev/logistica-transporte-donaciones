@@ -4,6 +4,8 @@ use App\Http\Controllers\TrazabilidadController;
 use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\LogisticaPaquetesProxyController;
 use App\Http\Controllers\DonacionesInventarioProxyController;
+use App\Http\Controllers\RescateReleasesProxyController;
+
 
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +31,9 @@ Route::prefix('gateway')->group(function () {
 
     Route::prefix('donaciones')->group(function () {
         Route::get('inventario/por-producto', [DonacionesInventarioProxyController::class, 'porProducto']);
+    });
+     Route::prefix('animales')->group(function () {
+        Route::get('releases', [RescateReleasesProxyController::class, 'animalesReleases']);
     });
 });
 

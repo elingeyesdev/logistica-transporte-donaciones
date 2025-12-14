@@ -241,7 +241,7 @@ class MicroserviceClient
     }
 
     public function fetchFirstSimpleIdentityByCi(string $ci): array
-{
+    {
     $priorityServices = [
         'logistica'        => 'MS_LOGISTICA_URL',
         'donaciones'       => 'MS_DONACIONES_URL',
