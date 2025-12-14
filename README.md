@@ -38,14 +38,16 @@ Esta opción levanta:
 `cd <CARPETA_DEL_REPO>`
 ## 1.2 Variables de entorno (.env)
 
-Crea tu `.env` desde el ejemplo:
-
-- `cp .env.example .env`
-
-**Nota importante:** en Docker, el host de Postgres normalmente debe ser el nombre del servicio:
-
-- `DB_HOST=db`
-
+- En el archivo docker-compose.yml se encuentra la sección `Environment`, estas variables son las que el modelo desplegado el Docker utilizara como `.env`. 
+- Modifica los valores de base de datos, URLs de los otros microservicios y API_KEY para HelpDesk.
+- Para el envio de correos se tienen las siguientes variables:
+-- MAIL_MAILER: smtp //SERVICIO DE CORREO
+-- MAIL_HOST: smtp.gmail.com //HOSTING SMTP
+-- MAIL_PORT: 587
+-- MAIL_USERNAME: //ESTE ES EL CORREO PARA ACCESO A SMTP
+-- MAIL_PASSWORD: //GENERA TU CLAVE DE ACCESO 
+-- MAIL_ENCRYPTION: tls
+-- MAIL_FROM_ADDRESS: //TU DIRECCION DE CORREO PARA EL ENVIO
 ---
 
 ## 1.3 Redes externas (IMPORTANTE)
@@ -133,6 +135,14 @@ Edita `.env` (ejemplo típico local):
 - `DB_DATABASE=<TU_BD>`
 - `DB_USERNAME=<TU_USUARIO>`
 - `DB_PASSWORD=<TU_PASSWORD>`
+- Para el envio de correos se tienen las siguientes variables:
+-- MAIL_MAILER: smtp 
+-- MAIL_HOST: smtp.gmail.com
+-- MAIL_PORT: 587
+-- MAIL_USERNAME: `<TU_USUARIO>`
+-- MAIL_PASSWORD: `<TU_CLAVE_DE_ACCESO>` 
+-- MAIL_ENCRYPTION: tls
+-- MAIL_FROM_ADDRESS: `<TU_DIRECCION_DE_CORREO>`
 
 ### 2.3 Instalar dependencias PHP
 - `composer install`
@@ -178,8 +188,11 @@ Ejemplos típicos:
   - `http://<IP_DE_TU_PC>:8000`
 
 ---
+### 3.2 Instalar dependencias
+- Correr el comando a continuación para obtener las dependencias necesarias para la ejecución del proyecto.
+`npm install` 
 
-### 3.2 Ejecutar en Android
+### 3.3 Ejecutar en Android
 
 - Instala la app Expo Go
 - Dentro del proyecto móvil:
@@ -188,7 +201,7 @@ Ejemplos típicos:
 
 ---
 
-### 3.3 Ejecutar en iOS
+### 3.4 Ejecutar en iOS
 - Instala la app Expo Go
 - Dentro del proyecto móvil:
   - Ejecuta el comando `npx expo start` y espera a ver un codigo QR
@@ -198,7 +211,7 @@ Ejemplos típicos:
 
 ## Endpoints externos (configuración del Backend)
 
-Este proyecto depende de URLs/keys externas (Gateway, Inventario, Hotspot, Animales, Helpdesk). Revisa en tu `.env` y reemplazalos por las url correctas:
+Este proyecto depende de URLs/keys externas (Gateway, Inventario, Hotspot, Animales, Helpdesk). Revisa en tu `.env` y reemplazalos por las url correctas en los siguientes campos tanto en el .env como en Environment dentro del docker-compose.yml:
 
 - `HELPDESK_API_URL`
 - `HELPDESK_API_KEY`
