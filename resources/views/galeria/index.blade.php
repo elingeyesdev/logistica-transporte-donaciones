@@ -1,6 +1,7 @@
 @extends('adminlte::page')
 
 @section('title', 'Galería')
+@section('layout_topnav', true)
 
 @section('content_header')
     <h1>Galería</h1>
