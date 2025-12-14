@@ -418,4 +418,31 @@ class TrazabilidadController extends Controller
             'solicitudes'       => $solicitudes,
         ]);
     }
+
+    public function codigosSolicitudes()
+    {
+        $solicitudes = Solicitud::select('id_solicitud', 'codigo_seguimiento', 'estado')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success'      => true,
+            'total'        => $solicitudes->count(),
+            'solicitudes'  => $solicitudes,
+        ]);
+    }
+
+    public function placasVehiculos()
+    {
+        $vehiculos = Vehiculo::select('id_vehiculo', 'placa')
+            ->orderBy('placa')
+            ->get();
+
+        return response()->json([
+            'success'   => true,
+            'total'     => $vehiculos->count(),
+            'vehiculos' => $vehiculos,
+        ]);
+    }
+
 }
