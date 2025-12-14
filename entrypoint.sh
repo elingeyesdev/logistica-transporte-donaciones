@@ -13,6 +13,7 @@ fi
 
 echo "Instalando dependencias de Composer..."
 composer install --no-interaction --prefer-dist --optimize-autoloader
+composer require lukehowland/helpdeskwidget
 
 echo "Generando APP_KEY (si no existe)..."
 php artisan key:generate --force || true
