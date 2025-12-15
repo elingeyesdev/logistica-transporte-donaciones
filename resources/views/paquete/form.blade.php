@@ -141,26 +141,67 @@
             @endif
         </div>
     </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputImagen = document.getElementById('imagen');
-            const previewImagen = document.getElementById('preview-imagen');
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputImagen   = document.getElementById('imagen');
+        const previewImagen = document.getElementById('preview-imagen');
 
-            if (inputImagen && previewImagen) {
-                inputImagen.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file && file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = function(event) {
-                            previewImagen.src = event.target.result;
-                            previewImagen.classList.remove('d-none');
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
+        if (!inputImagen || !previewImagen) return;
+
+        inputImagen.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+
+            const reader = new FileReader();
+            const img    = new Image();
+
+            reader.onload = function(ev) {
+                img.onload = function() {
+                    const maxWidth  = 1600;
+                    const maxHeight = 1600;
+
+                    let width  = img.width;
+                    let height = img.height;
+
+                    const scale = Math.min(
+                        maxWidth  / width,
+                        maxHeight / height,
+                        1
+                    );
+                    width  = Math.round(width * scale);
+                    height = Math.round(height * scale);
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width  = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(function (blob) {
+                        if (!blob) return;
+
+                        const compressedFile = new File(
+                            [blob],
+                            file.name.replace(/\.\w+$/, '.jpg'),
+                            { type: 'image/jpeg', lastModified: Date.now() }
+                        );
+
+                        const dt = new DataTransfer();
+                        dt.items.add(compressedFile);
+                        inputImagen.files = dt.files;
+
+                        const url = URL.createObjectURL(blob);
+                        previewImagen.src = url;
+                        previewImagen.classList.remove('d-none');
+                    }, 'image/jpeg', 0.7);
+                };
+
+                img.src = ev.target.result;
+            };
+
+            reader.readAsDataURL(file);
         });
+    });
     </script>
 
 
@@ -176,6 +217,10 @@
               <label for="mapa-ubicacion-paquete">Seleccione la Ubicación en el Mapa</label>
               <div id="mapa-ubicacion-paquete" style="height: 400px; width: 100%; border: 1px solid #ddd; border-radius: 4px;"></div>
               <p class="form-text text-muted">Su ubicación se detecta automáticamente, no es posible editar este punto por seguridad.</p>
+              <p class="form-text text-muted">
+                <strong>Demostración con mapa liberado:</strong> puede seleccionar libremente la ubicación sobre el mapa.
+              </p>
+
               {!! $errors->first('latitud', '<div class="invalid-feedback d-block"><strong>:message</strong></div>') !!}
               {!! $errors->first('longitud', '<div class="invalid-feedback d-block"><strong>:message</strong></div>') !!}
             </div>
@@ -278,6 +323,7 @@
     $defaultZoom = $hasCoords ? 13 : 6;
 @endphp
 
+
 <script>
 (function() {
 
@@ -300,11 +346,11 @@
 
     const map = L.map('mapa-ubicacion-paquete', {
       zoomControl: true,
-      dragging: false, 
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
-      boxZoom: false,
-      touchZoom: false,
+      //dragging: false, 
+      //scrollWheelZoom: false,
+      //doubleClickZoom: false,
+      //boxZoom: false,
+      //touchZoom: false,
     }).setView([defaultLat, defaultLng], defaultZoom);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -316,10 +362,14 @@
 
     const latInput = document.getElementById('latitud');
     const lngInput = document.getElementById('longitud');
+    const direccionInput = document.getElementById('zona');
+    const provinciaInput = document.getElementById('provincia_actual');
 
     function setMarker(lat, lng) {
-      latInput.value = lat.toFixed(6);
-      lngInput.value = lng.toFixed(6);
+      if (latInput && lngInput) {
+        latInput.value = lat.toFixed(6);
+        lngInput.value = lng.toFixed(6);
+      }
 
       if (!marker) {
         marker = L.marker([lat, lng], {
@@ -332,8 +382,6 @@
       map.setView([lat, lng], 15);
       reverseGeocode(lat, lng);
     }
-        const direccionInput = document.getElementById('zona');
-    const provinciaInput = document.getElementById('provincia_actual');
 
     function reverseGeocode(lat, lng) {
       if (!direccionInput && !provinciaInput) return;
@@ -374,40 +422,39 @@
         });
     }
 
-    if (latInput.value && lngInput.value) {
+    if (latInput && lngInput && latInput.value && lngInput.value) {
       const lat = parseFloat(latInput.value);
       const lng = parseFloat(lngInput.value);
       if (!isNaN(lat) && !isNaN(lng)) {
         setMarker(lat, lng);
-        return;
       }
-    }
-
-    if (navigator.geolocation) {
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         function(position) {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
-
           setMarker(lat, lng);
         },
         function(error) {
           console.warn("Error o permiso denegado en geolocalización:", error);
           setMarker(FALLBACK_LAT, FALLBACK_LNG);
-          latInput.value = "";
-          lngInput.value = "";
 
           const geoAlert = document.getElementById("geo-alert");
-          geoAlert.classList.remove("d-none");
-          geoAlert.innerHTML = `
+          if (geoAlert) {
+            geoAlert.classList.remove("d-none");
+            geoAlert.innerHTML = `
               Se usó una ubicación de referencia para registrar la posición del paquete.
-          `;
+            `;
+          }
         },
         { enableHighAccuracy: true, timeout: 8000 }
       );
+    } else {
+      setMarker(FALLBACK_LAT, FALLBACK_LNG);
     }
 
-    map.on("click", function() {
+    map.on("click", function(e) {
+      setMarker(e.latlng.lat, e.latlng.lng);
     });
 
   }

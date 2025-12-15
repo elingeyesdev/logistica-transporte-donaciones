@@ -105,6 +105,9 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script>
+    window.MAPBOX_TOKEN = @json(config('services.mapbox.token'));
+</script>
+<script>
 const formatDate = (dateStr) => {
     if (!dateStr) return 'Sin fecha';
     const d = new Date(dateStr);
@@ -160,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const m = L.marker([destinoLat, destinoLng], { icon: destinoIcon, zIndexOffset: 1000 })
             .addTo(mapInstance);
 
-        m.bindTooltip('Destino Final', {
+        m.bindTooltip('Destino', {
             permanent: true,
             direction: 'top',
             offset: [0, -16],
@@ -269,9 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const routing = L.Routing.control({
         waypoints: points.map(p => L.latLng(p.lat, p.lng)),
-        router: L.Routing.osrmv1({
-            serviceUrl: 'https://router.project-osrm.org/route/v1'
-        }),
+        router: L.Routing.mapbox(window.MAPBOX_TOKEN),
         lineOptions: {
             styles: [{ color: 'blue', opacity: 0.7, weight: 5 }]
         },

@@ -48,5 +48,8 @@ return [
     'gateway' => [
         'base_url' => env('GATEWAY_API_URL', 'http://127.0.0.1:8000' ),
     ],
+    'mapbox' => [
+        'token' => env('MAPBOX_TOKEN'),
+    ],
 
 ];
