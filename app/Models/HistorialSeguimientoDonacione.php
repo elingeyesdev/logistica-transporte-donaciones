@@ -57,7 +57,7 @@ class HistorialSeguimientoDonacione extends Model
      */
     public function paquete()
     {
-        return $this->belongsTo(\App\Models\paquete::class, 'id_paquete', 'id_paquete');
+        return $this->belongsTo(\App\Models\Paquete::class, 'id_paquete', 'id_paquete');
     }
     
     /**
